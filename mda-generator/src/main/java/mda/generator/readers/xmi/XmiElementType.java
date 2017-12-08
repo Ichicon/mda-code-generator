@@ -1,9 +1,14 @@
-package mda.generator.beans;
+package mda.generator.readers.xmi;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public enum UmlElementType {
+/**
+ * Types d'éléments rencontrés dans le ficheir XMI
+ * @author Fabien
+ *
+ */
+public enum XmiElementType {
 	PACKAGE("uml:Package"), // Package
 	COMMENT("uml:Comment"), // Commentaire sur un diagramme (va dans le package)
 	CLASS("uml:Class"), // Classe/table
@@ -11,15 +16,15 @@ public enum UmlElementType {
 	ASSOCIATION("uml:Association"), // Association entre deux classes
 	DOMAIN("uml:PrimitiveType"); // Définition d'un domaine
 	
-	private static Map<String, UmlElementType> mapPerName = new HashMap<>();
+	private static Map<String, XmiElementType> mapPerName = new HashMap<>();
 	static {
-		for(UmlElementType elt : values()) {
+		for(XmiElementType elt : values()) {
 			mapPerName.put(elt.name, elt);
 		}
 	}
 	
 	private final String name;
-	UmlElementType(String name) {
+	XmiElementType(String name) {
 		this.name = name;		
 	}
 		
@@ -32,7 +37,7 @@ public enum UmlElementType {
 
 
 
-	public static UmlElementType getByName(String name) {
+	public static XmiElementType getByName(String name) {
 		return mapPerName.get(name);
 	}
 	

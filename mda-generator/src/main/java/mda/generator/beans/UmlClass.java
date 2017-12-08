@@ -7,47 +7,49 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 
 public class UmlClass {	
-	private String eaId;
+	private String id;
+	private String camelCaseName;
 	private String name;
-	private String rawName;
 	private String comment;
-	
+
 	private UmlPackage xmiPackage;
 	private List<UmlAttribute> attributs = new ArrayList<>();
+	private List<UmlAssociation> associations = new ArrayList<>();
+
 	/**
 	 * @return the eaId
 	 */
-	public String getEaId() {
-		return eaId;
+	public String getId() {
+		return id;
 	}
 	/**
 	 * @param eaId the eaId to set
 	 */
-	public void setEaId(String eaId) {
-		this.eaId = eaId;
+	public void setId(String eaId) {
+		this.id = eaId;
 	}
 	/**
 	 * @return the name
 	 */
-	public String getName() {
-		return name;
+	public String getCamelCaseName() {
+		return camelCaseName;
 	}
 	/**
 	 * @param name the name to set
 	 */
 	public void setName(String name) {
 		// On modifie le nom
-		this.rawName = name;
-		this.name = StringUtils.remove(WordUtils.capitalizeFully(name, '_'), "_");
+		this.name = name;
+		this.camelCaseName = StringUtils.remove(WordUtils.capitalizeFully(name, '_'), "_");
 	}
-	
+
 	/**
 	 * @return the rawName
 	 */
-	public String getRawName() {
-		return rawName;
+	public String getName() {
+		return name;
 	}
-	
+
 	/**
 	 * @return the pack
 	 */
@@ -60,8 +62,8 @@ public class UmlClass {
 	public void setXmiPackage(UmlPackage pack) {
 		this.xmiPackage = pack;
 	}
-	
-	
+
+
 	/**
 	 * @return the comment
 	 */
@@ -80,21 +82,41 @@ public class UmlClass {
 	public List<UmlAttribute> getAttributs() {
 		return attributs;
 	}
-	/**
-	 * @param attribut the attribut to set
-	 */
-	public void setAttribut(List<UmlAttribute> attribut) {
-		this.attributs = attribut;
-	}	
 	
+	/**
+	 * Renvoie la liste des attributs PKs
+	 * @return liste des attributs PKs
+	 */
+	public List<UmlAttribute> getPKs(){
+		List<UmlAttribute> pks = new ArrayList<>();
+		for(UmlAttribute attr : attributs) {
+			if(attr.isPK()) {
+				pks.add(attr);
+			}
+		}
+		
+		return pks;
+	}
+
+	/**
+	 * @return the associations
+	 */
+	public List<UmlAssociation> getAssociations() {
+		return associations;
+	}
+
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("\n\t. ").append(name).append(" (").append(rawName).append(")").append(" : ");
-		
+		sb.append("\n\t. ").append(camelCaseName).append(" (").append(name).append(")").append(" : ");
+
 		for(UmlAttribute attribut : attributs) {
 			sb.append("\n\t\t- ").append(attribut);
 		}
 		
+		for(UmlAssociation association : associations) {
+			sb.append("\n\t\t> ").append(association);
+		}
+
 		return sb.toString(); 
 	}
 }

@@ -3,15 +3,19 @@ package mda.generator.beans;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 
+/**
+ * Attribut d'une classe
+ * @author Fabien
+ *
+ */
 public class UmlAttribute {
 	private boolean isPK;
-	private String rawName;
 	private String name;
+	private String camelCaseName;
 	private UmlDomain domain;
 	private String comment;
 	private Boolean isNotNull;
-	private UmlAssociation association;
-	
+
 	/**
 	 * @return the isPK
 	 */
@@ -27,37 +31,24 @@ public class UmlAttribute {
 	}
 
 	/**
-	 * @return the association
-	 */
-	public UmlAssociation getAssociation() {
-		return association;
-	}
-	
-	/**
-	 * @param association the association to set
-	 */
-	public void setAssociation(UmlAssociation association) {
-		this.association = association;
-	}
-	/**
 	 * @return the name
 	 */
-	public String getName() {
-		return name;
+	public String getCamelCaseName() {
+		return camelCaseName;
 	}
 	/**
 	 * @param name the name to set
 	 */
 	public void setName(String name) {
-		this.rawName = name;
-		this.name =  WordUtils.uncapitalize(StringUtils.remove(WordUtils.capitalizeFully(name, '_'), "_"));
+		this.name = name;
+		this.camelCaseName =  WordUtils.uncapitalize(StringUtils.remove(WordUtils.capitalizeFully(name, '_'), "_"));
 	}
 	
 	/**
 	 * @return the rawName
 	 */
-	public String getRawName() {
-		return rawName;
+	public String getName() {
+		return name;
 	}
 	
 	
@@ -102,6 +93,6 @@ public class UmlAttribute {
 
 	@Override
 	public String toString() {
-		return name + " => " + rawName + " " + (isPK?"(PK)":"") + " " +domain.getName()+" " + (isNotNull?"not null":"nullable") + " " + (association!=null?association.toString():"");
+		return camelCaseName + " => " + name + " " + (isPK?"(PK)":"") + " " +domain.getName()+" " + (isNotNull?"not null":"nullable");
 	}
 }

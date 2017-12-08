@@ -1,5 +1,5 @@
 package mda.generator.writers;
 
-public class CreateTableWriter {
+public class SQLWriter {
 
 }

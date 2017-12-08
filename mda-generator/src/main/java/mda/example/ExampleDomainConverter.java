@@ -53,6 +53,7 @@ public class ExampleDomainConverter implements DomainToTypeConverter {
 		mapBddTypes.put("DO_ORDRE_REPARTITION","varchar2(10)");
 		mapBddTypes.put("DO_DATE","DATE");
 		mapBddTypes.put("DO_DATE_HEURE","DATE");
+		mapBddTypes.put("DO_FICHIER","BLOB"); 
 	}
 	
 	

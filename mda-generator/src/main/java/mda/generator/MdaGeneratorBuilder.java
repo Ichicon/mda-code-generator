@@ -1,14 +1,11 @@
 package mda.generator;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
 import org.apache.commons.lang3.StringUtils;
 
 import mda.generator.converters.DomainToTypeConverter;
 import mda.generator.exceptions.MdaGeneratorException;
 import mda.generator.readers.ModelFileReader;
-import mda.generator.readers.XmiReader;
+import mda.generator.readers.xmi.XmiReader;
 
 public class MdaGeneratorBuilder {
 	private Class<? extends ModelFileReader> readerClass = XmiReader.class;
@@ -56,6 +53,7 @@ public class MdaGeneratorBuilder {
 		}
 		generator.setPathToModelFile(pathToModel);
 		generator.setReaderClass(readerClass);
+		generator.setConverterClass(typeConverter);
 		
 		// TODO autres parametres pour la genration
 		
