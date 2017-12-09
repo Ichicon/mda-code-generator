@@ -118,7 +118,8 @@
 					</packagedElement>
 				</packagedElement>
 				<packagedElement xmi:type="uml:Package" xmi:id="EAPK_7BFBE783_5B4E_4b0c_8863_65F0517BAEEB" name="fr.gouv.mindef.gestim.domain.securite" visibility="public">
-					<ownedComment xmi:type="uml:Comment" xmi:id="EAID_4C9F275C_9B4C_435a_96C9_9F2D7A0A17D0" body="Tables liées à la gestion des droits, utilisateurs (la gestion des utilisateurs et profils est assurée côté SAGA)"/>
+					<ownedComment xmi:type="uml:Comment" xmi:id="EAID_4C9F275C_9B4C_435a_96C9_9F2D7A0A17D0" body="Tables liées à la gestion des droits, utilisateurs.
+La gestion des utilisateurs et profils est assurée côté SAGA)"/>
 					<packagedElement xmi:type="uml:Class" xmi:id="EAID_2C4ECB9B_732A_46ce_92E2_2DC5334A1BF7" name="profil_gestim" visibility="public">
 						<ownedAttribute xmi:type="uml:Property" xmi:id="EAID_B4B80C9B_F362_432a_BCEC_ABD3D1659A24" name="profil_id" visibility="private" isStatic="false" isReadOnly="false" isDerived="false" isOrdered="false" isUnique="true" isDerivedUnion="false">
 							<lowerValue xmi:type="uml:LiteralInteger" xmi:id="EAID_LI000033_F362_432a_BCEC_ABD3D1659A24" value="1"/>

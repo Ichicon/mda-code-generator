@@ -3,9 +3,9 @@ package mda.example;
 import java.util.HashMap;
 import java.util.Map;
 
-import mda.generator.converters.DomainToTypeConverter;
+import mda.generator.converters.ConverterInterface;
 
-public class ExampleDomainConverter implements DomainToTypeConverter {
+public class ExampleDomainConverter implements ConverterInterface {
 	private static final Map<String, String> mapJavaTypes = new HashMap<>(); // domain => type
 	private static final Map<String, String> mapBddTypes = new HashMap<>(); // domain => type
 	

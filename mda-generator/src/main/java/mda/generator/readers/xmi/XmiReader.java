@@ -19,14 +19,14 @@ import mda.generator.beans.UmlAttribute;
 import mda.generator.beans.UmlClass;
 import mda.generator.beans.UmlDomain;
 import mda.generator.beans.UmlPackage;
-import mda.generator.readers.ModelFileReader;
+import mda.generator.readers.ModelFileReaderInterface;
 
 /**
  * Classe de lecture d'un fichier XMI 2.1 issue d'Enterprise Architect
  * @author Fabien
  *
  */
-public class XmiReader implements ModelFileReader {
+public class XmiReader implements ModelFileReaderInterface {
 	private static Logger LOG = LogManager.getLogger();
 
 	private Map<String, UmlClass> classesMap = new HashMap<>(); // by id
@@ -58,8 +58,6 @@ public class XmiReader implements ModelFileReader {
 	 * Extraction de tous les éléments du fichiers (DOMAINES, PACKAGE, CLASSES, ASSOCIATIONS).
 	 */
 	public void extractObjects(String pathToXmi) {
-		LOG.info("Lecture du fichier " + pathToXmi);
-
 		try {    		
 			DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance()
 					.newDocumentBuilder();
@@ -113,12 +111,17 @@ public class XmiReader implements ModelFileReader {
 		}
 	}
 
+	/**
+	 * Extraction des packages du schéma
+	 * @param packageNode
+	 */
 	protected void extrairePackage(Node packageNode) {
 		UmlPackage xmiPackage = new UmlPackage();
-		xmiPackage.setEaId(XmiUtil.getElementId(packageNode));
+		xmiPackage.setId(XmiUtil.getElementId(packageNode));
 		xmiPackage.setName(XmiUtil.getElementName(packageNode));
 
 		// On cherche les commentaires
+		// FIXME voir comment sont intégrés les sauts de lignes (<br/> ?)
 		List<Node>  commentaires = XmiUtil.getChildsWithTagNameAndType(packageNode, "ownedComment", XmiElementType.COMMENT);
 		if(!commentaires.isEmpty()) {
 			StringBuilder sbCommentaires = new StringBuilder();
@@ -220,7 +223,7 @@ public class XmiReader implements ModelFileReader {
 		xmiAttribut.setPK(xrefsVals != null && xrefsVals.contains("@NAME=isID@ENDNAME"));
 
 		// Ajout de l'attribut dans la classe
-		xmiClass.getAttributs().add(xmiAttribut);
+		xmiClass.getAttributes().add(xmiAttribut);
 	}
 
 

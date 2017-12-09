@@ -4,21 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UmlPackage {
-	private String eaId;
+	private String id;
 	private String name;
 	private String comment;
 	private List<UmlClass> classes = new ArrayList<>();
 	/**
 	 * @return the eaId
 	 */
-	public String getEaId() {
-		return eaId;
+	public String getId() {
+		return id;
 	}
 	/**
 	 * @param eaId the eaId to set
 	 */
-	public void setEaId(String eaId) {
-		this.eaId = eaId;
+	public void setId(String eaId) {
+		this.id = eaId;
 	}
 	/**
 	 * @return the name

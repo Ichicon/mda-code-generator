@@ -5,7 +5,7 @@ package mda.generator.converters;
  * @author Fabien
  *
  */
-public interface DomainToTypeConverter {
+public interface ConverterInterface {
 	/**
 	 * Fournit un nom de type java pour un nom de domaine
 	 * @param domainName nom du domaine

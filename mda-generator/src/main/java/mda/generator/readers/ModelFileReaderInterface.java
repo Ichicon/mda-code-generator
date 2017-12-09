@@ -13,7 +13,7 @@ import mda.generator.beans.UmlPackage;
  * @author Fabien Crapart
  *
  */
-public interface ModelFileReader {
+public interface ModelFileReaderInterface {
 	/**
 	 * Main method to extract data from model file
 	 * @param pathToModelFile Path to model file to read

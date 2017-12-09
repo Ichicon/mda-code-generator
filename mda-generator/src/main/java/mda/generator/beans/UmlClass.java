@@ -79,7 +79,7 @@ public class UmlClass {
 	/**
 	 * @return the attribut
 	 */
-	public List<UmlAttribute> getAttributs() {
+	public List<UmlAttribute> getAttributes() {
 		return attributs;
 	}
 	
