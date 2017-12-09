@@ -17,7 +17,7 @@ import mda.generator.writers.sql.SQLWriterInterface;
 /**
  * Java classes and SQL generator from model file
  * 
- * With standard JavaWriter add a comment line containing JavaWriter.ONE_TIME_GENERATION value to prevent class from being erased.
+ * With standard JavaWriter add a comment line containing // NO GENERATION to prevent class from being erased.
  * 
  * @author Fabien Crapart
  *
