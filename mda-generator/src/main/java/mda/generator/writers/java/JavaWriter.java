@@ -1,14 +1,19 @@
 package mda.generator.writers.java;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.velocity.Template;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.Velocity;
 
+import mda.generator.MdaGeneratorBuilder;
 import mda.generator.beans.UmlPackage;
 import mda.generator.exceptions.MdaGeneratorException;
 
@@ -35,16 +40,9 @@ public class JavaWriter implements JavaWriterInterface {
 	
 	// Constants for code
 	private static String PAKAGE = "package ";
-	private static String IMPORT = "import ";
-	private static String CLAZZ = " class ";
-	private static String BRACKET_START = " {\n";
-	private static String BRACKET_END = "}\n";
-	private static String SPACE = " ";
-	private static String INDENT = "    "; // 4 spaces
 	private static String END = ";";
 	private static String EMPTY = "";
 	private static String BREAK = "\n";
-	private static String END_BREAK = ";\n";
 	
 	// Constants for comments 
 	private static String START_COMMENT = "/**\n";
@@ -68,6 +66,10 @@ public class JavaWriter implements JavaWriterInterface {
 
 	@Override
 	public void writeSourceCode() {
+		Properties prop = new Properties();
+		prop.setProperty("file.resource.loader.path", MdaGeneratorBuilder.getApplicationPath().toString());
+		Velocity.init(prop);
+		
 		if(config == null) {
 			throw new MdaGeneratorException("No config initialized for java writer,use initWriterConfig before calling writeSourceCode");
 		}
@@ -105,31 +107,44 @@ public class JavaWriter implements JavaWriterInterface {
 		}
 
 		// Creating package-info (erasing already existing one)
+		VelocityContext context = new VelocityContext();
+		context.put("javaPackage", javaPackage);
+		
+		// Writing package-info file
 		Path packageInfoPath = javaPackage.getPackagePath().resolve("package-info.java");
-		LOG.info("Creating " + packageInfoPath);
-		
-		StringBuilder content = new StringBuilder();
-
-		// Comments
-		generateCommentLinesFromComments(content, javaPackage.getComments(), EMPTY);	
-
-		// Package line
-		content.append(PAKAGE).append(javaPackage.getPackageName()).append(END);
-		
-		// Ecriture du fichier
 		try {
-			Files.write(packageInfoPath, content.toString().getBytes(config.getCharset()));
-		} catch (IOException e) {
+			writeFileFromTemplate(packageInfoPath, "package-info.vm", context);
+		}catch (IOException e) {
 			throw new MdaGeneratorException("Error while creating package-info "  + packageInfoPath + " for package " + javaPackage.getPackageName(), e);		
 		}
 		
+//		
+//		
+//		
+//	
+//		LOG.info("Creating " + packageInfoPath);
+//		
+//		StringBuilder content = new StringBuilder();
+//
+//		// Comments
+//		generateCommentLinesFromComments(content, javaPackage.getCommentsList(), EMPTY);	
+//
+//		// Package line
+//		content.append(PAKAGE).append(javaPackage.getPackageName()).append(END);
+//		
+//		// Ecriture du fichier
+//		try {
+//			Files.write(packageInfoPath, content.toString().getBytes(config.getCharset()));
+//		} catch (IOException e) {
+//			throw new MdaGeneratorException("Error while creating package-info "  + packageInfoPath + " for package " + javaPackage.getPackageName(), e);		
+//		}
+//		
 		// Writing classes
 		for(JavaClass javaClass : javaPackage.getClasses()) {
 			try {
 				writeClass(javaClass);
 			} catch (IOException e) {
 				throw new MdaGeneratorException("Error while creating class "  + javaClass.getClassPath(), e);		
-
 			}
 		}
 	}
@@ -143,13 +158,11 @@ public class JavaWriter implements JavaWriterInterface {
 		// Test if file already existe
 		Path classPath = javaClass.getClassPath();
 		
-		StringBuilder oldContent = new StringBuilder();
 		StringBuilder contentToKeep = new StringBuilder();
 		boolean doNotRegenerate = false;
 		boolean keepContent = false;
 		if(Files.exists(classPath)) {
 			for(String line : Files.readAllLines(classPath)) {
-				oldContent.append(line).append(BREAK);
 				// No generation for this one
 				if(line.contains(ONE_TIME_GENERATION)) {
 					doNotRegenerate =true;
@@ -157,177 +170,53 @@ public class JavaWriter implements JavaWriterInterface {
 				}
 				// We keep user edited content
 				if(keepContent) {
-					contentToKeep.append(line).append(BREAK);
+					if(contentToKeep.length()>0) {
+						contentToKeep.append(BREAK);
+					}
+					contentToKeep.append(line);
 				}	
 				
 				// Comment to detect user content (after this line)
 				if(line.contains(END_OF_GENERATED)) {
 					keepContent = true;
-				}
-				
-				
+				}		
 			}
 		}
 		
 		// Class generation only if allowed
 		if(!doNotRegenerate) {
-			writeClassContent(classPath, javaClass, keepContent, oldContent, contentToKeep);			
+			writeClassContentWithTemplate(classPath, javaClass, keepContent, contentToKeep);
+			//writeClassContent(classPath, javaClass, keepContent, oldContent, contentToKeep);			
 		} else {
 			LOG.debug(classPath + " will not be overwritten because '" + ONE_TIME_GENERATION + "' is present");
 		}
 	}
 	
-	/**
-	 * 
-	 * @param classPath
-	 * @param javaClass
-	 * @param keepContent
-	 * @param oldContent
-	 * @param contentToKeep
-	 * @throws IOException
-	 */
-	protected void writeClassContent(Path classPath, JavaClass javaClass, boolean keepContent, StringBuilder oldContent, StringBuilder contentToKeep) throws IOException {
-		StringBuilder finalContent = new StringBuilder();
-		
-		// Package
-		finalContent.append(PAKAGE).append(javaClass.getPackageName()).append(END_BREAK).append(BREAK);
-		
-		// Imports
-		for(String importName : javaClass.getImportsList()) {
-			finalContent.append(IMPORT).append(importName).append(END_BREAK);
-		}
-		finalContent.append(BREAK);
+	protected void writeClassContentWithTemplate(Path classPath, JavaClass javaClass, boolean keepContent, StringBuilder contentToKeep) throws IOException {
+		VelocityContext context = new VelocityContext();
+
+		context.put( "javaClass", javaClass);
+		context.put( "keep_content", keepContent);
+		context.put( "content_to_keep", contentToKeep);
+		context.put( "generated_comment", GENERATED_COMMENT);
+		context.put( "end_of_generated", END_OF_GENERATED);
 	
-		List<String> comments = new ArrayList<>();
-		// Class comments 
-		comments.addAll(javaClass.getComments());
-		// Comment for auto generation
-		comments.add(EMPTY);
-		comments.add(GENERATED_COMMENT);
-		// generate full comments
-		generateCommentLinesFromComments(finalContent, comments, EMPTY);		
-	
-		// Annotations
-		for(JavaAnnotation annotation : javaClass.getAnnotationsList()) {
-			writeAnnotation(finalContent, annotation, EMPTY);
-		}	
-		
-		// Class line
-		finalContent
-			.append(javaClass.getVisibilite().toString())
-			.append(CLAZZ)
-			.append(javaClass.getName())
-			.append(BRACKET_START);
-		
-		// Attributes
-		for(JavaAttribute attribute : javaClass.getAttributesList()) {
-			writeAttribute(finalContent, attribute);
-		}
-				
-		// Methods
-		for(JavaMethod method : javaClass.getMethodsList()) {
-			finalContent.append(BREAK);
-			writeMethod(finalContent, method);
-		}
-		
-		
-		// End of generated code
-		finalContent.append(BREAK).append(END_OF_GENERATED).append(BREAK);
-		
-		// Add old content (end class is inside)
-		if(keepContent) {
-			finalContent.append(contentToKeep);
-		} else { // or end class
-			finalContent.append(BRACKET_END);
-		}
-		
-		// Ecriture du fichier de classe
-		if(oldContent.toString().equals(finalContent.toString())){
-			nbClassesIdentic++;
-		}else {
-			LOG.debug("Creating " + classPath + (keepContent?" with old content inside":""));				
-			Files.write(classPath, finalContent.toString().getBytes(config.getCharset()));
-			nbClassesGenerated++;
-		}
+		writeFileFromTemplate(classPath, "entity.vm", context);
 	}
 
-	private void writeAttribute(StringBuilder content, JavaAttribute attribute) {
-		content.append(INDENT)
-		.append(attribute.getVisibility().toString())
-		.append(SPACE).append(attribute.getJavaType())
-		.append(SPACE).append(attribute.getName())
-		.append(END_BREAK);
-	}
-	
-	private void writeMethod(StringBuilder content, JavaMethod method) {
-		// Comment
-		generateCommentLinesFromComments(content, method.getCommentLines(), INDENT);
-		
-		// Annotations
-		for(JavaAnnotation annotation : method.getAnnotations()) {
-			writeAnnotation(content, annotation, INDENT);
-		}	
-		
-		// Declaration
-		content.append(INDENT)
-		.append(method.getVisibility())
-		.append(SPACE).append(method.getReturnType())
-		.append(SPACE).append(method.getName())
-		.append("(");
-		boolean first = true;
-		for(String arg : method.getArgs()) {
-			if(first) {
-				first = false;
-			} else {
-				content.append(", ");
-			}
-			content.append(arg);
+	protected void writeFileFromTemplate(Path filePath, String templatePath, VelocityContext context ) throws IOException {
+		Template template = null;
+		try{
+			template = Velocity.getTemplate(templatePath);
+		}catch( Exception e ){ 
+			throw new MdaGeneratorException("Error while writing from template " + templatePath,e);
 		}
-		content.append(")");
-		
-		// Body
-		content.append(BRACKET_START);
-		for(String contentLine : method.getContentLines()) {
-			content.append(INDENT).append(INDENT).append(contentLine).append(END_BREAK);
-		}		
-		content.append(INDENT).append(BRACKET_END);
+		StringWriter sw = new StringWriter();
+		template.merge(context,sw);		
+		LOG.debug("Creating " + filePath);				
+		Files.write(filePath, sw.toString().getBytes(config.getCharset()));	
 	}
-	
-	/**
-	 * 
-	 * @param content
-	 * @param annotation
-	 * @param indent Beginning indent which depends on whether annotation is on class or attribute
-	 */
-	private void writeAnnotation(StringBuilder content, JavaAnnotation annotation, String indent) {
-		content.append(indent);
-		content.append(annotation.getName());
-		List<JavaAnnotationProperty> properties = annotation.getProperties();
-		if(!properties.isEmpty()) {
-			content.append("(");
-			boolean first = true;
-			for(JavaAnnotationProperty property : properties) {
-				if(first) {
-					first=false;
-				} else {
-					content.append(", ");
-				}
-							
-				if(property.isAnnotation()) {
-					// FIXME gérer écriture annotation dans annotation
-				} else {
-					content.append(property.getName()).append("=").append(property.getValue());
-				}
-			}
-			
-			content.append(")");
-		}
-		
-		content.append(BREAK);
-	}
-	
-	
-	
+
 	/**
 	 * 
 	 * @param content
@@ -342,4 +231,5 @@ public class JavaWriter implements JavaWriterInterface {
 		}
 		content.append(indent).append(END_COMMENT);
 	}
+
 }

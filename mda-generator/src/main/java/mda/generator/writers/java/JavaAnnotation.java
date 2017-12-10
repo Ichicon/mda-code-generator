@@ -50,4 +50,33 @@ public class JavaAnnotation {
 	public void addProperty(JavaAnnotationProperty property) {
 		this.properties.add(property);
 	}
+	
+	public String getDisplay(String indent) {
+		StringBuilder content = new StringBuilder();
+		content.append(indent);
+		content.append(getName());
+		List<JavaAnnotationProperty> properties = getProperties();
+		if(!properties.isEmpty()) {
+			content.append("(");
+			boolean first = true;
+			for(JavaAnnotationProperty property : properties) {
+				if(first) {
+					first=false;
+				} else {
+					content.append(", ");
+				}
+							
+				if(property.isAnnotation()) {
+					// FIXME gérer écriture annotation dans annotation
+				} else {
+					content.append(property.getName()).append("=").append(property.getValue());
+				}
+			}
+			
+			content.append(")");
+		}
+
+		
+		return content.toString();
+	}
 }

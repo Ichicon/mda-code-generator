@@ -1,0 +1,6 @@
+/**
+#foreach($comment in $javaPackage.getCommentsList())
+ * $comment
+#end
+ */
+package $javaPackage.getPackageName();

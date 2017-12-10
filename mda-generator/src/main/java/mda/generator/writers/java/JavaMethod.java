@@ -9,7 +9,7 @@ import java.util.List;
  *
  */
 public class JavaMethod {
-	private List<JavaAnnotation> annotations = new ArrayList<>();
+	private List<JavaAnnotation> annotationsList = new ArrayList<>();
 	
 	// TODO static, final ?
 
@@ -79,8 +79,8 @@ public class JavaMethod {
 	/**
 	 * @return the annotations (copy)
 	 */
-	public List<JavaAnnotation> getAnnotations() {
-		return new ArrayList<>(annotations);
+	public List<JavaAnnotation> getAnnotationsList() {
+		return new ArrayList<>(annotationsList);
 	}
 
 	/**
@@ -88,7 +88,7 @@ public class JavaMethod {
 	 * @param annotation new annotation to add
 	 */
 	public void addAnnotations(JavaAnnotation annotation) {
-		 annotations.add(annotation);
+		 annotationsList.add(annotation);
 	}
 
 
@@ -111,7 +111,7 @@ public class JavaMethod {
 	/**
 	 * @return the comments lines (copy)
 	 */
-	public List<String> getCommentLines() {
+	public List<String> getCommentsList() {
 		return new ArrayList<>(commentLines);
 	}
 	
@@ -121,5 +121,24 @@ public class JavaMethod {
 	 */
 	public void addCommentLine(String commentLine) {
 		commentLines.add(commentLine);
+	}
+	
+	/**
+	 * Display args as a list
+	 * @return
+	 */
+	public String getDisplayArgs() {
+		StringBuilder sb = new StringBuilder();
+		boolean first = true;
+		for(String arg : getArgs()) {
+			if(first) {
+				first = false;
+			} else {
+				sb.append(", ");
+			}
+			sb.append(arg);
+		}
+		
+		return sb.toString();
 	}
 }

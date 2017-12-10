@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -12,7 +13,12 @@ import mda.generator.beans.UmlAssociation;
 import mda.generator.beans.UmlAttribute;
 import mda.generator.beans.UmlClass;
 import mda.generator.converters.ConverterInterface;
+import mda.generator.exceptions.MdaGeneratorException;
 
+/**
+ * Java class to store data to print in class file
+ * @author Fabien Crapart
+ */
 public class JavaClass {
 	private final Path classPath;
 
@@ -20,7 +26,7 @@ public class JavaClass {
 
 	private ImportManager importManager = new ImportManager();
 
-	private final List<String> comments  = new ArrayList<>();	
+	private final List<String> commentsList  = new ArrayList<>();	
 	private final List<JavaAnnotation> annotationsList = new ArrayList<>();
 
 	private Visibility visibilite = Visibility.PUBLIC;
@@ -37,15 +43,15 @@ public class JavaClass {
 	 * @param umlClass
 	 * @param converter
 	 */
-	
+
 	public JavaClass(JavaPackage javaPackage, UmlClass umlClass, ConverterInterface converter) {
 		this.classPath = javaPackage.getPackagePath().resolve(umlClass.getCamelCaseName() + ".java");
 		this.name = umlClass.getCamelCaseName() ;
 
 		if(umlClass.getComment() != null) {
-			comments.addAll(Arrays.asList(umlClass.getComment().split("\n")));
+			commentsList.addAll(Arrays.asList(umlClass.getComment().split("\n")));
 		} else {
-			comments.add(JavaWriter.NO_COMMENT_FOUND);
+			commentsList.add(JavaWriter.NO_COMMENT_FOUND);
 		}
 
 		this.packageName = javaPackage.getPackageName();
@@ -61,11 +67,11 @@ public class JavaClass {
 				);
 
 		// PKs
-		managePKs(umlClass, converter);
+		managePKs(javaPackage, umlClass, converter);
 
 		// Attributes, getter, setter
 		manageAttributes(umlClass, converter);
-	
+
 		// Associations vers d'autres classes
 		manageAssociations(umlClass, converter);
 	}
@@ -94,8 +100,8 @@ public class JavaClass {
 	/**
 	 * @return the comment
 	 */
-	public List<String> getComments() {
-		return new ArrayList<>(comments);
+	public List<String> getCommentsList() {
+		return new ArrayList<>(commentsList);
 	}
 
 	/**
@@ -139,17 +145,18 @@ public class JavaClass {
 	public JavaClass getPkClass() {
 		return pkClass;
 	}
-	
+
 
 	/**
 	 * Generation des attributs et methodes (et classe si besoin) liées aux PKs
+	 * @param javaPackage
 	 * @param umlClass
 	 * @param converter
 	 */
-	private void managePKs(UmlClass umlClass, ConverterInterface converter) {
+	private void managePKs(JavaPackage javaPackage, UmlClass umlClass, ConverterInterface converter) {
 
 		if(umlClass.getPKs().size() > 1) {
-			// FIXME multiple pks !
+			// FIXME cas pk multiple 
 			// create class
 			// use it as attribute
 			// make getters/setters
@@ -161,33 +168,33 @@ public class JavaClass {
 			// Generate getter/setter			
 			JavaMethod getterPK = generateGetter(javaAttribute);
 			String seqName = "\"" + JavaWriter.SEQUENCE_PREFIX + umlClass.getName().toUpperCase() + "\"";
-		
+
 			// Id annotation on PK field
 			getterPK.addAnnotations(new JavaAnnotation(importManager.getFinalName("javax.persistence.Id")));
 			// Annotation Sequence generator
 			getterPK.addAnnotations(new JavaAnnotation(
-					importManager.getFinalName("javax.persistence.SequenceGenerator"), 
-					new JavaAnnotationProperty("name",seqName),
-					new JavaAnnotationProperty("sequenceName",seqName),
-					new JavaAnnotationProperty("allocationSize","20")
+				importManager.getFinalName("javax.persistence.SequenceGenerator"), 
+				new JavaAnnotationProperty("name",seqName),
+				new JavaAnnotationProperty("sequenceName",seqName),
+				new JavaAnnotationProperty("allocationSize","20")
 			));
-		// Annotation on PK field to use generator
+			// Annotation on PK field to use generator
 			getterPK.addAnnotations(new JavaAnnotation(
-					importManager.getFinalName("javax.persistence.GeneratedValue"),
-					new JavaAnnotationProperty("strategy",importManager.getFinalName("javax.persistence.GenerationType")+".SEQUENCE"),
-					new JavaAnnotationProperty("generator",seqName)
+				importManager.getFinalName("javax.persistence.GeneratedValue"),
+				new JavaAnnotationProperty("strategy",importManager.getFinalName("javax.persistence.GenerationType")+".SEQUENCE"),
+				new JavaAnnotationProperty("generator",seqName)
 			));	
 			// Annotation pour le nom de la colonne
 			getterPK.addAnnotations(new JavaAnnotation(
-					importManager.getFinalName("javax.persistence.Column"),
-					new JavaAnnotationProperty("name","\""+javaAttribute.getColumnName() +"\""),
-					new JavaAnnotationProperty("nullable",javaAttribute.isNotNull()?"false":"true")
+				importManager.getFinalName("javax.persistence.Column"),
+				new JavaAnnotationProperty("name","\""+javaAttribute.getColumnName() +"\""),
+				new JavaAnnotationProperty("nullable",javaAttribute.isNotNull()?"false":"true")
 			));
 			methodsList.add(getterPK);
 			methodsList.add(generateSetter(javaAttribute));
 		}
 	}
-	
+
 	/**
 	 * Attributs (no PLS) managements to create java attributes and getter/setters
 	 * @param umlClass
@@ -204,9 +211,9 @@ public class JavaClass {
 				JavaMethod getter = generateGetter(javaAttribute);
 				// Annotation pour le nom de la colonne
 				getter.addAnnotations(new JavaAnnotation(
-						importManager.getFinalName("javax.persistence.Column"),
-						new JavaAnnotationProperty("name","\""+javaAttribute.getColumnName() +"\""),
-						new JavaAnnotationProperty("nullable",javaAttribute.isNotNull()?"false":"true")
+					importManager.getFinalName("javax.persistence.Column"),
+					new JavaAnnotationProperty("name","\""+javaAttribute.getColumnName() +"\""),
+					new JavaAnnotationProperty("nullable",javaAttribute.isNotNull()?"false":"true")
 				));
 
 				methodsList.add(getter);
@@ -214,7 +221,7 @@ public class JavaClass {
 			}
 		}
 	}
-	
+
 	/**
 	 * Management of umlAssociation to create attributes and getter/setters
 	 * @param umlClass
@@ -227,15 +234,112 @@ public class JavaClass {
 				attributesList.add(javaAttribute);
 
 				// Generate getter/setter 
-				// TODO +  JPA annotations for getter setters
-				
-				methodsList.add(generateGetter(javaAttribute));
+				JavaMethod assocGetter = generateGetter(javaAttribute);
+
+				// xToMany
+				if(association.isTargetMultiple() ) {
+					// ManyToMany
+					if(association.getOpposite().isTargetMultiple()) {
+						// The "owner" have the annotation with join columns and intermediate table name
+						if(association.isOwner() ) {
+							assocGetter.addAnnotations(new JavaAnnotation(
+								importManager.getFinalName("javax.persistence.ManyToMany"),
+								new JavaAnnotationProperty("cascade","{"
+										+ importManager.getFinalName("javax.persistence.CascadeType")+".PERSIST,"
+										+ importManager.getFinalName("javax.persistence.CascadeType")+".MERGE}")
+							));
+							assocGetter.addAnnotations(new JavaAnnotation(
+								importManager.getFinalName("javax.persistence.JoinTable"),
+								new JavaAnnotationProperty("name","\"" +  association.getSource().getName() + "_" + association.getTarget().getName() + "\""),
+								new JavaAnnotationProperty("joinColumns","@JoinColumn(name = \""+ computePKName(association.getSource())+"\")"),
+								new JavaAnnotationProperty("inverseJoinColumns","@JoinColumn(name = \""+  computePKName(association.getTarget())+ "\")")
+							));
+						} else { // Not "owner" of the manyToMany, mappedBy with opposite getter is enough
+							assocGetter.addAnnotations(new JavaAnnotation(
+									importManager.getFinalName("javax.persistence.ManyToMany"),
+									new JavaAnnotationProperty("mappedBy","\""+ association.getOpposite().getRoleName() + "List\"")
+							));
+						}						
+					} else { // OneToMany
+						List<JavaAnnotationProperty> propertiesOneToMany = new ArrayList<>();
+
+						//  Bidirectionnal relation, mappedBy is enough
+						if(association.getOpposite().isTargetNavigable()) {
+							propertiesOneToMany.add(new JavaAnnotationProperty("mappedBy","\""+ association.getOpposite().getRoleName() + "List\""));
+						} else {// Unidirectional, needs join column name and reference column name
+							JavaAnnotation joinColumn = new JavaAnnotation(
+									importManager.getFinalName("javax.persistence.JoinColumn"),
+									new JavaAnnotationProperty("name","\"" + computePKName(association.getSource())+ "\""),
+									new JavaAnnotationProperty("referencedColumnName","\"" + computeFKName(association.getOpposite()) + "\"")	
+									);
+							assocGetter.addAnnotations(joinColumn);							
+						}					
+						// Add orphan removal
+						propertiesOneToMany.add(new JavaAnnotationProperty("orphanRemoval","true"));
+
+						// OneToMany with properties
+						JavaAnnotation oneToMany = new JavaAnnotation(
+								importManager.getFinalName("javax.persistence.OneToMany"),
+								propertiesOneToMany.toArray(new JavaAnnotationProperty[0])				
+								);					
+						assocGetter.addAnnotations(oneToMany);				
+					}
+				} else { // xToOne
+					// ManyToOne
+					if(association.getOpposite().isTargetMultiple()) {				
+						assocGetter.addAnnotations(new JavaAnnotation(importManager.getFinalName("javax.persistence.ManyToOne")));	
+						assocGetter.addAnnotations(new JavaAnnotation(
+								importManager.getFinalName("javax.persistence.JoinColumn"),
+								new JavaAnnotationProperty("name","\"" + computePKName(association.getTarget())+ "\""),
+								new JavaAnnotationProperty("referencedColumnName","\"" + computeFKName(association) + "\"")	
+								));										
+					} else { // OneToOne is too complicated to generate, use a "false" n -> 1 instead
+						throw new MdaGeneratorException("This generator doesn't support 1 -> 1 for association " + association.getName() + ", use n -> 1 instead");
+					}
+				}
+
+				methodsList.add(assocGetter);
 				methodsList.add(generateSetter(javaAttribute));	
 			}
 		}
 	}
 
-	
+
+	/**
+	 * 
+	 * @param umlClass
+	 * @return
+	 */
+	private String computePKName(UmlClass umlClass) {
+		String pkName;
+		List<UmlAttribute> pks = umlClass.getPKs();
+		if(pks.isEmpty()) {
+			// FIXME put exception back again
+			return "no_pk";
+			//throw new MdaGeneratorException("Cannot find a PK for class " + umlClass.getName());
+		} else if(pks.size()==1) {
+			pkName = pks.get(0).getName();
+		} else {
+			// FIXME gérer cas pk multiple
+			throw new MdaGeneratorException("Multiple PKs not implemented for class " + umlClass.getName());
+		}
+
+		return pkName;		
+	}
+
+	private String computeFKName(UmlAssociation umlAssociation) {
+		String fkName = computePKName(umlAssociation.getTarget());
+
+		// Si le nom de l'association à trois parties séparée par des "_", on ajoute la troisième partie dans le nom de la clef
+		String[] assocPart = umlAssociation.getName().split("_");
+		if(assocPart.length > 2) {
+			fkName += "_" + String.join("_",Arrays.copyOfRange(assocPart, 2, assocPart.length));
+		}
+
+		return fkName;
+	}
+
+
 	private static JavaMethod generateGetter(JavaAttribute attribute) {
 		JavaMethod getter = new JavaMethod(Visibility.PUBLIC, attribute.getJavaType(), "get" + StringUtils.capitalize(attribute.getName()));
 

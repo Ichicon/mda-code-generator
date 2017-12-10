@@ -64,7 +64,7 @@ public class JavaPackage {
 	/**
 	 * @return the package comments
 	 */
-	public List<String> getComments() {
+	public List<String> getCommentsList() {
 		return comments;
 	}
 

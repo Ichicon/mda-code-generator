@@ -87,7 +87,7 @@ public class UmlAssociation {
 	 */
 	public String getRoleName() {
 		if(StringUtils.isEmpty(roleName)) {
-			return target.getCamelCaseName();
+			return StringUtils.uncapitalize(target.getCamelCaseName());
 		}
 		return roleName;
 	}

@@ -53,14 +53,17 @@ public class JavaAttribute {
 		this.isPK =false;
 		this.columnName = null; // mappedby ?
 			
+		String javaTypeName = umlAssociation.getTarget().getXmiPackage().getName() + "." + umlAssociation.getTarget().getCamelCaseName();
 		if(umlAssociation.isTargetMultiple()) {
 			this.name = umlAssociation.getRoleName()+ "List";
+			this.javaType = importManager.getFinalName("java.util.Set") + "<" + importManager.getFinalName(javaTypeName) + ">";
 		} else {
 			this.name = umlAssociation.getRoleName();
+			this.javaType = importManager.getFinalName(javaTypeName);
 		}
 
-		String javaTypeName = umlAssociation.getTarget().getXmiPackage().getName() + "." + umlAssociation.getTarget().getCamelCaseName(); 
-		this.javaType = importManager.getFinalName(javaTypeName);
+		 
+
 		this.isNotNull = umlAssociation.isTargetNullable();
 
 		this.comments.add("Association " + umlAssociation.getName() + " to " + umlAssociation.getTarget().getCamelCaseName());
