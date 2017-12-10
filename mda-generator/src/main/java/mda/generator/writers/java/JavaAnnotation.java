@@ -1,6 +1,7 @@
 package mda.generator.writers.java;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -13,21 +14,21 @@ import org.apache.commons.lang3.StringUtils;
 public class JavaAnnotation {
 	/** Full annotation name */
 	private final String name;
-	/** Pacakge name computed for imports resolution */
-	private final String packageName;
 
 	/** Properties of annotation if needed, ex : \@Annotation(properties) */
 	private List<JavaAnnotationProperty> properties = new ArrayList<>();
-		
+
 	/**
 	 * Constructor of annotation
-	 * @param name Full name of annotation (with package)
+	 * @param nameWithoutArobase name of annotation (with package) but no @
 	 */
-	public JavaAnnotation(String name) {
-		this.name = name;
-		this.packageName = StringUtils.substringBeforeLast(name, ".");
+	public JavaAnnotation(String nameWithoutArobase, JavaAnnotationProperty... properties) {
+		this.name = "@" + nameWithoutArobase;
+		if(properties.length > 0) {
+			this.properties.addAll(Arrays.asList(properties));
+		}
 	}
-	
+
 	/**
 	 * @return the name
 	 */
@@ -35,24 +36,18 @@ public class JavaAnnotation {
 		return name;
 	}
 
-	/**
-	 * @return the packageName
-	 */
-	public String getPackageName() {
-		return packageName;
-	}
 
 	/**
-	 * @return the properties
+	 * @return the properties (copy)
 	 */
 	public List<JavaAnnotationProperty> getProperties() {
-		return properties;
+		return new ArrayList<>(properties);
 	}
 
 	/**
-	 * @param properties the properties to set
+	 * @param property the property to add
 	 */
-	public void setProperties(List<JavaAnnotationProperty> properties) {
-		this.properties = properties;
+	public void addProperty(JavaAnnotationProperty property) {
+		this.properties.add(property);
 	}
 }

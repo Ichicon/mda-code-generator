@@ -16,11 +16,11 @@ public class ImportManager {
 	private Map<String, String> imports = new HashMap<>();
 	
 	/**
-	 * 
+	 * Add type to imports if not already present, compute final name for class inside code
 	 * @param fullName
 	 * @return the name to use (could be full name if name already use)
 	 */
-	public String addTypeAndGetFinalName(String fullName) {
+	public String getFinalName(String fullName) {
 		String simpleName = StringUtils.substringAfterLast(fullName, ".");
 		if(StringUtils.isEmpty(simpleName)) {
 			return fullName;

@@ -1,5 +1,11 @@
 package mda.generator.writers.java;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import mda.generator.exceptions.MdaGeneratorException;
+
 /**
  * Property of an annotation ( ex: @ManyToMany(name = value) )
  * The value can be another annotation.
@@ -7,13 +13,41 @@ package mda.generator.writers.java;
  * @author Fabien Crapart
  */
 public class JavaAnnotationProperty {	
-	private String name;
+	private final String name;
 	
 	/** True if value is annotation */
-	private boolean isAnnotation;
+	private final boolean isAnnotation;
 	
-	private String value;
-	private JavaAnnotation annotationValue;
+	private final String value;
+	private final List<JavaAnnotation> annotationValues = new ArrayList<>();
+	
+	/**
+	 * Simple property for annotation
+	 * @param name
+	 * @param value
+	 */
+	public JavaAnnotationProperty(String name, String value) {
+		this.name =name;
+		this.value = value;		
+		this.isAnnotation =false;
+	}
+	
+	/**
+	 * Property wich is another annotation
+	 * @param name
+	 * @param value
+	 */
+	public JavaAnnotationProperty(String name, JavaAnnotation... values) {
+		this.name =name;
+		this.value = null;
+		if(values.length <= 0) {
+			throw new MdaGeneratorException("Annotation property " + name + " must have at least one value");
+		}
+		
+		this.annotationValues.addAll(Arrays.asList(values));
+		this.isAnnotation = true;
+	}
+	
 	/**
 	 * @return the name
 	 */
@@ -21,40 +55,19 @@ public class JavaAnnotationProperty {
 		return name;
 	}
 	/**
-	 * @param name the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
-	/**
 	 * @return the value
 	 */
 	public String getValue() {
 		return value;
 	}
+
 	/**
-	 * @param value the value to set
+	 * @return the annotationValues
 	 */
-	public void setValue(String value) {
-		this.value = value;
+	public List<JavaAnnotation> getAnnotationValue() {
+		return annotationValues;
 	}
-	/**
-	 * @return the annotationValue
-	 */
-	public JavaAnnotation getAnnotationValue() {
-		return annotationValue;
-	}
-	/**
-	 * @param annotationValue the annotationValue to set
-	 */
-	public void setAnnotationValue(JavaAnnotation annotationValue) {
-		this.annotationValue = annotationValue;
-		if(annotationValue != null) {
-			isAnnotation = true;
-		} else {
-			isAnnotation = false;
-		}
-	}
+
 	/**
 	 * @return the isAnnotation
 	 */

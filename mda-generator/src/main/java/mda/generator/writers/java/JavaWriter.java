@@ -48,7 +48,7 @@ public class JavaWriter implements JavaWriterInterface {
 	private static String CONTINUE_COMMENT = " * ";
 	private static String GENERATED_COMMENT = "This file has been automatically generated.";
 	
-	private static String NO_COMMENT_FOUND = "No comment found in model diagram \n";
+	public static String NO_COMMENT_FOUND = "No comment found in model diagram";
 
 	// Writer config
 	private JavaWriterConfig config;
@@ -203,9 +203,9 @@ public class JavaWriter implements JavaWriterInterface {
 		// generate full comments
 		generateCommentLinesFromComments(finalContent, comments, EMPTY);		
 	
-		// TODO Annotations
+		// Annotations
 		for(JavaAnnotation annotation : javaClass.getAnnotationsList()) {
-			writeAnnotation(finalContent, annotation, "");
+			writeAnnotation(finalContent, annotation, EMPTY);
 		}	
 		
 		// Class line
@@ -257,10 +257,12 @@ public class JavaWriter implements JavaWriterInterface {
 	
 	private void writeMethod(StringBuilder content, JavaMethod method) {
 		// Comment
-		generateCommentLinesFromComments(content, method.getComments(), INDENT);
+		generateCommentLinesFromComments(content, method.getCommentLines(), INDENT);
 		
 		// Annotations
-		
+		for(JavaAnnotation annotation : method.getAnnotations()) {
+			writeAnnotation(content, annotation, INDENT);
+		}	
 		
 		// Declaration
 		content.append(INDENT)
@@ -281,7 +283,7 @@ public class JavaWriter implements JavaWriterInterface {
 		
 		// Body
 		content.append(BRACKET_START);
-		for(String contentLine : method.getContent()) {
+		for(String contentLine : method.getContentLines()) {
 			content.append(INDENT).append(INDENT).append(contentLine).append(END_BREAK);
 		}		
 		content.append(INDENT).append(BRACKET_END);
@@ -295,6 +297,22 @@ public class JavaWriter implements JavaWriterInterface {
 	 */
 	private void writeAnnotation(StringBuilder content, JavaAnnotation annotation, String indent) {
 		content.append(indent);
+		content.append(annotation.getName());
+		List<JavaAnnotationProperty> properties = annotation.getProperties();
+		if(!properties.isEmpty()) {
+			content.append("(");
+			for(JavaAnnotationProperty property : properties) {
+				if(property.isAnnotation()) {
+					// FIXME gérer écriture annotation dans annotation
+				} else {
+					content.append(property.getName()).append("=").append(property.getValue());
+				}
+			}
+			
+			content.append(")");
+		}
+		
+		content.append(BREAK);
 	}
 	
 	
@@ -306,9 +324,7 @@ public class JavaWriter implements JavaWriterInterface {
 	 */
 	protected void generateCommentLinesFromComments(StringBuilder content, List<String> comments , String indent) {
 		content.append(indent).append(START_COMMENT);
-		if(comments.isEmpty()){
-			content.append(indent).append(CONTINUE_COMMENT).append(NO_COMMENT_FOUND);
-		}else {
+		if(!comments.isEmpty()){
 			for(String commentLine : comments) {
 				content.append(indent).append(CONTINUE_COMMENT).append(commentLine).append(BREAK);
 			}

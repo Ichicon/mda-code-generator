@@ -18,8 +18,8 @@ public class JavaMethod {
 	private final String returnType;
 	private final List<String> args;
 	
-	private final List<String> content = new ArrayList<>();
-	private final List<String> comments = new ArrayList<>();
+	private final List<String> contentLines = new ArrayList<>();
+	private final List<String> commentLines = new ArrayList<>();
 	
 	/**
 	 * Constructeur d'un attribut de classe java
@@ -35,6 +35,12 @@ public class JavaMethod {
 		this.args = new ArrayList<>(args);
 	}
 	
+	/**
+	 * Method without args
+	 * @param visibility
+	 * @param returnType
+	 * @param name
+	 */
 	public JavaMethod(Visibility visibility, String returnType, String name) {
 		this.visibility = visibility;
 		this.returnType = returnType;
@@ -71,24 +77,26 @@ public class JavaMethod {
 	}
 
 	/**
-	 * @return the annotations
+	 * @return the annotations (copy)
 	 */
 	public List<JavaAnnotation> getAnnotations() {
-		return annotations;
+		return new ArrayList<>(annotations);
 	}
 
 	/**
-	 * @param annotations the annotations to set
+	 * Add annotation to method
+	 * @param annotation new annotation to add
 	 */
-	public void setAnnotations(List<JavaAnnotation> annotations) {
-		this.annotations = annotations;
+	public void addAnnotations(JavaAnnotation annotation) {
+		 annotations.add(annotation);
 	}
+
 
 	/**
 	 * @return the content lines (copy)
 	 */
-	public List<String> getContent() {
-		return new ArrayList<>(content);
+	public List<String> getContentLines() {
+		return new ArrayList<>(contentLines);
 	}
 	
 	/**
@@ -96,15 +104,15 @@ public class JavaMethod {
 	 * @param contentLine new line to add
 	 */
 	public void addContentLine(String contentLine) {
-		content.add(contentLine);
+		contentLines.add(contentLine);
 	}
 	
 
 	/**
 	 * @return the comments lines (copy)
 	 */
-	public List<String> getComments() {
-		return new ArrayList<>(comments);
+	public List<String> getCommentLines() {
+		return new ArrayList<>(commentLines);
 	}
 	
 	/**
@@ -112,6 +120,6 @@ public class JavaMethod {
 	 * @param commentLine new line to add
 	 */
 	public void addCommentLine(String commentLine) {
-		comments.add(commentLine);
+		commentLines.add(commentLine);
 	}
 }

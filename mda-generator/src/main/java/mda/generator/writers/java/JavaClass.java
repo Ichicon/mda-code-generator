@@ -37,7 +37,7 @@ public class JavaClass {
 	 * 
 	 * @param javaPackage
 	 * @param umlClass
-	 * @param converter Converter de domain -> type java/sql
+	 * @param converter
 	 */
 	public JavaClass(JavaPackage javaPackage, UmlClass umlClass, ConverterInterface converter) {
 		this.classPath = javaPackage.getPackagePath().resolve(umlClass.getCamelCaseName() + ".java");
@@ -45,23 +45,44 @@ public class JavaClass {
 		
 		if(umlClass.getComment() != null) {
 			comments.addAll(Arrays.asList(umlClass.getComment().split("\n")));
-		} 
+		} else {
+			comments.add(JavaWriter.NO_COMMENT_FOUND);
+		}
 
 		this.packageName = javaPackage.getPackageName();
 		
+		// Annotation entity
+		annotationsList.add(new JavaAnnotation(importManager.getFinalName("javax.persistence.Entity")));
+		// Annotation table
+		annotationsList.add(
+				new JavaAnnotation(
+						importManager.getFinalName("javax.persistence.Table"),
+						new JavaAnnotationProperty("name","\"" + umlClass.getName() + "\"")
+				)
+		);
+		
+		
+		// Attributes, getter, setter
 		for(UmlAttribute umlAttribute : umlClass.getAttributes()) {
-			JavaAttribute javaAttribut = new JavaAttribute(umlAttribute, converter, importManager);
-			attributesList.add(javaAttribut);
+			JavaAttribute javaAttribute = new JavaAttribute(umlAttribute, converter, importManager);
+			attributesList.add(javaAttribute);
 			
 			// Generate getter/setter
-			methodsList.add(generateGetter(javaAttribut.getJavaType(), javaAttribut.getName(),javaAttribut.getComments()));
-			methodsList.add(generateSetter(javaAttribut.getJavaType(), javaAttribut.getName(), javaAttribut.getComments()));
-			
+			methodsList.add(generateGetter(javaAttribute));
+			methodsList.add(generateSetter(javaAttribute));		
 		}
 		
-		// FIXME gérer associations java
+		// Associations vers d'autres classes
 		for(UmlAssociation association : umlClass.getAssociations()) {
-			//attributes, methods ..
+			if(association.isTargetNavigable()) {
+				JavaAttribute javaAttribute = new JavaAttribute(association, converter, importManager);
+				attributesList.add(javaAttribute);
+				
+				// Generate getter/setter 
+				// TODO +  JPA annotations for getter setters
+				methodsList.add(generateGetter(javaAttribute));
+				methodsList.add(generateSetter(javaAttribute));	
+			}
 		}
 	}
 
@@ -130,37 +151,36 @@ public class JavaClass {
 
 	
 	
-	private static JavaMethod generateGetter(String type, String attrName, List<String> comments) {
-		JavaMethod getter = new JavaMethod(Visibility.PUBLIC, type, "get" + StringUtils.capitalize(attrName));
+	private static JavaMethod generateGetter(JavaAttribute attribute) {
+		JavaMethod getter = new JavaMethod(Visibility.PUBLIC, attribute.getJavaType(), "get" + StringUtils.capitalize(attribute.getName()));
 		
 		// Comment from model
-		for(String commentLine : comments) {
+		for(String commentLine : attribute.getComments()) {
 			getter.addCommentLine(commentLine);
 		}
 		// Comment for return
-		getter.addCommentLine("@return value of " + attrName);
+		getter.addCommentLine("@return value of " + attribute.getName());
 		
-		getter.addContentLine("return " + attrName);
+		getter.addContentLine("return " + attribute.getName());
 		
-		return getter;
-		
+		return getter;		
 	}
 	
-	private static JavaMethod generateSetter(String type, String attrName, List<String> comments) {
+	private static JavaMethod generateSetter(JavaAttribute attribute) {
 		List<String> args = new ArrayList<>();
-		args.add("final " + type + " " + attrName);
+		args.add("final " + attribute.getJavaType() + " " + attribute.getName());
 		
-		JavaMethod setter = new JavaMethod(Visibility.PUBLIC, "void", "set" + StringUtils.capitalize(attrName), args);
+		JavaMethod setter = new JavaMethod(Visibility.PUBLIC, "void", "set" + StringUtils.capitalize(attribute.getName()), args);
 		
 		// Comment from model
-		for(String commentLine : comments) {
+		for(String commentLine : attribute.getComments()) {
 			setter.addCommentLine(commentLine);
 		}
 		// Comment for param
-		setter.addCommentLine("@param " + attrName + " new value to give to "  + attrName);
+		setter.addCommentLine("@param " + attribute.getName() + " new value to give to "  + attribute.getName());
 		
 		// Content for setter
-		setter.addContentLine("this." + attrName + " = " + attrName);
+		setter.addContentLine("this." + attribute.getName() + " = " + attribute.getName());
 
 		return setter;
 	}

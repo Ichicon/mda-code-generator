@@ -37,6 +37,8 @@ public class JavaPackage {
 		
 		if(umlPackage.getComment() != null) {
 			this.comments.addAll(Arrays.asList(StringUtils.split(umlPackage.getComment(),"\n")));
+		} else {
+			comments.add(JavaWriter.NO_COMMENT_FOUND);
 		}
 	
 		for(UmlClass umlClass : umlPackage.getClasses()) {

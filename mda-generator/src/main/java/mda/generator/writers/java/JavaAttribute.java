@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import mda.generator.beans.UmlAssociation;
 import mda.generator.beans.UmlAttribute;
 import mda.generator.converters.ConverterInterface;
 
@@ -28,17 +29,39 @@ private List<JavaAnnotation> annotations = new ArrayList<>();
 	 * @param converter typeConverter
 	 */
 	public JavaAttribute(UmlAttribute umlAttribute, ConverterInterface converter, ImportManager importManager) {
-		this.javaType= importManager.addTypeAndGetFinalName(converter.getJavaType(umlAttribute.getDomain().getName()));
+		this.javaType= importManager.getFinalName(converter.getJavaType(umlAttribute.getDomain().getName()));
 		this.name = umlAttribute.getCamelCaseName();
 		
 		if(umlAttribute.getComment() != null) {
 			this.comments.addAll(Arrays.asList(umlAttribute.getComment().split("\n")));
+		} else {
+			comments.add(JavaWriter.NO_COMMENT_FOUND);
 		}
 		
 		this.isNotNull = umlAttribute.getIsNotNull();
 		
 		
 		// Annotations ?
+	}
+	
+	/**
+	 * Attribute from association
+	 * @param umlAssociation
+	 * @param converter
+	 * @param importManager
+	 */
+	public JavaAttribute(UmlAssociation umlAssociation, ConverterInterface converter, ImportManager importManager) {
+		if(umlAssociation.isTargetMultiple()) {
+			this.name = umlAssociation.getRoleName()+ "List";
+		} else {
+			this.name = umlAssociation.getRoleName();
+		}
+		
+		String javaTypeName = umlAssociation.getTarget().getXmiPackage().getName() + "." + umlAssociation.getTarget().getCamelCaseName(); 
+		this.javaType = importManager.getFinalName(javaTypeName);
+		this.isNotNull = umlAssociation.isTargetNullable();
+		
+		this.comments.add("Association " + umlAssociation.getName() + " to " + umlAssociation.getTarget().getCamelCaseName());
 	}
 
 	/**
