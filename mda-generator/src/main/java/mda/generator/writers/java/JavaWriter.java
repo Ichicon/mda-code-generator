@@ -29,6 +29,10 @@ public class JavaWriter implements JavaWriterInterface {
 	/** Constant use to mark the end of generated code in a file, the rest of file can be edited without being erased */
 	public static String END_OF_GENERATED ="// END OF GENERATED CODE - YOU CAN EDIT THE FILE AFTER THIS LINE, DO NOT EDIT THIS LINE OR BEFORE THIS LINE";
 
+	// Sequence prefix
+	public static String SEQUENCE_PREFIX = "SEQ_";
+	
+	
 	// Constants for code
 	private static String PAKAGE = "package ";
 	private static String IMPORT = "import ";
@@ -301,7 +305,14 @@ public class JavaWriter implements JavaWriterInterface {
 		List<JavaAnnotationProperty> properties = annotation.getProperties();
 		if(!properties.isEmpty()) {
 			content.append("(");
+			boolean first = true;
 			for(JavaAnnotationProperty property : properties) {
+				if(first) {
+					first=false;
+				} else {
+					content.append(", ");
+				}
+							
 				if(property.isAnnotation()) {
 					// FIXME gérer écriture annotation dans annotation
 				} else {

@@ -13,37 +13,36 @@ import mda.generator.converters.ConverterInterface;
  * @author Fabien Crapart
  */
 public class JavaAttribute {
-private List<JavaAnnotation> annotations = new ArrayList<>();
-	
 	private final Visibility visibility = Visibility.PRIVATE;
 	private final String name;
+	private final String columnName;
 	private final List<String> comments = new ArrayList<>(); 
 	private final String javaType;
 	private final boolean isNotNull;
-	
-	
-	
+	private final boolean isPK;
+
+
+
 	/**
 	 * Creation of java attribute
 	 * @param umlAttribute Uml attribute definition
 	 * @param converter typeConverter
 	 */
 	public JavaAttribute(UmlAttribute umlAttribute, ConverterInterface converter, ImportManager importManager) {
+		this.isPK = umlAttribute.isPK();
 		this.javaType= importManager.getFinalName(converter.getJavaType(umlAttribute.getDomain().getName()));
 		this.name = umlAttribute.getCamelCaseName();
-		
+		this.columnName = umlAttribute.getName();
+
 		if(umlAttribute.getComment() != null) {
 			this.comments.addAll(Arrays.asList(umlAttribute.getComment().split("\n")));
 		} else {
 			comments.add(JavaWriter.NO_COMMENT_FOUND);
 		}
-		
+
 		this.isNotNull = umlAttribute.getIsNotNull();
-		
-		
-		// Annotations ?
 	}
-	
+
 	/**
 	 * Attribute from association
 	 * @param umlAssociation
@@ -51,16 +50,19 @@ private List<JavaAnnotation> annotations = new ArrayList<>();
 	 * @param importManager
 	 */
 	public JavaAttribute(UmlAssociation umlAssociation, ConverterInterface converter, ImportManager importManager) {
+		this.isPK =false;
+		this.columnName = null; // mappedby ?
+			
 		if(umlAssociation.isTargetMultiple()) {
 			this.name = umlAssociation.getRoleName()+ "List";
 		} else {
 			this.name = umlAssociation.getRoleName();
 		}
-		
+
 		String javaTypeName = umlAssociation.getTarget().getXmiPackage().getName() + "." + umlAssociation.getTarget().getCamelCaseName(); 
 		this.javaType = importManager.getFinalName(javaTypeName);
 		this.isNotNull = umlAssociation.isTargetNullable();
-		
+
 		this.comments.add("Association " + umlAssociation.getName() + " to " + umlAssociation.getTarget().getCamelCaseName());
 	}
 
@@ -78,14 +80,14 @@ private List<JavaAnnotation> annotations = new ArrayList<>();
 		return name;
 	}
 
-	
+
 	/**
 	 * @return the javaType
 	 */
 	public String getJavaType() {
 		return javaType;
 	}
-	
+
 	/**
 	 * @return the isNotNull
 	 */
@@ -101,17 +103,16 @@ private List<JavaAnnotation> annotations = new ArrayList<>();
 	}
 
 	/**
-	 * @return the annotations
+	 * @return the isPK
 	 */
-	public List<JavaAnnotation> getAnnotations() {
-		return annotations;
+	public boolean isPK() {
+		return isPK;
 	}
 
 	/**
-	 * @param annotations the annotations to set
+	 * @return the columnName
 	 */
-	public void setAnnotations(List<JavaAnnotation> annotations) {
-		this.annotations = annotations;
+	public String getColumnName() {
+		return columnName;
 	}
-	
 }
