@@ -18,7 +18,8 @@ public class JavaMethod {
 	private final String returnType;
 	private final List<String> args;
 	
-	private String content;
+	private final List<String> content = new ArrayList<>();
+	private final List<String> comments = new ArrayList<>();
 	
 	/**
 	 * Constructeur d'un attribut de classe java
@@ -32,6 +33,13 @@ public class JavaMethod {
 		this.returnType = returnType;
 		this.name = name;
 		this.args = new ArrayList<>(args);
+	}
+	
+	public JavaMethod(Visibility visibility, String returnType, String name) {
+		this.visibility = visibility;
+		this.returnType = returnType;
+		this.name = name;
+		this.args = new ArrayList<>();
 	}
 
 	/**
@@ -77,18 +85,33 @@ public class JavaMethod {
 	}
 
 	/**
-	 * @return the content
+	 * @return the content lines (copy)
 	 */
-	public String getContent() {
-		return content;
+	public List<String> getContent() {
+		return new ArrayList<>(content);
 	}
+	
+	/**
+	 * Add line to content
+	 * @param contentLine new line to add
+	 */
+	public void addContentLine(String contentLine) {
+		content.add(contentLine);
+	}
+	
 
 	/**
-	 * @param content the content to set
+	 * @return the comments lines (copy)
 	 */
-	public void setContent(String content) {
-		this.content = content;
+	public List<String> getComments() {
+		return new ArrayList<>(comments);
 	}
 	
-	
+	/**
+	 * Add line to comment
+	 * @param commentLine new line to add
+	 */
+	public void addCommentLine(String commentLine) {
+		comments.add(commentLine);
+	}
 }

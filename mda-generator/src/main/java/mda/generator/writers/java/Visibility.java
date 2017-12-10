@@ -18,7 +18,7 @@ public enum Visibility {
 	/**
 	 * @return the javaCode
 	 */
-	public String getJavaCode() {
+	public String toString() {
 		return javaCode;
 	}	
 }

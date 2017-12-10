@@ -1,6 +1,7 @@
 package mda.generator.writers.java;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import mda.generator.beans.UmlAttribute;
@@ -15,20 +16,29 @@ private List<JavaAnnotation> annotations = new ArrayList<>();
 	
 	private final Visibility visibility = Visibility.PRIVATE;
 	private final String name;
-	private final String comment;
+	private final List<String> comments = new ArrayList<>(); 
 	private final String javaType;
 	private final boolean isNotNull;
+	
+	
 	
 	/**
 	 * Creation of java attribute
 	 * @param umlAttribute Uml attribute definition
 	 * @param converter typeConverter
 	 */
-	public JavaAttribute(UmlAttribute umlAttribute, ConverterInterface converter) {
-		this.javaType= converter.getJavaType(umlAttribute.getDomain().getName());
+	public JavaAttribute(UmlAttribute umlAttribute, ConverterInterface converter, ImportManager importManager) {
+		this.javaType= importManager.addTypeAndGetFinalName(converter.getJavaType(umlAttribute.getDomain().getName()));
 		this.name = umlAttribute.getCamelCaseName();
-		this.comment = umlAttribute.getComment();
+		
+		if(umlAttribute.getComment() != null) {
+			this.comments.addAll(Arrays.asList(umlAttribute.getComment().split("\n")));
+		}
+		
 		this.isNotNull = umlAttribute.getIsNotNull();
+		
+		
+		// Annotations ?
 	}
 
 	/**
@@ -63,8 +73,8 @@ private List<JavaAnnotation> annotations = new ArrayList<>();
 	/**
 	 * @return the comment
 	 */
-	public String getComment() {
-		return comment;
+	public List<String> getComments() {
+		return comments;
 	}
 
 	/**

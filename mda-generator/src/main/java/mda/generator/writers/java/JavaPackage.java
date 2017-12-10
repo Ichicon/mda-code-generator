@@ -3,6 +3,7 @@ package mda.generator.writers.java;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -20,22 +21,24 @@ import mda.generator.converters.ConverterInterface;
 public class JavaPackage {
 	private final Path packagePath;
 	private final String packageName;
-	private final String packageComment;
-	
-	private List<JavaClass> classes = new ArrayList<>();
+	private final List<String> comments = new ArrayList<>();	
+	private final List<JavaClass> classes = new ArrayList<>();
 	
 	/**
 	 * Package initialization
 	 * @param parentPath Root of source code
 	 * @param packageName Package name
-	 * @param packageComment Facultative : comment to include in package-info.java
+	 * @param comments Facultative : comment to include in package-info.java
 	 * @param converter Type converter for classes
 	 */
 	public JavaPackage(Path parentPath, UmlPackage umlPackage, ConverterInterface converter) {
 		this.packagePath = parentPath.resolve(Paths.get(StringUtils.replaceChars(umlPackage.getName(), '.','/')));
 		this.packageName = umlPackage.getName();
-		this.packageComment = umlPackage.getComment();
 		
+		if(umlPackage.getComment() != null) {
+			this.comments.addAll(Arrays.asList(StringUtils.split(umlPackage.getComment(),"\n")));
+		}
+	
 		for(UmlClass umlClass : umlPackage.getClasses()) {
 			classes.add(new JavaClass(this, umlClass, converter));
 		}
@@ -57,10 +60,10 @@ public class JavaPackage {
 	}
 
 	/**
-	 * @return the packageComment
+	 * @return the package comments
 	 */
-	public String getPackageComment() {
-		return packageComment;
+	public List<String> getComments() {
+		return comments;
 	}
 
 	/**

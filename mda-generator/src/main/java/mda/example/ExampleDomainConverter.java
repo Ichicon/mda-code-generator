@@ -27,8 +27,8 @@ public class ExampleDomainConverter implements ConverterInterface {
 		mapJavaTypes.put("DO_LIBELLE_LONG","String");
 		mapJavaTypes.put("DO_MOT_PASSE","String");
 		mapJavaTypes.put("DO_ORDRE_REPARTITION","String");
-		mapJavaTypes.put("DO_DATE","LocalDate");
-		mapJavaTypes.put("DO_DATE_HEURE","LocalDateTime");
+		mapJavaTypes.put("DO_DATE","java.time.LocalDate");
+		mapJavaTypes.put("DO_DATE_HEURE","java.time.LocalDateTime");
 		// Blob
 		// set  Hibernate.getLobCreator(session).createBlob(inputStream, file.length());
 		// get  blob.getBytes(1, (int) blob.length()); -> write to file
