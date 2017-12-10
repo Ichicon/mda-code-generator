@@ -30,7 +30,7 @@ public class JavaAttribute {
 	 */
 	public JavaAttribute(UmlAttribute umlAttribute, ConverterInterface converter, ImportManager importManager) {
 		this.isPK = umlAttribute.isPK();
-		this.javaType= importManager.getFinalName(converter.getJavaType(umlAttribute.getDomain().getName()));
+		this.javaType= importManager.getFinalName(converter.getJavaType(umlAttribute.getDomain()));
 		this.name = umlAttribute.getCamelCaseName();
 		this.columnName = umlAttribute.getName();
 

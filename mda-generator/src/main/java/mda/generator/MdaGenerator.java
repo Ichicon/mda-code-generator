@@ -18,6 +18,10 @@ import mda.generator.writers.sql.SQLWriterInterface;
  * Java classes and SQL generator from model file
  * 
  * With standard JavaWriter add a comment line containing // NO GENERATION to prevent class from being erased.
+ * TODO Use a metadata model file for domains
+ * TODO implements composite pk
+ * TODO add simple DAO generation (with template)
+ * TODO add sql generation
  * 
  * @author Fabien Crapart
  *
@@ -154,21 +158,21 @@ public class MdaGenerator {
 		reader.extractObjects(pathToModelFile.toString());
 
 		// Logs de ce qui a été extrait
-		StringBuilder sbXmiObjects = new StringBuilder();
+		StringBuilder sbUmlObjects = new StringBuilder();
 
-		sbXmiObjects.append("\n\nDOMAINS (JAVA / DATABASE):\n-------------------------------------");
-		for(UmlDomain xmiDomain : reader.getDomainsMap().values()) {
-			sbXmiObjects.append(xmiDomain);
-			sbXmiObjects.append(" ").append(converter.getJavaType(xmiDomain.getName()));
-			sbXmiObjects.append(" / ").append(converter.getDataBaseType(xmiDomain.getName()));
+		sbUmlObjects.append("\n\nDOMAINS (JAVA / DATABASE):\n-------------------------------------");
+		for(UmlDomain umlDomain : reader.getDomainsMap().values()) {
+			sbUmlObjects.append(umlDomain);
+			sbUmlObjects.append(" ").append(converter.getJavaType(umlDomain));
+			sbUmlObjects.append(" / ").append(converter.getDataBaseType(umlDomain));
 		}
 
-		sbXmiObjects.append("\n\nPACKAGES & CLASSES :\n-------------------------------------");		
+		sbUmlObjects.append("\n\nPACKAGES & CLASSES :\n-------------------------------------");		
 		for(UmlPackage xmiPackage : reader.getPackagesMap().values()) {
-			sbXmiObjects.append(xmiPackage);
+			sbUmlObjects.append(xmiPackage);
 		}
 
-		LOG.info(sbXmiObjects);
+		LOG.info(sbUmlObjects);
 
 		// Generation du code java	
 		JavaWriterConfig javaConfig = new JavaWriterConfig();

@@ -1,5 +1,7 @@
 package mda.generator.converters;
 
+import mda.generator.beans.UmlDomain;
+
 /**
  * Interface pour spécifier une classe qui fourni le noms des types java  et bdd pour chaque nom de domaine
  * @author Fabien
@@ -8,15 +10,15 @@ package mda.generator.converters;
 public interface ConverterInterface {
 	/**
 	 * Fournit un nom de type java pour un nom de domaine
-	 * @param domainName nom du domaine
+	 * @param domain domaine
 	 * @return Nom  de la classe java correspondante
 	 */
-	public String getJavaType(String domainName);
+	public String getJavaType(UmlDomain domain);
 	
 	/**
 	 * Fournit un nom de type bdd pour un nom de domaine
-	 * @param domainName  nom du domaine
+	 * @param domain  domaine
 	 * @return nom du type bdd correspondant
 	 */
-	public String getDataBaseType(String domainName);
+	public String getDataBaseType(UmlDomain domain);
 }

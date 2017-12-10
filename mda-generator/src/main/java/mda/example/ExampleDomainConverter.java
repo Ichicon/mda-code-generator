@@ -3,6 +3,7 @@ package mda.example;
 import java.util.HashMap;
 import java.util.Map;
 
+import mda.generator.beans.UmlDomain;
 import mda.generator.converters.ConverterInterface;
 
 public class ExampleDomainConverter implements ConverterInterface {
@@ -58,8 +59,8 @@ public class ExampleDomainConverter implements ConverterInterface {
 	
 	
 	@Override
-	public String getJavaType(String domainName) {
-		String javaType = mapJavaTypes.get(domainName);
+	public String getJavaType(UmlDomain domain) {
+		String javaType = mapJavaTypes.get(domain.getName());
 		if(javaType == null) {
 			javaType = "Unknown";
 		}	
@@ -67,8 +68,8 @@ public class ExampleDomainConverter implements ConverterInterface {
 	}
 
 	@Override
-	public String getDataBaseType(String domainName) {
-		String bddType = mapBddTypes.get(domainName);
+	public String getDataBaseType(UmlDomain domain) {
+		String bddType = mapBddTypes.get(domain.getName());
 		if(bddType == null) {
 			bddType = "Unknown";
 		}	
