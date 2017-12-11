@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
@@ -18,11 +17,9 @@ import mda.generator.beans.UmlPackage;
 import mda.generator.exceptions.MdaGeneratorException;
 
 /**
- * Class to write java packages and classes
- * TODO voir pour utiliser des templates
+ * Class to write java packages and classes from Uml objects
  * 
  * @author Fabien Crapart
- *
  */
 public class JavaWriter implements JavaWriterInterface {
 	/** Logger */
@@ -34,30 +31,19 @@ public class JavaWriter implements JavaWriterInterface {
 	/** Constant use to mark the end of generated code in a file, the rest of file can be edited without being erased */
 	public static String END_OF_GENERATED ="// END OF GENERATED CODE - YOU CAN EDIT THE FILE AFTER THIS LINE, DO NOT EDIT THIS LINE OR BEFORE THIS LINE";
 
-	// Sequence prefix
-	public static String SEQUENCE_PREFIX = "SEQ_";
+	/** Sequence prefix */
+	public static String SEQUENCE_PREFIX = "SEQ_";	
 	
+	/** Line break */
+	public static String BREAK = "\n";
 	
-	// Constants for code
-	private static String PAKAGE = "package ";
-	private static String END = ";";
-	private static String EMPTY = "";
-	private static String BREAK = "\n";
-	
-	// Constants for comments 
-	private static String START_COMMENT = "/**\n";
-	private static String END_COMMENT = " */\n";
-	private static String CONTINUE_COMMENT = " * ";
-	private static String GENERATED_COMMENT = "This file has been automatically generated.";
-	
+	/** Commment to add to specify that the file has been generated */
+	public static String GENERATED_COMMENT = "This file has been automatically generated.";
+	/** Comment to insert when no comment found in diagram */
 	public static String NO_COMMENT_FOUND = "No comment found in model diagram";
 
-	// Writer config
+	/** Writer config */
 	private JavaWriterConfig config;
-	
-	// Counters for generation
-	private int nbClassesIdentic = 0;
-	private int nbClassesGenerated =0;
 
 	@Override
 	public void initWriterConfig(JavaWriterConfig config) {
@@ -65,11 +51,7 @@ public class JavaWriter implements JavaWriterInterface {
 	}
 
 	@Override
-	public void writeSourceCode() {
-		Properties prop = new Properties();
-		prop.setProperty("file.resource.loader.path", MdaGeneratorBuilder.getApplicationPath().toString());
-		Velocity.init(prop);
-		
+	public void writeSourceCode() {		
 		if(config == null) {
 			throw new MdaGeneratorException("No config initialized for java writer,use initWriterConfig before calling writeSourceCode");
 		}
@@ -81,14 +63,10 @@ public class JavaWriter implements JavaWriterInterface {
 			throw new MdaGeneratorException("Error while creating source root path", e);
 		}
 
-		// Iterate dans create packages and classes inside
+		// Iterate to create packages and classes inside
 		for(UmlPackage umlPackage : config.getUmlPackages()) {
 			createPackage(config.getJavaOutputDirectory(), umlPackage);
 		}
-		
-		// Log creations
-		LOG.info("Created classes: " + nbClassesGenerated);
-		LOG.info("Identic classes: " + nbClassesIdentic);
 	}
 
 	/**
@@ -113,32 +91,11 @@ public class JavaWriter implements JavaWriterInterface {
 		// Writing package-info file
 		Path packageInfoPath = javaPackage.getPackagePath().resolve("package-info.java");
 		try {
-			writeFileFromTemplate(packageInfoPath, "package-info.vm", context);
+			writeFileFromTemplate(packageInfoPath, config.getPathToPackageInfoTemplate(), context);
 		}catch (IOException e) {
 			throw new MdaGeneratorException("Error while creating package-info "  + packageInfoPath + " for package " + javaPackage.getPackageName(), e);		
 		}
-		
-//		
-//		
-//		
-//	
-//		LOG.info("Creating " + packageInfoPath);
-//		
-//		StringBuilder content = new StringBuilder();
-//
-//		// Comments
-//		generateCommentLinesFromComments(content, javaPackage.getCommentsList(), EMPTY);	
-//
-//		// Package line
-//		content.append(PAKAGE).append(javaPackage.getPackageName()).append(END);
-//		
-//		// Ecriture du fichier
-//		try {
-//			Files.write(packageInfoPath, content.toString().getBytes(config.getCharset()));
-//		} catch (IOException e) {
-//			throw new MdaGeneratorException("Error while creating package-info "  + packageInfoPath + " for package " + javaPackage.getPackageName(), e);		
-//		}
-//		
+
 		// Writing classes
 		for(JavaClass javaClass : javaPackage.getClasses()) {
 			try {
@@ -201,13 +158,17 @@ public class JavaWriter implements JavaWriterInterface {
 		context.put( "generated_comment", GENERATED_COMMENT);
 		context.put( "end_of_generated", END_OF_GENERATED);
 	
-		writeFileFromTemplate(classPath, "entity.vm", context);
+		writeFileFromTemplate(classPath,  config.getPathToEntitiesTemplate(), context);
 	}
 
-	protected void writeFileFromTemplate(Path filePath, String templatePath, VelocityContext context ) throws IOException {
+	protected void writeFileFromTemplate(Path filePath, Path templatePath, VelocityContext context ) throws IOException {
+		Properties prop = new Properties();
+		prop.setProperty("file.resource.loader.path", templatePath.getParent().toString());
+		Velocity.init(prop);
+		
 		Template template = null;
 		try{
-			template = Velocity.getTemplate(templatePath);
+			template = Velocity.getTemplate(templatePath.getFileName().toString());
 		}catch( Exception e ){ 
 			throw new MdaGeneratorException("Error while writing from template " + templatePath,e);
 		}
@@ -216,20 +177,4 @@ public class JavaWriter implements JavaWriterInterface {
 		LOG.debug("Creating " + filePath);				
 		Files.write(filePath, sw.toString().getBytes(config.getCharset()));	
 	}
-
-	/**
-	 * 
-	 * @param content
-	 * @param comments
-	 */
-	protected void generateCommentLinesFromComments(StringBuilder content, List<String> comments , String indent) {
-		content.append(indent).append(START_COMMENT);
-		if(!comments.isEmpty()){
-			for(String commentLine : comments) {
-				content.append(indent).append(CONTINUE_COMMENT).append(commentLine).append(BREAK);
-			}
-		}
-		content.append(indent).append(END_COMMENT);
-	}
-
 }

@@ -12,6 +12,9 @@ public class JavaWriterConfig {
 	private Path javaOutputDirectory; 
 	private Collection<UmlPackage> umlPackages; 
 	private ConverterInterface converter;
+	private Path pathToPackageInfoTemplate;
+	private Path pathToEntitiesTemplate;
+	private Path pathToDaosTemplate;
 	private String entities;
 	private String daos;
 	private Charset charset = StandardCharsets.UTF_8;
@@ -88,4 +91,41 @@ public class JavaWriterConfig {
 	public void setCharset(Charset charset) {
 		this.charset = charset;
 	}
+	/**
+	 * @return the pathToEntitiesTemplate
+	 */
+	public Path getPathToEntitiesTemplate() {
+		return pathToEntitiesTemplate;
+	}
+	/**
+	 * @param pathToEntitiesTemplate the pathToEntitiesTemplate to set
+	 */
+	public void setPathToEntitiesTemplate(Path pathToEntitiesTemplate) {
+		this.pathToEntitiesTemplate = pathToEntitiesTemplate;
+	}
+	/**
+	 * @return the pathToDaosTemplate
+	 */
+	public Path getPathToDaosTemplate() {
+		return pathToDaosTemplate;
+	}
+	/**
+	 * @param pathToDaosTemplate the pathToDaosTemplate to set
+	 */
+	public void setPathToDaosTemplate(Path pathToDaosTemplate) {
+		this.pathToDaosTemplate = pathToDaosTemplate;
+	}
+	/**
+	 * @return the pathToPackageInfoTemplate
+	 */
+	public Path getPathToPackageInfoTemplate() {
+		return pathToPackageInfoTemplate;
+	}
+	/**
+	 * @param pathToPackageInfoTemplate the pathToPackageInfoTemplate to set
+	 */
+	public void setPathToPackageInfoTemplate(Path pathToPackageInfoTemplate) {
+		this.pathToPackageInfoTemplate = pathToPackageInfoTemplate;
+	}
+	
 }

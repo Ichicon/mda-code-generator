@@ -1,6 +1,7 @@
 package mda.generator;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,21 +31,27 @@ public class MdaGenerator {
 	private static final Logger LOG = LogManager.getLogger(MdaGenerator.class);
 
 	private Path pathToModelFile;
+	private Path pathToMetadataFile;
 	private Class<? extends ModelFileReaderInterface> readerClass;
-	private Class<? extends ConverterInterface> converterClass;	
-	private Class<? extends JavaWriterInterface> javaWriterClass;	
-	private Class<? extends SQLWriterInterface> sqlWriterClass;	
 	
+	private Class<? extends ConverterInterface> converterClass;	
 	
 	/** Emplacement de sortie des packages et fichiers générés */
 	private Path javaOutputDirectory = null;
-	/** Emplacement du fichier SQL généré en sortie */
-	private Path sqlOutputDirectory = null;
-
-	/** Nom dans les packages qui correspond à l'emplacement des entities, permet de faire le path équivalent pour les daos */
+	private Class<? extends JavaWriterInterface> javaWriterClass;	
+	private Path pathToPackageInfoTemplate;
+	private Path pathToEntitiesTemplate;
+	private Path pathToDaosTemplate;
+	/** Nom dans les packages qui correspond à l'emplacement des entities, permet de conserver un path équivalent pour les daos */
 	private String entitiesPackagePartName = "entities";
 	private String daosPackagePartName = "daos";
 
+	
+	/** Emplacement du fichier SQL généré en sortie */
+	private Path sqlOutputDirectory = null;
+	private Class<? extends SQLWriterInterface> sqlWriterClass;	
+	private Path pathToCreateSQLTemplate  = Paths.get("createSQL.vm");
+	
 	/**
 	 * @param pathToModelFile the pathToModelFile to set
 	 */
@@ -107,6 +114,41 @@ public class MdaGenerator {
 	public void setDaosPackagePartName(String daosPackagePartName) {
 		this.daosPackagePartName = daosPackagePartName;
 	}
+	
+	/**
+	 * @param pathToMetadataFile the pathToMetadataFile to set
+	 */
+	public void setPathToMetadataFile(Path pathToMetadataFile) {
+		this.pathToMetadataFile = pathToMetadataFile;
+	}
+
+	/**
+	 * @param pathToEntitiesTemplate the pathToEntitiesTemplate to set
+	 */
+	public void setPathToEntitiesTemplate(Path pathToEntitiesTemplate) {
+		this.pathToEntitiesTemplate = pathToEntitiesTemplate;
+	}
+
+	/**
+	 * @param pathToDaosTemplate the pathToDaosTemplate to set
+	 */
+	public void setPathToDaosTemplate(Path pathToDaosTemplate) {
+		this.pathToDaosTemplate = pathToDaosTemplate;
+	}
+	
+	/**
+	 * @param pathToCreateSQLTemplate the pathToCreateSQLTemplate to set
+	 */
+	public void setPathToCreateSQLTemplate(Path pathToCreateSQLTemplate) {
+		this.pathToCreateSQLTemplate = pathToCreateSQLTemplate;
+	}
+	
+	/**
+	 * @param pathToPackageInfoTemplate the pathToPacakgeInfoTemplate to set
+	 */
+	public void setPathToPackageInfoTemplate(Path pathToPackageInfoTemplate) {
+		this.pathToPackageInfoTemplate = pathToPackageInfoTemplate;
+	}
 
 	/**
 	 * 
@@ -150,12 +192,11 @@ public class MdaGenerator {
 			throw new MdaGeneratorException("Impossible d'instancier le sql writer", e);
 		}
 		
-		
 		// Display configuration in logs
 		logConfiguration();
 		
 		// Lecture du xmi
-		reader.extractObjects(pathToModelFile.toString());
+		reader.extractObjects(pathToModelFile.toString(), pathToMetadataFile.toString());
 
 		// Logs de ce qui a été extrait
 		StringBuilder sbUmlObjects = new StringBuilder();
@@ -181,13 +222,16 @@ public class MdaGenerator {
 		javaConfig.setConverter(converter);
 		javaConfig.setEntities(entitiesPackagePartName);
 		javaConfig.setDaos(daosPackagePartName);
+		javaConfig.setPathToPackageInfoTemplate(pathToPackageInfoTemplate);
+		javaConfig.setPathToEntitiesTemplate(pathToEntitiesTemplate);
+		javaConfig.setPathToDaosTemplate(pathToDaosTemplate);
 		
 		javaWriter.initWriterConfig(javaConfig);
 		javaWriter.writeSourceCode();
 
 		
 		// Generation du sql
-		sqlWriter.writeSql();
+		sqlWriter.writeSql(sqlOutputDirectory);
 	}
 
 	private void logConfiguration() {

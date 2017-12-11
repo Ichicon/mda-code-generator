@@ -13,12 +13,14 @@ public class Main {
 	public static void main(String[] args) {
 		MdaGenerator generator = new MdaGeneratorBuilder() //
 				.withModelPath(MdaGeneratorBuilder.getApplicationPath().resolve("example.xmi"))
-				.withReaderClass(XmiReader.class)
+				.withMetadataPath(MdaGeneratorBuilder.getApplicationPath().resolve("example.xmi"))
+//				.withReaderClass(XmiReader.class)
 				.withTypeConverter(ExampleDomainConverter.class)
-				.withJavaOutputDirectory(MdaGeneratorBuilder.getApplicationPath().getParent().getParent().resolve("src/main/javagen"))
-				.withSqlOutputDirectory(MdaGeneratorBuilder.getApplicationPath().getParent().getParent().resolve("src/dev/sql/create"))
-				.withEntitiesPackagePartName("domain")
-				.withDaosPackagePartName("daos")
+		//		.withJavaOutputDirectory(MdaGeneratorBuilder.getApplicationPath().getParent().getParent().resolve("src/main/javagen"))
+//				.withSqlOutputDirectory(MdaGeneratorBuilder.getApplicationPath().getParent().getParent().resolve("src/dev/sql/create"))
+//				.withEntitiesPackagePartName("domain")
+//				.withDaosPackagePartName("daos")
+				.withEntityTemplate(MdaGeneratorBuilder.getApplicationPath().resolve("entity2.vm"))
 				.build();
 
 		generator.generate();

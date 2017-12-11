@@ -65,12 +65,8 @@ public class JavaAnnotation {
 				} else {
 					content.append(", ");
 				}
-							
-				if(property.isAnnotation()) {
-					// FIXME gérer écriture annotation dans annotation
-				} else {
-					content.append(property.getName()).append("=").append(property.getValue());
-				}
+
+				content.append(property.getName()).append("=").append(property.getValue());
 			}
 			
 			content.append(")");

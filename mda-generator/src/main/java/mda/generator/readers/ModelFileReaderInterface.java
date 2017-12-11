@@ -17,8 +17,9 @@ public interface ModelFileReaderInterface {
 	/**
 	 * Main method to extract data from model file
 	 * @param pathToModelFile Path to model file to read
+	 * @param pathToModelFile Path to metadata file to read
 	 */
-	void extractObjects(String pathToModelFile);
+	void extractObjects(String pathToModelFile, String pathToMetadataFile);
 	
 	/**
 	 * @return Map by name of domains in the file 

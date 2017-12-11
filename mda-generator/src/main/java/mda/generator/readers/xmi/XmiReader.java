@@ -23,7 +23,7 @@ import mda.generator.readers.ModelFileReaderInterface;
 
 /**
  * Classe de lecture d'un fichier XMI 2.1 issue d'Enterprise Architect
- * @author Fabien
+ * @author Fabien Crapart
  *
  */
 public class XmiReader implements ModelFileReaderInterface {
@@ -57,7 +57,7 @@ public class XmiReader implements ModelFileReaderInterface {
 	/**
 	 * Extraction de tous les éléments du fichiers (DOMAINES, PACKAGE, CLASSES, ASSOCIATIONS).
 	 */
-	public void extractObjects(String pathToXmi) {
+	public void extractObjects(String pathToXmi, String pathToMetadataXmi) {
 		try {    		
 			DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance()
 					.newDocumentBuilder();
@@ -121,7 +121,6 @@ public class XmiReader implements ModelFileReaderInterface {
 		xmiPackage.setName(XmiUtil.getElementName(packageNode));
 
 		// On cherche les commentaires
-		// FIXME voir comment sont intégrés les sauts de lignes (<br/> ?)
 		List<Node>  commentaires = XmiUtil.getChildsWithTagNameAndType(packageNode, "ownedComment", XmiElementType.COMMENT);
 		if(!commentaires.isEmpty()) {
 			StringBuilder sbCommentaires = new StringBuilder();
