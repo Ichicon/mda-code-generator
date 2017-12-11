@@ -10,6 +10,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hibernate.sql.ordering.antlr.GeneratedOrderByLexer;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -19,6 +20,7 @@ import mda.generator.beans.UmlAttribute;
 import mda.generator.beans.UmlClass;
 import mda.generator.beans.UmlDomain;
 import mda.generator.beans.UmlPackage;
+import mda.generator.exceptions.MdaGeneratorException;
 import mda.generator.readers.ModelFileReaderInterface;
 
 /**
@@ -58,13 +60,18 @@ public class XmiReader implements ModelFileReaderInterface {
 	 * Extraction de tous les éléments du fichiers (DOMAINES, PACKAGE, CLASSES, ASSOCIATIONS).
 	 */
 	public void extractObjects(String pathToXmi, String pathToMetadataXmi) {
-		try {    		
+		extractMetadata(pathToMetadataXmi);	
+		extractModel(pathToXmi);
+	}
+	
+	protected void extractModel(String pathToXmi) {
+		try {    			
 			DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance()
 					.newDocumentBuilder();
 			Document doc = dBuilder.parse(new File(pathToXmi));
 
-			// Analyse des packages et domaines
-			parcourirPackagesEtDomaines(doc);
+			// Analyse des packages
+			parcourirPackages(doc);
 
 			// On parcours classes et attributs
 			parcourirClasses(doc);
@@ -75,14 +82,46 @@ public class XmiReader implements ModelFileReaderInterface {
 		} catch (Exception e) {
 			LOG.error("Erreur lors du parsing du fichier XMI", e);
 		}
-
+	}
+	
+	protected void extractMetadata(String pathToMetadataXmi) {
+		try {  
+			DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance()
+					.newDocumentBuilder();
+			Document doc = dBuilder.parse(new File(pathToMetadataXmi));
+			
+			NodeList elts = doc.getDocumentElement().getElementsByTagName("DataRow");
+			for (int idx = 0; idx < elts.getLength(); idx++) {    	
+				Node currNode = elts.item(idx);
+				if (currNode.getNodeType() == Node.ELEMENT_NODE) {
+					List<Node> columns = XmiUtil.getChildsWithTagName(currNode, "Column");
+					Map<String, String> columnNameValue = new HashMap<>();
+					for(Node column: columns) {
+						String name = XmiUtil.getAttribute(column, "name");
+						String value = XmiUtil.getAttribute(column, "value");
+						columnNameValue.put(name, value);
+					}
+					
+					if("Java".equals(columnNameValue.get("ProductName"))){
+						UmlDomain umlDomain = new UmlDomain();
+						umlDomain.setName(columnNameValue.get("DataType")); 
+						umlDomain.setTypeName(columnNameValue.get("GenericType"));
+						umlDomain.setMaxLength(columnNameValue.get("MaxLen"));
+						umlDomain.setPrecision(columnNameValue.get("MaxPrec"));
+						domainsMap.put(umlDomain.getName(), umlDomain);
+					}
+				}
+			}
+		}	catch (Exception e) {
+			LOG.error("Erreur lors du parsing du fichier XMI", e);
+		}
 	}
 
 	/**
 	 * Permet d'extraire les packages et les domaines
 	 * @param doc
 	 */
-	private void parcourirPackagesEtDomaines(Document doc) {
+	private void parcourirPackages(Document doc) {
 		NodeList elts = doc.getDocumentElement().getElementsByTagName("packagedElement");
 		for (int idx = 0; idx < elts.getLength(); idx++) {    	
 			Node currNode = elts.item(idx);
@@ -96,10 +135,6 @@ public class XmiReader implements ModelFileReaderInterface {
 						if(name.contains(".")) {
 							extrairePackage(currNode);
 						}
-
-						break;
-					case DOMAIN :
-						extraireDomaine(currNode);
 						break;
 					default:
 						break;
@@ -164,7 +199,7 @@ public class XmiReader implements ModelFileReaderInterface {
 						break;
 					}
 				} catch(Exception e) {
-					LOG.error("Type non reconnnu = '" +  XmiUtil.getElementType(currNode)+"'",e);
+					LOG.error("Error lors du traitement de la node de type '" +  XmiUtil.getElementType(currNode)+"'",e);
 				}
 			}
 		}
@@ -206,7 +241,12 @@ public class XmiReader implements ModelFileReaderInterface {
 		// Domain ex:  <properties type="DO_ID" derived="0" collection="false" duplicates="0" changeability="changeable"/>
 		Node properties = XmiUtil.getFirstChildsNodeWithTagName(attribut, "properties");
 		String domainName = XmiUtil.getAttribute(properties, "type");
-		xmiAttribut.setDomain(domainsMap.get(domainName));
+		
+		UmlDomain domain = domainsMap.get(domainName);
+		if(domain == null) {
+			throw new MdaGeneratorException("Domain " + domainName + " not found for attribute " + xmiAttribut.getName() + " of class " + xmiClass.getName());
+		}
+		xmiAttribut.setDomain(domain);
 
 		// Commentaire ex : <style value="Identifiant technique de l'utilisateur"/>
 		Node style = XmiUtil.getFirstChildsNodeWithTagName(attribut, "style");
@@ -219,7 +259,7 @@ public class XmiReader implements ModelFileReaderInterface {
 		// PK ? ex :  <xrefs value="$XREFPROP=$XID={3C6F55AC-762C-4339-AEA5-6B85C4EEFAB8}$XID;$NAM=CustomProperties$NAM;$TYP=attribute property$TYP;$VIS=Public$VIS;$PAR=0$PAR;$DES=@PROP=@NAME=isID@ENDNAME;@TYPE=Boolean@ENDTYPE;@VALU=1@ENDVALU;@PRMT=@ENDPRMT;@ENDPROP;$DES;$CLT={C11171CB-49AD-4ae1-97B5-32E527D973EB}$CLT;$SUP=<none>$SUP;$ENDXREF;"/>
 		Node xrefs = XmiUtil.getFirstChildsNodeWithTagName(attribut, "xrefs");
 		String xrefsVals = XmiUtil.getAttribute(xrefs, "value");
-		xmiAttribut.setPK(xrefsVals != null && xrefsVals.contains("@NAME=isID@ENDNAME"));
+		xmiAttribut.setPK(xrefsVals != null && xrefsVals.contains("$DES=@PROP=@NAME=isID@ENDNAME;@TYPE=Boolean@ENDTYPE;@VALU=1@ENDVALU;"));
 
 		// Ajout de l'attribut dans la classe
 		xmiClass.getAttributes().add(xmiAttribut);

@@ -321,7 +321,8 @@ public class JavaClass {
 			pkName = pks.get(0).getName();
 		} else {
 			// FIXME gérer cas pk multiple
-			throw new MdaGeneratorException("Multiple PKs not implemented for class " + umlClass.getName());
+			return "double_pk";
+			//throw new MdaGeneratorException("Multiple PKs not implemented for class " + umlClass.getName());
 		}
 
 		return pkName;		

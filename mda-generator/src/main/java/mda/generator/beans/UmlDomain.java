@@ -1,5 +1,7 @@
 package mda.generator.beans;
 
+import mda.generator.exceptions.MdaGeneratorException;
+
 /**
  * Domain representing a type in the model file
  * 
@@ -7,9 +9,9 @@ package mda.generator.beans;
  */
 public class UmlDomain {
 	private String name;
-	private int minLength;
-	private int maxLength;
-	private int precision;
+	private String typeName;
+	private String maxLength;
+	private String precision;
 	
 	/**
 	 * @return the name
@@ -23,44 +25,50 @@ public class UmlDomain {
 	public void setName(String name) {
 		this.name = name;
 	}
-
+	
 	/**
-	 * @return the minLength
+	 * @return the typeName
 	 */
-	public int getMinLength() {
-		return minLength;
+	public String getTypeName() {
+		return typeName;
 	}
 	/**
-	 * @param minLength the minLength to set
+	 * @param typeName the typeName to set
 	 */
-	public void setMinLength(int minLength) {
-		this.minLength = minLength;
+	public void setTypeName(String typeName) {
+		if(typeName == null) {
+			throw new MdaGeneratorException("GenericType undefined for domain " + name);
+		}
+		this.typeName = typeName;
 	}
 	/**
 	 * @return the maxLength
 	 */
-	public int getMaxLength() {
+	public String getMaxLength() {
 		return maxLength;
 	}
 	/**
 	 * @param maxLength the maxLength to set
 	 */
-	public void setMaxLength(int maxLength) {
+	public void setMaxLength(String maxLength) {
 		this.maxLength = maxLength;
 	}
 	/**
 	 * @return the precision
 	 */
-	public int getPrecision() {
+	public String getPrecision() {
 		return precision;
 	}
 	/**
 	 * @param precision the precision to set
 	 */
-	public void setPrecision(int precision) {
+	public void setPrecision(String precision) {
 		this.precision = precision;
 	}
 	public String toString() {
-		return "\n\t" + name;
+		return "\n\t" + name + "(" + typeName + ")" 
+			+ (maxLength != null && !maxLength.equals("0")?" maxLength="+maxLength:""
+			+ (precision != null && !precision.equals("0")?" precision="+precision:"")
+		);
 	}
 }

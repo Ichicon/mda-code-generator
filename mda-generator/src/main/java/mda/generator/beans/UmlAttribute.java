@@ -1,7 +1,7 @@
 package mda.generator.beans;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.text.WordUtils;
+import org.apache.commons.text.WordUtils;
 
 /**
  * Attribut d'une classe
