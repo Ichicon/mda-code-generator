@@ -49,13 +49,13 @@ public class MdaGeneratorBuilder {
 	private String daosPackagePartName = "daos";
 	
 	/** Package-info Velocity template */
-	private Path pathToPackageInfoTemplate = getApplicationPath().resolve("package-info.vm");
+	private Path pathToPackageInfoTemplate = getApplicationPath().resolve("templates").resolve("package-info.vm");
 	/** Entities Velocity template */
-	private Path pathToEntitiesTemplate = getApplicationPath().resolve("entities.vm");
+	private Path pathToEntitiesTemplate = getApplicationPath().resolve("templates").resolve("entity.vm");
 	/** DAOs Velocity template */
-	private Path pathToDaosTemplate = getApplicationPath().resolve("daos.vm");
+	private Path pathToDaosTemplate = getApplicationPath().resolve("templates").resolve("dao.vm");
 	/** Create SQL Velocity template */
-	private Path pathToCreateSQLTemplate = getApplicationPath().resolve("createSQL.vm");
+	private Path pathToCreateSQLTemplate = getApplicationPath().resolve("templates").resolve("createSQL.vm");
 	
 	/**
 	 * [MANDATORY] Path to model file to use for mda generation

@@ -50,7 +50,7 @@ public class MdaGenerator {
 	/** Emplacement du fichier SQL généré en sortie */
 	private Path sqlOutputDirectory = null;
 	private Class<? extends SQLWriterInterface> sqlWriterClass;	
-	private Path pathToCreateSQLTemplate  = Paths.get("createSQL.vm");
+	private Path pathToCreateSQLTemplate;
 	
 	/**
 	 * @param pathToModelFile the pathToModelFile to set
