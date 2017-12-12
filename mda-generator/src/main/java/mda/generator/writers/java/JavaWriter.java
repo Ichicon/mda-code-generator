@@ -30,9 +30,6 @@ public class JavaWriter implements JavaWriterInterface {
 
 	/** Constant use to mark the end of generated code in a file, the rest of file can be edited without being erased */
 	public static String END_OF_GENERATED ="// END OF GENERATED CODE - YOU CAN EDIT THE FILE AFTER THIS LINE, DO NOT EDIT THIS LINE OR BEFORE THIS LINE";
-
-	/** Sequence prefix */
-	public static String SEQUENCE_PREFIX = "SEQ_";	
 	
 	/** Line break */
 	public static String BREAK = "\n";
@@ -46,16 +43,13 @@ public class JavaWriter implements JavaWriterInterface {
 	private JavaWriterConfig config;
 
 	@Override
-	public void initWriterConfig(JavaWriterConfig config) {
-		this.config = config;
-	}
-
-	@Override
-	public void writeSourceCode() {		
+	public void writeSourceCode(JavaWriterConfig config) {
 		if(config == null) {
-			throw new MdaGeneratorException("No config initialized for java writer,use initWriterConfig before calling writeSourceCode");
+			throw new MdaGeneratorException("Null config given for java writer");
 		}
-
+		
+		this.config = config;
+		
 		// Create the root directory for sources if doesn't exists
 		try {
 			Files.createDirectories(config.getJavaOutputDirectory());
@@ -118,6 +112,7 @@ public class JavaWriter implements JavaWriterInterface {
 		StringBuilder contentToKeep = new StringBuilder();
 		boolean doNotRegenerate = false;
 		boolean keepContent = false;
+		boolean lineAdded = false;
 		if(Files.exists(classPath)) {
 			for(String line : Files.readAllLines(classPath)) {
 				// No generation for this one
@@ -127,8 +122,10 @@ public class JavaWriter implements JavaWriterInterface {
 				}
 				// We keep user edited content
 				if(keepContent) {
-					if(contentToKeep.length()>0) {
+					if(lineAdded) {
 						contentToKeep.append(BREAK);
+					}else {
+						lineAdded=true;
 					}
 					contentToKeep.append(line);
 				}	

@@ -13,16 +13,17 @@ import mda.generator.exceptions.MdaGeneratorException;
 import mda.generator.readers.ModelFileReaderInterface;
 import mda.generator.writers.java.JavaWriterConfig;
 import mda.generator.writers.java.JavaWriterInterface;
+import mda.generator.writers.sql.SQLWriterConfig;
 import mda.generator.writers.sql.SQLWriterInterface;
 
 /**
  * Java classes and SQL generator from model file
  * 
  * With standard JavaWriter add a comment line containing // NO GENERATION to prevent class from being erased.
- * TODO Use a metadata model file for domains
  * TODO implements composite pk
- * TODO add simple DAO generation (with template)
+ * TODO add simple spring DAO generation
  * TODO add sql generation
+ * TODO manage default value from model
  * 
  * @author Fabien Crapart
  *
@@ -226,12 +227,18 @@ public class MdaGenerator {
 		javaConfig.setPathToEntitiesTemplate(pathToEntitiesTemplate);
 		javaConfig.setPathToDaosTemplate(pathToDaosTemplate);
 		
-		javaWriter.initWriterConfig(javaConfig);
-		javaWriter.writeSourceCode();
+		javaWriter.writeSourceCode(javaConfig);
 
 		
 		// Generation du sql
-		sqlWriter.writeSql(sqlOutputDirectory);
+		SQLWriterConfig sqlConfig = new SQLWriterConfig();
+		sqlConfig.setPackagesList(reader.getPackagesMap().values());
+		sqlConfig.setSqlOutputDirectory(sqlOutputDirectory);
+		sqlConfig.setSqlTemplatePath(pathToCreateSQLTemplate);
+		sqlConfig.setConverter(converter);
+		// TODO add exluded prefixes
+		
+		sqlWriter.writeSql(sqlConfig);
 	}
 
 	private void logConfiguration() {

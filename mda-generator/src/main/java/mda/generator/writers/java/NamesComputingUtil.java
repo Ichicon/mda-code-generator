@@ -15,6 +15,17 @@ import mda.generator.exceptions.MdaGeneratorException;
  *
  */
 public class NamesComputingUtil {
+	public static String SEQUENCE_PREFIX ="SEQ_";
+	
+	/**
+	 * Compute sequence name for a table with unique PK
+	 * @param umlClass
+	 * @return Sequence name
+	 */
+	public static String computeSequenceName(UmlClass umlClass) {
+		return SEQUENCE_PREFIX + umlClass.getName().toUpperCase();
+	}
+	
 	/**
 	 * Calcul le nom de l'objet dans un relation
 	 * @param association
@@ -63,6 +74,35 @@ public class NamesComputingUtil {
 		}
 
 		return pkName;		
+	}
+	
+	public static String computeFKValue(UmlAssociation umlAssociation) {
+		String fkValue = null;
+		
+		// We can use fk name defined in model if it's a single pk
+		if(umlAssociation.getTarget().getPKs().size() == 1) {
+			fkValue = umlAssociation.getFkName();		
+		}	
+		
+		// If no fk name defined or multiple pk, we use pk names from target table
+		if(StringUtils.isEmpty(fkValue)) {
+			fkValue = computePKValue(umlAssociation.getTarget());
+		}
+
+		return fkValue;
+	}
+
+	
+	public static String computePKValue(UmlClass umlClass) {
+		StringBuilder pkValue = new StringBuilder();
+		for(UmlAttribute pk : umlClass.getPKs()) {
+			if(pkValue.length() > 0) {
+				pkValue.append(", ");
+			}
+			pkValue.append(pk.getName());
+		}
+		
+		return pkValue.toString();
 	}
 
 }

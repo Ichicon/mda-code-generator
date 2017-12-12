@@ -13,7 +13,7 @@ import mda.generator.readers.ModelFileReaderInterface;
 import mda.generator.readers.xmi.XmiReader;
 import mda.generator.writers.java.JavaWriter;
 import mda.generator.writers.java.JavaWriterInterface;
-import mda.generator.writers.sql.SQLWriter;
+import mda.generator.writers.sql.OracleSQLWriter;
 import mda.generator.writers.sql.SQLWriterInterface;
 
 
@@ -37,7 +37,7 @@ public class MdaGeneratorBuilder {
 	private Class<? extends JavaWriterInterface> javaWriter = JavaWriter.class;
 	
 	/** Classe pour écrire le sql */
-	private Class<? extends SQLWriterInterface> sqlWriter = SQLWriter.class;
+	private Class<? extends SQLWriterInterface> sqlWriter = OracleSQLWriter.class;
 	
 	/** Emplacement de sortie des packages et fichiers générés */
 	private Path javaOutputDirectory = getApplicationPath().getParent().getParent().resolve("src/main/javagen");
@@ -50,12 +50,12 @@ public class MdaGeneratorBuilder {
 	
 	/** Package-info Velocity template */
 	private Path pathToPackageInfoTemplate = getApplicationPath().resolve("templates").resolve("package-info.vm");
-	/** Entities Velocity template */
+	/** JPA Entities Velocity template */
 	private Path pathToEntitiesTemplate = getApplicationPath().resolve("templates").resolve("entity.vm");
 	/** DAOs Velocity template */
-	private Path pathToDaosTemplate = getApplicationPath().resolve("templates").resolve("dao.vm");
+	private Path pathToDaosTemplate = getApplicationPath().resolve("templates").resolve("dao_spring.vm");
 	/** Create SQL Velocity template */
-	private Path pathToCreateSQLTemplate = getApplicationPath().resolve("templates").resolve("createSQL.vm");
+	private Path pathToCreateSQLTemplate = getApplicationPath().resolve("templates").resolve("createSQL_oracle.vm");
 	
 	/**
 	 * [MANDATORY] Path to model file to use for mda generation

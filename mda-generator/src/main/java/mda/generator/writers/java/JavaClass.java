@@ -167,7 +167,7 @@ public class JavaClass {
 
 			// Generate getter/setter			
 			JavaMethod getterPK = generateGetter(javaAttribute);
-			String seqName = "\"" + JavaWriter.SEQUENCE_PREFIX + umlClass.getName().toUpperCase() + "\"";
+			String seqName = "\"" + NamesComputingUtil.computeSequenceName(umlClass) + "\"";
 
 			// Id annotation on PK field
 			getterPK.addAnnotations(new JavaAnnotation(importManager.getFinalName("javax.persistence.Id")));

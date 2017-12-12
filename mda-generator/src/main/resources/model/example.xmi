@@ -152,7 +152,7 @@
 							<type xmi:idref="EAJava_DO_DATE_HEURE"/>
 						</ownedAttribute>
 					</packagedElement>
-					<packagedElement xmi:type="uml:Class" xmi:id="EAID_657F3D18_DF26_4b93_B955_3C20689AEE3C" name="user" visibility="public">
+					<packagedElement xmi:type="uml:Class" xmi:id="EAID_657F3D18_DF26_4b93_B955_3C20689AEE3C" name="appuser" visibility="public">
 						<ownedAttribute xmi:type="uml:Property" xmi:id="EAID_8F229E83_001E_4a39_97CD_E0A671FE014C" name="user_id" visibility="private" isStatic="false" isReadOnly="false" isDerived="false" isOrdered="false" isUnique="true" isDerivedUnion="false">
 							<lowerValue xmi:type="uml:LiteralInteger" xmi:id="EAID_LI000051_001E_4a39_97CD_E0A671FE014C" value="1"/>
 							<upperValue xmi:type="uml:LiteralInteger" xmi:id="EAID_LI000052_001E_4a39_97CD_E0A671FE014C" value="1"/>
@@ -641,7 +641,7 @@
 					</attribute>
 				</attributes>
 			</element>
-			<element xmi:idref="EAID_657F3D18_DF26_4b93_B955_3C20689AEE3C" xmi:type="uml:Class" name="user" scope="public">
+			<element xmi:idref="EAID_657F3D18_DF26_4b93_B955_3C20689AEE3C" xmi:type="uml:Class" name="appuser" scope="public">
 				<model package="EAPK_861D5800_0BB6_4b10_BE6E_806EAB1E58F4" tpos="0" ea_localid="97" ea_eleType="element"/>
 				<properties isSpecification="false" sType="Class" nType="0" scope="public" isRoot="false" isLeaf="false" isAbstract="false" isActive="false"/>
 				<project author="fcrapart" version="1.0" phase="1.0" created="2017-12-11 14:12:23" modified="2017-12-11 14:16:21" complexity="1" status="Proposed"/>
@@ -882,7 +882,7 @@
 		<connectors>
 			<connector xmi:idref="EAID_6D7CE537_634C_44d4_9160_62498D487408">
 				<source xmi:idref="EAID_657F3D18_DF26_4b93_B955_3C20689AEE3C">
-					<model ea_localid="97" type="Class" name="user"/>
+					<model ea_localid="97" type="Class" name="appuser"/>
 					<role visibility="Public" targetScope="instance"/>
 					<type multiplicity="0..*" aggregation="none" containment="Unspecified"/>
 					<constraints/>
@@ -952,7 +952,7 @@
 			</connector>
 			<connector xmi:idref="EAID_122110EB_8EB0_4dd2_AC97_6F14AA452738">
 				<source xmi:idref="EAID_657F3D18_DF26_4b93_B955_3C20689AEE3C">
-					<model ea_localid="97" type="Class" name="user"/>
+					<model ea_localid="97" type="Class" name="appuser"/>
 					<role name="usersOnSite" visibility="Public" targetScope="instance"/>
 					<type multiplicity="0..*" aggregation="none" containment="Unspecified"/>
 					<constraints/>
@@ -987,7 +987,7 @@
 			</connector>
 			<connector xmi:idref="EAID_78C7143F_E7B7_4c9a_82F3_CBE2EEDE8308">
 				<source xmi:idref="EAID_657F3D18_DF26_4b93_B955_3C20689AEE3C">
-					<model ea_localid="97" type="Class" name="user"/>
+					<model ea_localid="97" type="Class" name="appuser"/>
 					<role name="members" visibility="Public" targetScope="instance"/>
 					<type multiplicity="0..*" aggregation="none" containment="Unspecified"/>
 					<constraints/>
@@ -1022,7 +1022,7 @@
 			</connector>
 			<connector xmi:idref="EAID_C524DA1A_4F8B_4849_B6D7_1309B910AE98">
 				<source xmi:idref="EAID_657F3D18_DF26_4b93_B955_3C20689AEE3C">
-					<model ea_localid="97" type="Class" name="user"/>
+					<model ea_localid="97" type="Class" name="appuser"/>
 					<role visibility="Public" targetScope="instance"/>
 					<type multiplicity="0..*" aggregation="none" containment="Unspecified"/>
 					<constraints/>
