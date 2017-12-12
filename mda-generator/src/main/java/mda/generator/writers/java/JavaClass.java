@@ -153,7 +153,7 @@ public class JavaClass {
 	 * @param umlClass
 	 * @param converter
 	 */
-	private void managePKs(JavaPackage javaPackage, UmlClass umlClass, ConverterInterface converter) {
+	protected void managePKs(JavaPackage javaPackage, UmlClass umlClass, ConverterInterface converter) {
 
 		if(umlClass.getPKs().size() > 1) {
 			// FIXME cas pk multiple 
@@ -200,7 +200,7 @@ public class JavaClass {
 	 * @param umlClass
 	 * @param converter
 	 */
-	private void manageAttributes(UmlClass umlClass, ConverterInterface converter) {
+	protected void manageAttributes(UmlClass umlClass, ConverterInterface converter) {
 		for(UmlAttribute umlAttribute : umlClass.getAttributes()) {
 			// PKs managed before
 			if(!umlAttribute.isPK()) {
@@ -227,7 +227,7 @@ public class JavaClass {
 	 * @param umlClass
 	 * @param converter
 	 */
-	private void manageAssociations(UmlClass umlClass, ConverterInterface converter) {
+	protected void manageAssociations(UmlClass umlClass, ConverterInterface converter) {
 		for(UmlAssociation association : umlClass.getAssociations()) {
 			if(association.isTargetNavigable()) {
 				JavaAttribute javaAttribute = new JavaAttribute(association, converter, importManager);
@@ -240,59 +240,14 @@ public class JavaClass {
 				if(association.isTargetMultiple() ) {
 					// ManyToMany
 					if(association.getOpposite().isTargetMultiple()) {
-						// The "owner" have the annotation with join columns and intermediate table name
-						if(association.isOwner() ) {
-							assocGetter.addAnnotations(new JavaAnnotation(
-								importManager.getFinalName("javax.persistence.ManyToMany"),
-								new JavaAnnotationProperty("cascade","{"
-										+ importManager.getFinalName("javax.persistence.CascadeType")+".PERSIST,"
-										+ importManager.getFinalName("javax.persistence.CascadeType")+".MERGE}")
-							));
-							assocGetter.addAnnotations(new JavaAnnotation(
-								importManager.getFinalName("javax.persistence.JoinTable"),
-								new JavaAnnotationProperty("name","\"" +  association.getSource().getName() + "_" + association.getTarget().getName() + "\""),
-								new JavaAnnotationProperty("joinColumns","@JoinColumn(name = \""+ computePKName(association.getSource())+"\")"),
-								new JavaAnnotationProperty("inverseJoinColumns","@JoinColumn(name = \""+  computePKName(association.getTarget())+ "\")")
-							));
-						} else { // Not "owner" of the manyToMany, mappedBy with opposite getter is enough
-							assocGetter.addAnnotations(new JavaAnnotation(
-									importManager.getFinalName("javax.persistence.ManyToMany"),
-									new JavaAnnotationProperty("mappedBy","\""+ association.getOpposite().getRoleName() + "List\"")
-							));
-						}						
+						buildManyToMany(association, assocGetter);						
 					} else { // OneToMany
-						List<JavaAnnotationProperty> propertiesOneToMany = new ArrayList<>();
-
-						//  Bidirectionnal relation, mappedBy is enough
-						if(association.getOpposite().isTargetNavigable()) {
-							propertiesOneToMany.add(new JavaAnnotationProperty("mappedBy","\""+ association.getOpposite().getRoleName() + "List\""));
-						} else {// Unidirectional, needs join column name and reference column name
-							JavaAnnotation joinColumn = new JavaAnnotation(
-									importManager.getFinalName("javax.persistence.JoinColumn"),
-									new JavaAnnotationProperty("name","\"" + computePKName(association.getSource())+ "\""),
-									new JavaAnnotationProperty("referencedColumnName","\"" + computeFKName(association.getOpposite()) + "\"")	
-									);
-							assocGetter.addAnnotations(joinColumn);							
-						}					
-						// Add orphan removal
-						propertiesOneToMany.add(new JavaAnnotationProperty("orphanRemoval","true"));
-
-						// OneToMany with properties
-						JavaAnnotation oneToMany = new JavaAnnotation(
-								importManager.getFinalName("javax.persistence.OneToMany"),
-								propertiesOneToMany.toArray(new JavaAnnotationProperty[0])				
-								);					
-						assocGetter.addAnnotations(oneToMany);				
+						buildOneToMany(association, assocGetter);		
 					}
 				} else { // xToOne
 					// ManyToOne
 					if(association.getOpposite().isTargetMultiple()) {				
-						assocGetter.addAnnotations(new JavaAnnotation(importManager.getFinalName("javax.persistence.ManyToOne")));	
-						assocGetter.addAnnotations(new JavaAnnotation(
-								importManager.getFinalName("javax.persistence.JoinColumn"),
-								new JavaAnnotationProperty("name","\"" + computePKName(association.getTarget())+ "\""),
-								new JavaAnnotationProperty("referencedColumnName","\"" + computeFKName(association) + "\"")	
-								));										
+						buildManyToOne(association, assocGetter);		
 					} else { // OneToOne is too complicated to generate, use a "false" n -> 1 instead
 						throw new MdaGeneratorException("This generator doesn't support 1 -> 1 for association " + association.getName() + ", use n -> 1 instead");
 					}
@@ -303,43 +258,79 @@ public class JavaClass {
 			}
 		}
 	}
-
+	
+	/**
+	 * Build One to many annotations
+	 * @param association association with data
+	 * @param assocGetter Getter for the many to one
+	 */
+	protected void buildManyToOne(UmlAssociation association, JavaMethod assocGetter) {
+		assocGetter.addAnnotations(new JavaAnnotation(importManager.getFinalName("javax.persistence.ManyToOne")));	
+		assocGetter.addAnnotations(new JavaAnnotation(
+				importManager.getFinalName("javax.persistence.JoinColumn"),
+				new JavaAnnotationProperty("name","\"" + NamesComputingUtil.computeFKName(association) + "\""),
+				new JavaAnnotationProperty("referencedColumnName","\"" + NamesComputingUtil.computePKName(association.getTarget()) + "\"")	
+				));	
+	}
 
 	/**
-	 * 
-	 * @param umlClass
-	 * @return
+	 * Build One to many annotations
+	 * @param association association with data
+	 * @param assocGetter Getter for the one to many
 	 */
-	private String computePKName(UmlClass umlClass) {
-		String pkName;
-		List<UmlAttribute> pks = umlClass.getPKs();
-		if(pks.isEmpty()) {
-			// FIXME put exception back again
-			return "no_pk";
-			//throw new MdaGeneratorException("Cannot find a PK for class " + umlClass.getName());
-		} else if(pks.size()==1) {
-			pkName = pks.get(0).getName();
-		} else {
-			// FIXME gérer cas pk multiple
-			return "double_pk";
-			//throw new MdaGeneratorException("Multiple PKs not implemented for class " + umlClass.getName());
-		}
+	protected void buildOneToMany(UmlAssociation association, JavaMethod assocGetter) {
+		List<JavaAnnotationProperty> propertiesOneToMany = new ArrayList<>();
 
-		return pkName;		
+		//  Bidirectionnal relation, mappedBy is enough
+		if(association.getOpposite().isTargetNavigable()) {
+			propertiesOneToMany.add(new JavaAnnotationProperty("mappedBy","\""+ NamesComputingUtil.computeFkObjectName(association.getOpposite()) + "List\""));
+		} else {// Unidirectional, needs join column name and reference column name
+			JavaAnnotation joinColumn = new JavaAnnotation(
+					importManager.getFinalName("javax.persistence.JoinColumn"),
+					new JavaAnnotationProperty("name","\"" + NamesComputingUtil.computeFKName(association.getOpposite())+ "\""),
+					new JavaAnnotationProperty("referencedColumnName","\"" + NamesComputingUtil.computePKName(association.getSource()) + "\"")	
+					);
+			assocGetter.addAnnotations(joinColumn);							
+		}					
+		// Add orphan removal
+		propertiesOneToMany.add(new JavaAnnotationProperty("orphanRemoval","true"));
+
+		// OneToMany with properties
+		JavaAnnotation oneToMany = new JavaAnnotation(
+				importManager.getFinalName("javax.persistence.OneToMany"),
+				propertiesOneToMany.toArray(new JavaAnnotationProperty[0])				
+				);					
+		assocGetter.addAnnotations(oneToMany);	
 	}
-
-	private String computeFKName(UmlAssociation umlAssociation) {
-		String fkName = computePKName(umlAssociation.getTarget());
-
-		// Si le nom de l'association à trois parties séparée par des "_", on ajoute la troisième partie dans le nom de la clef
-		String[] assocPart = umlAssociation.getName().split("_");
-		if(assocPart.length > 2) {
-			fkName += "_" + String.join("_",Arrays.copyOfRange(assocPart, 2, assocPart.length));
+	
+	/**
+	 * Build many to many annotations
+	 * @param association association with data
+	 * @param assocGetter Getter for the many to many
+	 */
+	protected void buildManyToMany(UmlAssociation association, JavaMethod assocGetter) {
+		// The "owner" have the annotation with join columns and intermediate table name
+		if(association.isOwner() ) {
+			assocGetter.addAnnotations(new JavaAnnotation(
+				importManager.getFinalName("javax.persistence.ManyToMany"),
+				new JavaAnnotationProperty("cascade","{"
+						+ importManager.getFinalName("javax.persistence.CascadeType")+".PERSIST,"
+						+ importManager.getFinalName("javax.persistence.CascadeType")+".MERGE}")
+			));
+			assocGetter.addAnnotations(new JavaAnnotation(
+				importManager.getFinalName("javax.persistence.JoinTable"),
+				new JavaAnnotationProperty("name","\"" +  association.getName() + "\""),
+				new JavaAnnotationProperty("joinColumns","@JoinColumn(name = \""+ NamesComputingUtil.computeFKName(association.getOpposite())+"\")"),
+				new JavaAnnotationProperty("inverseJoinColumns","@JoinColumn(name = \""+  NamesComputingUtil.computeFKName(association)+ "\")")
+			));
+		} else { // Not "owner" of the manyToMany, mappedBy with opposite getter is enough
+			assocGetter.addAnnotations(new JavaAnnotation(
+					importManager.getFinalName("javax.persistence.ManyToMany"),
+					new JavaAnnotationProperty("mappedBy","\""+ association.getOpposite().getFkObjectName() + "List\"")
+			));
 		}
-
-		return fkName;
 	}
-
+	
 
 	private static JavaMethod generateGetter(JavaAttribute attribute) {
 		JavaMethod getter = new JavaMethod(Visibility.PUBLIC, attribute.getJavaType(), "get" + StringUtils.capitalize(attribute.getName()));

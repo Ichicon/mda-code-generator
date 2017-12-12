@@ -298,7 +298,7 @@ public class XmiReader implements ModelFileReaderInterface {
 		umlAssoc.setTarget(target);
 		owner.getAssociations().add(umlAssoc);
 
-		// Calcul de la mulitiplicté et nullabilité ex: <type multiplicity="0..1" 
+		// Calcul de la multiplicté et nullabilité ex: <type multiplicity="0..1" 
 		String cardinalite = XmiUtil.getAttribute(XmiUtil.getFirstChildsNodeWithTagName(targetNode, "type"), "multiplicity");
 		switch(cardinalite) {
 		case "1":
@@ -329,10 +329,19 @@ public class XmiReader implements ModelFileReaderInterface {
 		}else {
 			umlAssoc.setTargetNavigable(false);
 		}
+			
+		// Facultatif, récupérer le nom de l'objet FK ex: <role name="organismeParent"
+		String fkObjectName = XmiUtil.getAttribute(XmiUtil.getFirstChildsNodeWithTagName(targetNode, "role"), "name");
+		umlAssoc.setFkObjectName(fkObjectName);
 		
-		// Facultatif, récupérer le nom du role ex: <role name="organismeParent"
-		String roleName = XmiUtil.getAttribute(XmiUtil.getFirstChildsNodeWithTagName(targetNode, "role"), "name");
-		umlAssoc.setRoleName(roleName);
+		// Facultatif, récupérer le nom de la colonne FK <style value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Navigable;alias=workplace_service_id;"/>
+		String stylesValues = XmiUtil.getAttribute(XmiUtil.getFirstChildsNodeWithTagName(targetNode, "style"), "value");
+		String fkColumNanme =  null;
+		for(String styleValue : stylesValues.split(";")) {
+			if(styleValue != null && styleValue.startsWith("alias=")) {
+				umlAssoc.setFkName(styleValue.split("=")[1]);
+			}
+		}
 		
 		return umlAssoc;		
 	}

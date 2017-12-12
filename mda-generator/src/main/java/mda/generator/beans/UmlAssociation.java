@@ -21,7 +21,8 @@ public class UmlAssociation {
 	private boolean targetNavigable;
 	
 	 // si pas défini, on utilise le nom de la classe target comme nom
-	private String roleName;
+	private String fkObjectName; // utilisé pour le nom de l'objet
+	private String fkName; // utilisé pour le nom de la clef
 	
 	private UmlClass source;
 	private UmlClass target;
@@ -83,22 +84,35 @@ public class UmlAssociation {
 	}
 
 	/**
-	 * @return the roleName
+	 * @return name of fk object
 	 */
-	public String getRoleName() {
-		if(StringUtils.isEmpty(roleName)) {
-			return StringUtils.uncapitalize(target.getCamelCaseName());
-		}
-		return roleName;
+	public String getFkObjectName() {
+		return fkObjectName;
 	}
 
 	/**
-	 * @param roleName the roleName to set
+	 * @param name for fk object in association
 	 */
-	public void setRoleName(String roleName) {
-		this.roleName = roleName;
+	public void setFkObjectName(String roleName) {
+		this.fkObjectName = roleName;
 	}
 	
+	
+	
+	/**
+	 * @return name of fk column
+	 */
+	public String getFkName() {	
+		return fkName;
+	}
+
+	/**
+	 * @param fkName the fk name to set
+	 */
+	public void setFkName(String fkName) {
+		this.fkName = fkName;
+	}
+
 	/**
 	 * @return the owner
 	 */
@@ -186,9 +200,13 @@ public class UmlAssociation {
 		sb.append(targetNavigable?"> ":" ");
 
 		sb.append(target.getCamelCaseName());
-		if(!StringUtils.isEmpty(roleName)) {
-			sb.append(" alias " + roleName);
+		if(!StringUtils.isEmpty(fkObjectName)) {
+			sb.append(" as " + fkObjectName);
 		}
+		if(!StringUtils.isEmpty(fkName)) {
+			sb.append(" on " + fkName);
+		}
+		
 		
 		sb.append(" [");
 		sb.append(targetNullable?"0":"1");

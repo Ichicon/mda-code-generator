@@ -51,18 +51,16 @@ public class JavaAttribute {
 	 */
 	public JavaAttribute(UmlAssociation umlAssociation, ConverterInterface converter, ImportManager importManager) {
 		this.isPK =false;
-		this.columnName = null; // mappedby ?
+		this.columnName = null;
 			
 		String javaTypeName = umlAssociation.getTarget().getXmiPackage().getName() + "." + umlAssociation.getTarget().getCamelCaseName();
 		if(umlAssociation.isTargetMultiple()) {
-			this.name = umlAssociation.getRoleName()+ "List";
+			this.name = NamesComputingUtil.computeFkObjectName(umlAssociation)+ "List";
 			this.javaType = importManager.getFinalName("java.util.Set") + "<" + importManager.getFinalName(javaTypeName) + ">";
 		} else {
-			this.name = umlAssociation.getRoleName();
+			this.name = NamesComputingUtil.computeFkObjectName(umlAssociation);
 			this.javaType = importManager.getFinalName(javaTypeName);
 		}
-
-		 
 
 		this.isNotNull = umlAssociation.isTargetNullable();
 
