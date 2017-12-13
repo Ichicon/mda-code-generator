@@ -1,11 +1,5 @@
 package mda.generator.writers.java;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import mda.generator.exceptions.MdaGeneratorException;
-
 /**
  * Property of an annotation ( ex: @ManyToMany(name = value) )
  * The value can be another annotation.

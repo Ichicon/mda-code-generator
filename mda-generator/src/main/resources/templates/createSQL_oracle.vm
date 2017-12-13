@@ -1,19 +1,19 @@
 -- *********************************************
+-- CREATE TABLES FOR ORACLE
+--
 -- This file has been automatically generated
 -- *********************************************
 
-## GENERATE SEQUENCES
 -- ================================
--- SEQUENCES DECLARATIONS
+-- SEQUENCES
 -- ================================
 #foreach( $sequence in $sequencesList )
 CREATE SEQUENCE $sequence.getName() START WITH 1000 INCREMENT BY 1 NOCACHE NOCYCLE;
 #end
  
  
-## GENERATE TABLES
 -- ================================
--- TABLES DECLARATIONS
+-- TABLES
 -- ================================
 #foreach( $table in $tablesList )
 CREATE TABLE $table.getName() (
@@ -30,19 +30,27 @@ COMMENT ON TABLE $table.getName() IS '$table.getComment().replaceAll("'","''")'
 #end
 ## COLUMNS COMMENTS
 #foreach ( $column in $table.getColumnsList() )
-#if ($table.getComment() )
+#if ($column.getComment() )
 COMMENT ON COLUMN $table.getName().$column.getName() IS '$column.getComment().replaceAll("'","''")'
 #end
 #end
 
 #end
 
-## GENERATES FKS
+
 -- ================================
--- FOREIGN KEYS DECLARATIONS
+-- FOREIGN KEYS
 -- ================================
 #foreach( $fk in $fksList )
 ALTER TABLE $fk.getSourceName() ADD CONSTRAINT FK_$fk.getName() FOREIGN KEY ($fk.getFkValue()) REFERENCES $fk.getTargetName()($fk.getPkValue());
+#end
+
+
+-- ================================
+-- FOREIGN KEYS INDEXES
+-- ================================
+#foreach( $fk in $fksList )
+CREATE INDEX IDX_$fk.getName() ON $fk.getSourceName() ($fk.getFkValue());
 #end
 
 ## END OF GENERATED SQL

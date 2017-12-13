@@ -1,7 +1,7 @@
 package mda.generator.writers.java;
 
 /**
- * Class to write java packages and classes
+ * Class to write java packages, entities and daos
  * 
  * @author Fabien Crapart
  *

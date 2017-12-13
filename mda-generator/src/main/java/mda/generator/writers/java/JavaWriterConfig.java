@@ -8,6 +8,11 @@ import java.util.Collection;
 import mda.generator.beans.UmlPackage;
 import mda.generator.converters.ConverterInterface;
 
+/**
+ * Configuration for JavaWriter, alimented by MdaGenerator
+ * @author Fabien Crapart
+ *
+ */
 public class JavaWriterConfig {
 	private Path javaOutputDirectory; 
 	private Collection<UmlPackage> umlPackages; 

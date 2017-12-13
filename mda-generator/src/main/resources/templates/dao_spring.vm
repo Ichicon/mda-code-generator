@@ -1,0 +1,14 @@
+package $daoPackageName;
+
+import org.springframework.data.repository.CrudRepository;
+import $javaClass.getPackageName().$javaClass.getName();
+
+/**
+ * Data Access Object for $javaClass.getName() using Spring CrudRepository interface
+ *
+ * This file has been automatically generated
+ */
+public interface $javaClass.getName()DAO extends CrudRepository<$javaClass.getName(), #if($javaClass.getPkField()) $javaClass.getPkField().getJavaType()#else mda.example.CompositeKey#end> {
+
+}
+// STOP GENERATION -> Comment used to prevent generator from generate the file again, DO NOT REMOVE IT

@@ -1,32 +1,32 @@
 package mda.generator.writers.sql;
 
 import java.io.IOException;
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.Velocity;
 
 import mda.generator.beans.UmlAssociation;
 import mda.generator.beans.UmlAttribute;
 import mda.generator.beans.UmlClass;
 import mda.generator.beans.UmlPackage;
 import mda.generator.exceptions.MdaGeneratorException;
+import mda.generator.writers.VelocityUtils;
 import mda.generator.writers.java.NamesComputingUtil;
 
+/**
+ * Create SQL files for Oracle
+ * @author Fabien Crapart
+ */
 public class OracleSQLWriter implements SQLWriterInterface {
 	/** Logger */
-	private static final Logger LOG = LogManager.getLogger();
-	
+	private static final Logger LOG = LogManager.getLogger(OracleSQLWriter.class);
+
+	private static final String STOP_GENERATION = "-- STOP GENERATION";
 	private static final String END_OF_GENERATED = "-- END OF GENERATED CODE - YOU CAN EDIT THE FILE AFTER THIS LINE, DO NOT EDIT THIS LINE OR BEFORE THIS LINE";
 	
 	private List<SQLForeignKey> fksList = new ArrayList<>();
@@ -34,8 +34,6 @@ public class OracleSQLWriter implements SQLWriterInterface {
 	private List<SQLSequence> sequencesList = new ArrayList<>();
 	
 	private SQLWriterConfig config;
-	
-	
 	
 	@Override
 	public void writeSql(SQLWriterConfig config) {
@@ -58,51 +56,34 @@ public class OracleSQLWriter implements SQLWriterInterface {
 		
 		// Write SQL file from template and extracted data
 		try {
-			writeFile(config.getSqlOutputDirectory().resolve("crebas.sql"));
+			writeSQLFile(config.getSqlOutputDirectory().resolve("create_tables.sql"), config.getCreateSqlTemplatePath());
+			writeSQLFile(config.getSqlOutputDirectory().resolve("drop_tables.sql"), config.getDropSqlTemplatePath());
 		}catch(Exception e) {
-			throw new MdaGeneratorException("Error while writing SQL file", e);
+			throw new MdaGeneratorException("Error while writing SQL files", e);
 		}
 	}
 	
 	/**
 	 * 
 	 * @param filePath
+	 * @param templateToUse
 	 * @throws IOException
 	 */
-	protected void writeFile(Path filePath) throws IOException {		
-		StringBuilder contentToKeep = new StringBuilder();
-		boolean keepContent = false;
-		boolean lineAdded = false;
-		if(Files.exists(filePath)) {
-			for(String line : Files.readAllLines(filePath)) {
-				// We keep user edited content
-				if(keepContent) {
-					if(lineAdded) {
-						contentToKeep.append("\n");
-					} else {
-						lineAdded = true;
-					}
-					contentToKeep.append(line);
-				}	
-				
-				// Comment to detect user content (after this line)
-				if(line.contains(END_OF_GENERATED)) {
-					keepContent = true;
-				}		
-			}
-		}
-		
+	protected void writeSQLFile(Path filePath, Path templateToUse) throws IOException {				
 		VelocityContext context = new VelocityContext();
+		if(VelocityUtils.analyseFileAndCompleteContext(filePath, STOP_GENERATION, END_OF_GENERATED, context)) {
+			context.put("sequencesList", sequencesList);
+			context.put("tablesList", tablesList);
+			context.put("fksList", fksList);
+			context.put("end_of_generated", END_OF_GENERATED);
 
-		context.put("sequencesList", sequencesList);
-		context.put("tablesList", tablesList);
-		context.put("fksList", fksList);
-		context.put("end_of_generated", END_OF_GENERATED);
-		context.put("keep_content", keepContent);
-		context.put("content_to_keep", contentToKeep.toString());
-
-		writeFileFromTemplate(filePath, config.getSqlTemplatePath(), context);
+			// FIXME add charset to config
+			VelocityUtils.writeFileFromTemplate(filePath, templateToUse, context, config.getCharset());
+		}else {
+			LOG.debug(filePath + " will not be overwritten because '" + STOP_GENERATION + "' is present");
+		}
 	}
+	
 	
 	/**
 	 * 
@@ -132,7 +113,7 @@ public class OracleSQLWriter implements SQLWriterInterface {
 				// Compute association columns and FKs
 				for(UmlAssociation umlAssociation : umlClass.getAssociations()) {
 					if(umlAssociation.isTargetMultiple()) {
-						// ManyToMany, on doit créer une table intermédiaire avec la pks de chaque table
+						// ManyToMany, need intermediate table
 						if(umlAssociation.getOpposite().isTargetMultiple() && umlAssociation.isOwner()) {
 							if(umlAssociation.getSource().getPKs().size() > 1 || umlAssociation.getTarget().getPKs().size() > 1) {
 								throw new MdaGeneratorException("Cannot create table for " + umlAssociation.getName() + " association, composite pk forbidden in many to many");
@@ -165,8 +146,20 @@ public class OracleSQLWriter implements SQLWriterInterface {
 							SQLForeignKey fk2 = new SQLForeignKey(umlAssociation.getName()+"_2", manyToManyTable.getName(), umlAssociation.getTarget().getName(), pk2.getName(), pk2.getName());
 							fksList.add(fk2);
 						}
-						// Sinon oneToMany, pas de FK
-					} else { // ManyToOne, on créé la FK
+						// oneToMany, no FK
+					} else { // ManyToOne, create FK
+                        // Columns for FK
+                        for(UmlAttribute pkX : umlAssociation.getTarget().getPKs()){
+                            SQLColumn fk;                       
+                            // Use fk column name defined in association
+                            if(umlAssociation.getTarget().getPKs().size() == 1) {
+                                fk = new SQLColumn(NamesComputingUtil.computeFKName(umlAssociation),pkX.getDomain(),true,"ManyToOne FK " + umlAssociation.getTarget().getName(), config.getConverter());
+                            } else { // Generate name from pk because it's a composite key
+                                fk = new SQLColumn(pkX.getName(),pkX.getDomain(),true,"ManyToOne FK " + umlAssociation.getTarget().getName(), config.getConverter());       
+                            }
+                            table.addColumn(fk);                       
+                        }
+                        
 						fksList.add(new SQLForeignKey(umlAssociation));
 					}
 				}
@@ -192,27 +185,5 @@ public class OracleSQLWriter implements SQLWriterInterface {
 		return false;
 	}
 	
-	/**
-	 * Write context to a file with a template
-	 * @param filePath Path to write file
-	 * @param templatePath Path to Velocity template
-	 * @param context File content in velocity context
-	 * @throws IOException Error while writing file
-	 */
-	protected void writeFileFromTemplate(Path filePath, Path templatePath, VelocityContext context ) throws IOException {
-		Properties prop = new Properties();
-		prop.setProperty("file.resource.loader.path", templatePath.getParent().toString());
-		Velocity.init(prop);
-		
-		Template template = null;
-		try{
-			template = Velocity.getTemplate(templatePath.getFileName().toString());
-		}catch( Exception e ){ 
-			throw new MdaGeneratorException("Error while writing from template " + templatePath,e);
-		}
-		StringWriter sw = new StringWriter();
-		template.merge(context,sw);		
-		LOG.debug("Creating SQL " + filePath);				
-		Files.write(filePath, sw.toString().getBytes(StandardCharsets.UTF_8));	
-	}
+
 }

@@ -1,12 +1,12 @@
 package mda.generator.writers.sql;
 
-import java.nio.file.Path;
-
-import mda.generator.beans.UmlPackage;
-
+/**
+ * Class to write sql create tables and drop tables files
+ * @author Fabien Crapart
+ */
 public interface SQLWriterInterface {
 	/**
-	 * Write sql with config
+	 * Write create tables and drop tables sql files with provided configuration
 	 * @param config
 	 */
 	void writeSql(SQLWriterConfig config);

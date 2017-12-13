@@ -1,20 +1,17 @@
 package mda.generator.writers.java;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Properties;
+import java.nio.file.Paths;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.Velocity;
 
-import mda.generator.MdaGeneratorBuilder;
 import mda.generator.beans.UmlPackage;
 import mda.generator.exceptions.MdaGeneratorException;
+import mda.generator.writers.VelocityUtils;
 
 /**
  * Class to write java packages and classes from Uml objects
@@ -23,10 +20,10 @@ import mda.generator.exceptions.MdaGeneratorException;
  */
 public class JavaWriter implements JavaWriterInterface {
 	/** Logger */
-	private static final Logger LOG = LogManager.getLogger();
+	private static final Logger LOG = LogManager.getLogger(JavaWriter.class);
 	
 	/** Comment to use in the file to not regenerate it at all */
-	public static String ONE_TIME_GENERATION ="// NO GENERATION";
+	public static String STOP_GENERATION ="// STOP GENERATION";
 
 	/** Constant use to mark the end of generated code in a file, the rest of file can be edited without being erased */
 	public static String END_OF_GENERATED ="// END OF GENERATED CODE - YOU CAN EDIT THE FILE AFTER THIS LINE, DO NOT EDIT THIS LINE OR BEFORE THIS LINE";
@@ -34,8 +31,6 @@ public class JavaWriter implements JavaWriterInterface {
 	/** Line break */
 	public static String BREAK = "\n";
 	
-	/** Commment to add to specify that the file has been generated */
-	public static String GENERATED_COMMENT = "This file has been automatically generated.";
 	/** Comment to insert when no comment found in diagram */
 	public static String NO_COMMENT_FOUND = "No comment found in model diagram";
 
@@ -71,107 +66,108 @@ public class JavaWriter implements JavaWriterInterface {
 	protected void createPackage(Path srcRoot, UmlPackage umlPackage) {
 		JavaPackage javaPackage = new JavaPackage(srcRoot, umlPackage, config.getConverter());
 
-		// Create package directory
-		try {
-			Files.createDirectories(javaPackage.getPackagePath());
-		} catch (IOException e) {
-			throw new MdaGeneratorException("Error while creating directory "  + javaPackage.getPackagePath() + " for package " + javaPackage.getPackageName(), e);
-		}
-
-		// Creating package-info (erasing already existing one)
-		VelocityContext context = new VelocityContext();
-		context.put("javaPackage", javaPackage);
+		// Writing package-info file for entities
+		Path entitiesPackagePath = writeEntitiesPackageInfo(javaPackage);
 		
-		// Writing package-info file
-		Path packageInfoPath = javaPackage.getPackagePath().resolve("package-info.java");
-		try {
-			writeFileFromTemplate(packageInfoPath, config.getPathToPackageInfoTemplate(), context);
-		}catch (IOException e) {
-			throw new MdaGeneratorException("Error while creating package-info "  + packageInfoPath + " for package " + javaPackage.getPackageName(), e);		
-		}
+		// Writing package-info file for daos (replace entities part name by daos part name)
+		Path daosPackagePath = writeDaosPackageInfo(javaPackage);
 
-		// Writing classes
+		// Writing classes and daos
 		for(JavaClass javaClass : javaPackage.getClasses()) {
 			try {
-				writeClass(javaClass);
+				writeClass(entitiesPackagePath, javaClass);		
+				writeDao(daosPackagePath, javaClass);
 			} catch (IOException e) {
-				throw new MdaGeneratorException("Error while creating class "  + javaClass.getClassPath(), e);		
+				throw new MdaGeneratorException("Error while generating class "  + javaClass.getName(), e);
 			}
+		}
+	}
+	
+	
+	
+	protected Path writeEntitiesPackageInfo(JavaPackage javaPackage) {
+		VelocityContext context = new VelocityContext();
+		context.put("commentsList", javaPackage.getCommentsList());
+		context.put("packageName", javaPackage.getPackageName());
+	
+		Path entitiesPackagePath =  javaPackage.getPackagePath();
+		Path entitiesPackageInfoPath = entitiesPackagePath.resolve("package-info.java");
+		try {
+			Files.createDirectories(entitiesPackagePath);
+			VelocityUtils.writeFileFromTemplate(entitiesPackageInfoPath, config.getPathToPackageInfoTemplate(), context, config.getCharset());
+		}catch (IOException e) {
+			throw new MdaGeneratorException("Error while creating entities package-info "  + entitiesPackageInfoPath + " for package " + javaPackage.getPackageName(), e);		
+		}
+
+		return entitiesPackagePath;
+	}
+	
+	protected Path writeDaosPackageInfo(JavaPackage javaPackage) {
+		VelocityContext context = new VelocityContext();
+		context.put("commentsList", javaPackage.getCommentsList());
+		context.put("packageName", replaceEntitiesWithDaos(javaPackage.getPackageName()));
+		
+		Path daosPackagePath = replaceEntitiesWithDaos(javaPackage.getPackagePath());
+		Path daosPackageInfoPath = daosPackagePath.resolve("package-info.java");
+		try {
+			Files.createDirectories(daosPackagePath);
+			VelocityUtils.writeFileFromTemplate(daosPackageInfoPath, config.getPathToPackageInfoTemplate(), context, config.getCharset());
+		}catch (IOException e) {
+			throw new MdaGeneratorException("Error while creating daos package-info "  + daosPackageInfoPath + " for package " + javaPackage.getPackageName(), e);		
+		}
+
+		return daosPackagePath;
+	}
+
+	
+	/**
+	 * 
+	 * @param packageEntitiesPath
+	 * @param javaClass
+	 * @throws IOException
+	 */
+	protected void writeClass(Path packageEntitiesPath, JavaClass javaClass) throws IOException {	
+		// Analyse file and existing content, add values to context to use in template
+		Path entityPath = packageEntitiesPath.resolve(javaClass.getName()+".java");
+		VelocityContext context = new VelocityContext();
+		if(VelocityUtils.analyseFileAndCompleteContext(entityPath, STOP_GENERATION, END_OF_GENERATED, context)) {
+			context.put( "javaClass", javaClass);
+			context.put( "end_of_generated", END_OF_GENERATED);
+		
+			VelocityUtils.writeFileFromTemplate(entityPath,  config.getPathToEntitiesTemplate(), context, config.getCharset());	
+		} else {
+			LOG.debug(entityPath + " will not be overwritten because '" + STOP_GENERATION + "' is present");
 		}
 	}
 	
 	/**
 	 * 
+	 * @param packageDaosPath
 	 * @param javaClass
 	 * @throws IOException
 	 */
-	protected void writeClass(JavaClass javaClass) throws IOException {
-		// Test if file already existe
-		Path classPath = javaClass.getClassPath();
+	protected void writeDao(Path packageDaosPath, JavaClass javaClass) throws IOException {	
+		// Test if file already exists
+		Path daoPath = packageDaosPath.resolve(javaClass.getName() + "DAO.java");
 		
-		StringBuilder contentToKeep = new StringBuilder();
-		boolean doNotRegenerate = false;
-		boolean keepContent = false;
-		boolean lineAdded = false;
-		if(Files.exists(classPath)) {
-			for(String line : Files.readAllLines(classPath)) {
-				// No generation for this one
-				if(line.contains(ONE_TIME_GENERATION)) {
-					doNotRegenerate =true;
-					break;
-				}
-				// We keep user edited content
-				if(keepContent) {
-					if(lineAdded) {
-						contentToKeep.append(BREAK);
-					}else {
-						lineAdded=true;
-					}
-					contentToKeep.append(line);
-				}	
-				
-				// Comment to detect user content (after this line)
-				if(line.contains(END_OF_GENERATED)) {
-					keepContent = true;
-				}		
-			}
-		}
-		
-		// Class generation only if allowed
-		if(!doNotRegenerate) {
-			writeClassContentWithTemplate(classPath, javaClass, keepContent, contentToKeep);
-			//writeClassContent(classPath, javaClass, keepContent, oldContent, contentToKeep);			
-		} else {
-			LOG.debug(classPath + " will not be overwritten because '" + ONE_TIME_GENERATION + "' is present");
-		}
-	}
-	
-	protected void writeClassContentWithTemplate(Path classPath, JavaClass javaClass, boolean keepContent, StringBuilder contentToKeep) throws IOException {
+		// Analyse file and existing content, add values to context to use in template
 		VelocityContext context = new VelocityContext();
-
-		context.put( "javaClass", javaClass);
-		context.put( "keep_content", keepContent);
-		context.put( "content_to_keep", contentToKeep);
-		context.put( "generated_comment", GENERATED_COMMENT);
-		context.put( "end_of_generated", END_OF_GENERATED);
+		if(VelocityUtils.analyseFileAndCompleteContext(daoPath, STOP_GENERATION, END_OF_GENERATED, context)) {
+			context.put("daoPackageName", replaceEntitiesWithDaos(javaClass.getPackageName()));		
+			context.put("javaClass", javaClass);
+			context.put("end_of_generated", END_OF_GENERATED);
+		
+			VelocityUtils.writeFileFromTemplate(daoPath,  config.getPathToDaosTemplate(), context, config.getCharset());	
+		} else {
+			LOG.debug(daoPath + " will not be overwritten because '" + STOP_GENERATION + "' is present");
+		}
+	}
 	
-		writeFileFromTemplate(classPath,  config.getPathToEntitiesTemplate(), context);
+	private Path replaceEntitiesWithDaos(Path entitiesPackagePath) {
+		return Paths.get(replaceEntitiesWithDaos(entitiesPackagePath.toString()));
 	}
 
-	protected void writeFileFromTemplate(Path filePath, Path templatePath, VelocityContext context ) throws IOException {
-		Properties prop = new Properties();
-		prop.setProperty("file.resource.loader.path", templatePath.getParent().toString());
-		Velocity.init(prop);
-		
-		Template template = null;
-		try{
-			template = Velocity.getTemplate(templatePath.getFileName().toString());
-		}catch( Exception e ){ 
-			throw new MdaGeneratorException("Error while writing from template " + templatePath,e);
-		}
-		StringWriter sw = new StringWriter();
-		template.merge(context,sw);		
-		LOG.debug("Creating " + filePath);				
-		Files.write(filePath, sw.toString().getBytes(config.getCharset()));	
+	private String replaceEntitiesWithDaos(String entitiesPackage) {
+		return entitiesPackage.replaceAll(config.getEntities(),config.getDaos());
 	}
 }

@@ -1,6 +1,8 @@
 /**
-#foreach($comment in $javaPackage.getCommentsList())
+#foreach($comment in $commentsList)
  * $comment
 #end
+ *
+ * This file has been automatically generated
  */
-package $javaPackage.getPackageName();
+package $packageName;

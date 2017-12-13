@@ -2,9 +2,13 @@ package mda.generator;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 
 import mda.example.Main;
 import mda.generator.converters.ConverterInterface;
@@ -56,6 +60,12 @@ public class MdaGeneratorBuilder {
 	private Path pathToDaosTemplate = getApplicationPath().resolve("templates").resolve("dao_spring.vm");
 	/** Create SQL Velocity template */
 	private Path pathToCreateSQLTemplate = getApplicationPath().resolve("templates").resolve("createSQL_oracle.vm");
+	/** DRop SQL Velocity template */
+	private Path pathToDropSQLTemplate = getApplicationPath().resolve("templates").resolve("dropSQL_oracle.vm");
+	/** Charsets for writing files */
+	private Charset charset = StandardCharsets.UTF_8;
+	/** Class prefixes for which sql tables will not be generated */
+	private List<String> excludedPrefixes;
 	
 	/**
 	 * [MANDATORY] Path to model file to use for mda generation
@@ -128,7 +138,7 @@ public class MdaGeneratorBuilder {
 	}
 	
 	/**
-	 * Entities template file,  default "PROGRAM_ROOT"/entities.vm
+	 * Entities template file,  default "PROGRAM_ROOT"/entity.vm
 	 * @param template path to template ex: D:/myproject/templates/entities.vm
 	 * @return builder to re-use
 	 */
@@ -138,7 +148,7 @@ public class MdaGeneratorBuilder {
 	}
 	
 	/**
-	 * DAOs template file,  default "PROGRAM_ROOT"/daos.vm
+	 * DAOs template file,  default "PROGRAM_ROOT"/dao_spring.vm
 	 * @param template path to template ex: D:/myproject/templates/daos.vm
 	 * @return builder to re-use
 	 */
@@ -148,7 +158,7 @@ public class MdaGeneratorBuilder {
 	}
 	
 	/**
-	 * CreateSQL template file,  default "PROGRAM_ROOT"/createSQL.vm
+	 * create_tables.sql template file,  default "PROGRAM_ROOT"/createSQL_oracle.vm
 	 * @param template path to template ex: D:/myproject/templates/createSQL.vm
 	 * @return builder to re-use
 	 */
@@ -156,6 +166,16 @@ public class MdaGeneratorBuilder {
 		this.pathToCreateSQLTemplate = template;		
 		return this;
 	}	
+	
+	/**
+	 * drop_tables.sql template file,  default "PROGRAM_ROOT"/dropSQL_oracle.vm
+	 * @param template path to template ex: D:/myproject/templates/dropSQL.vm
+	 * @return builder to re-use
+	 */
+	public MdaGeneratorBuilder withDropSQLTemplate(Path template) {
+		this.pathToDropSQLTemplate = template;		
+		return this;
+	}
 	
 	/**
 	 * Name of the package part which is root for daos, default "daos". Ex (see withEntitiesPackagePartName example too) : the package "com.mycompany.myproject.entities.users" will become "com.mycompany.myproject.daos.users" 
@@ -199,6 +219,28 @@ public class MdaGeneratorBuilder {
 		
 		return this;
 	}
+	
+	/**
+	 * Charset used to write the files
+	 * @param charset Charset to use to write files
+	 * @return builder to re-use
+	 */
+	public MdaGeneratorBuilder withCharset(Charset charset){
+		this.charset = charset;
+		
+		return this;
+	}
+	
+	/**
+	 * List of class name prefixes for which sql will no be generated (shared db with other application)
+	 * @param excludedPrefixes List of prefix to exclude, can be a list of tables too. Ex: "otherapp_" or "tableToExclude"
+	 * @return builder to re-use
+	 */
+	public MdaGeneratorBuilder withExcludedPrefixes(String... excludedPrefixes) {
+		this.excludedPrefixes = Arrays.asList(excludedPrefixes);
+		return this;
+	}
+	
 	
 
 	/**
@@ -255,6 +297,12 @@ public class MdaGeneratorBuilder {
 		if(pathToCreateSQLTemplate == null) {
 			throw new MdaGeneratorException("MdaGenerator needs a create sql template. Create a velocity template and bind it with mdaGeneratorBuilder.withCreateSQLTemplate(\"path/to/template.vm\")");
 		}
+		if(pathToDropSQLTemplate == null) {
+			throw new MdaGeneratorException("MdaGenerator needs a drop sql template. Create a velocity template and bind it with mdaGeneratorBuilder.withDropSQLTemplate(\"path/to/template.vm\")");
+		}
+		if(charset == null) {
+			throw new MdaGeneratorException("MdaGenerator needs a charset defined to create files. Use mdaGeneratorBuilder.withCharset(StandardCharsets.UTF_8)");
+		}
 		
 
 		generator.setPathToModelFile(pathToModel);
@@ -269,10 +317,13 @@ public class MdaGeneratorBuilder {
 		generator.setDaosPackagePartName(daosPackagePartName);
 		generator.setEntitiesPackagePartName(entitiesPackagePartName);
 		generator.setPathToCreateSQLTemplate(pathToCreateSQLTemplate);
+		generator.setPathToDropSQLTemplate(pathToDropSQLTemplate);
 		generator.setPathToEntitiesTemplate(pathToEntitiesTemplate);
 		generator.setPathToDaosTemplate(pathToDaosTemplate);
 		generator.setPathToPackageInfoTemplate(pathToPackageInfoTemplate);
-
+		generator.setCharset(charset);
+		generator.setExcludedPrefixes(excludedPrefixes);
+		
 		return generator;
 	}
 	

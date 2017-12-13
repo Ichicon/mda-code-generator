@@ -23,6 +23,7 @@ public class Main {
 //				.withDaosPackagePartName("daos")
 //				.withEntityTemplate(MdaGeneratorBuilder.getApplicationPath().resolve("templates").resolve("entity.vm"))
 //				.withPackageInfoTemplate(MdaGeneratorBuilder.getApplicationPath().resolve("templates").resolve("package-info.vm"))
+				.withExcludedPrefixes("test_","double_key")
 				.build();
 
 		generator.generate();

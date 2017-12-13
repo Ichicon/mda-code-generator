@@ -11,7 +11,7 @@ import $import;
  * $comment
 #end
  *
- * $generated_comment
+ * This file has been automatically generated
  */
 ## ANNOTATIONS
 #foreach( $annotation in $javaClass.getAnnotationsList() )

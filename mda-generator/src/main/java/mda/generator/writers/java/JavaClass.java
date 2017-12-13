@@ -4,7 +4,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -20,8 +19,6 @@ import mda.generator.exceptions.MdaGeneratorException;
  * @author Fabien Crapart
  */
 public class JavaClass {
-	private final Path classPath;
-
 	private final String packageName;
 
 	private ImportManager importManager = new ImportManager();
@@ -36,7 +33,9 @@ public class JavaClass {
 	private List<JavaMethod> methodsList = new ArrayList<>();
 
 	private JavaClass pkClass;
-
+	private JavaAttribute pkField;
+	
+	
 	/**
 	 * 
 	 * @param javaPackage
@@ -45,7 +44,6 @@ public class JavaClass {
 	 */
 
 	public JavaClass(JavaPackage javaPackage, UmlClass umlClass, ConverterInterface converter) {
-		this.classPath = javaPackage.getPackagePath().resolve(umlClass.getCamelCaseName() + ".java");
 		this.name = umlClass.getCamelCaseName() ;
 
 		if(umlClass.getComment() != null) {
@@ -74,13 +72,6 @@ public class JavaClass {
 
 		// Associations vers d'autres classes
 		manageAssociations(umlClass, converter);
-	}
-
-	/**
-	 * @return the classPath
-	 */
-	public Path getClassPath() {
-		return classPath;
 	}
 
 	/**
@@ -146,6 +137,12 @@ public class JavaClass {
 		return pkClass;
 	}
 
+	/**
+	 * @return the pkField
+	 */
+	public JavaAttribute getPkField() {
+		return pkField;
+	}
 
 	/**
 	 * Generation des attributs et methodes (et classe si besoin) liées aux PKs
@@ -162,11 +159,11 @@ public class JavaClass {
 			// make getters/setters
 		} else if(umlClass.getPKs().size() > 0){
 			UmlAttribute umlPK = umlClass.getPKs().get(0);
-			JavaAttribute javaAttribute = new JavaAttribute(umlPK, converter, importManager);
-			attributesList.add(javaAttribute);
+			pkField = new JavaAttribute(umlPK, converter, importManager);
+			attributesList.add(pkField);
 
 			// Generate getter/setter			
-			JavaMethod getterPK = generateGetter(javaAttribute);
+			JavaMethod getterPK = generateGetter(pkField);
 			String seqName = "\"" + NamesComputingUtil.computeSequenceName(umlClass) + "\"";
 
 			// Id annotation on PK field
@@ -187,11 +184,11 @@ public class JavaClass {
 			// Annotation pour le nom de la colonne
 			getterPK.addAnnotations(new JavaAnnotation(
 				importManager.getFinalName("javax.persistence.Column"),
-				new JavaAnnotationProperty("name","\""+javaAttribute.getColumnName() +"\""),
-				new JavaAnnotationProperty("nullable",javaAttribute.isNotNull()?"false":"true")
+				new JavaAnnotationProperty("name","\""+pkField.getColumnName() +"\""),
+				new JavaAnnotationProperty("nullable",pkField.isNotNull()?"false":"true")
 			));
 			methodsList.add(getterPK);
-			methodsList.add(generateSetter(javaAttribute));
+			methodsList.add(generateSetter(pkField));
 		}
 	}
 

@@ -1,7 +1,9 @@
 package mda.generator;
 
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,13 +33,14 @@ import mda.generator.writers.sql.SQLWriterInterface;
 public class MdaGenerator {
 	private static final Logger LOG = LogManager.getLogger(MdaGenerator.class);
 
+	/** Input models and reader */
 	private Path pathToModelFile;
 	private Path pathToMetadataFile;
 	private Class<? extends ModelFileReaderInterface> readerClass;
 	
 	private Class<? extends ConverterInterface> converterClass;	
 	
-	/** Emplacement de sortie des packages et fichiers générés */
+	/** Java generation */
 	private Path javaOutputDirectory = null;
 	private Class<? extends JavaWriterInterface> javaWriterClass;	
 	private Path pathToPackageInfoTemplate;
@@ -47,11 +50,107 @@ public class MdaGenerator {
 	private String entitiesPackagePartName = "entities";
 	private String daosPackagePartName = "daos";
 
-	
 	/** Emplacement du fichier SQL généré en sortie */
 	private Path sqlOutputDirectory = null;
 	private Class<? extends SQLWriterInterface> sqlWriterClass;	
 	private Path pathToCreateSQLTemplate;
+	private Path pathToDropSQLTemplate;
+	private List<String> excludedPrefixes;
+	
+	/** Charset */
+	private Charset charset;
+	
+	/**
+	 * 
+	 * @param pathToModelFile
+	 * @param readerClass
+	 */
+	public void generate() {
+		// Instanciation du reader
+		ModelFileReaderInterface reader;
+		try {
+			reader = readerClass.newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
+			LOG.error("Impossible d'instancier le reader" , e);		
+			throw new MdaGeneratorException("Impossible d'instancier le reader", e);
+		}
+		
+		// Instanciation du converter
+		ConverterInterface converter;
+		try {
+			converter = converterClass.newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
+			LOG.error("Impossible d'instancier le converter" , e);		
+			throw new MdaGeneratorException("Impossible d'instancier le converter", e);
+		}
+		
+		// Instanciation du java writer
+		JavaWriterInterface javaWriter;
+		try {
+			javaWriter = javaWriterClass.newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
+			LOG.error("Impossible d'instancier le java writer" , e);		
+			throw new MdaGeneratorException("Impossible d'instancier le java writer", e);
+		}
+		
+		// Instanciation du sql writer
+		SQLWriterInterface sqlWriter;
+		try {
+			sqlWriter = sqlWriterClass.newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
+			LOG.error("Impossible d'instancier le sql writer" , e);		
+			throw new MdaGeneratorException("Impossible d'instancier le sql writer", e);
+		}
+		
+		// Display configuration in logs
+		logConfiguration();
+		
+		// Lecture du xmi
+		reader.extractObjects(pathToModelFile.toString(), pathToMetadataFile.toString());
+
+		// Logs de ce qui a été extrait
+		StringBuilder sbUmlObjects = new StringBuilder();
+
+		sbUmlObjects.append("\n\nDOMAINS (JAVA / DATABASE):\n-------------------------------------");
+		for(UmlDomain umlDomain : reader.getDomainsMap().values()) {
+			sbUmlObjects.append(umlDomain);
+			sbUmlObjects.append(" ").append(converter.getJavaType(umlDomain));
+			sbUmlObjects.append(" / ").append(converter.getDataBaseType(umlDomain));
+		}
+
+		sbUmlObjects.append("\n\nPACKAGES & CLASSES :\n-------------------------------------");		
+		for(UmlPackage xmiPackage : reader.getPackagesMap().values()) {
+			sbUmlObjects.append(xmiPackage);
+		}
+
+		LOG.info(sbUmlObjects);
+
+		// Generation du code java	
+		JavaWriterConfig javaConfig = new JavaWriterConfig();
+		javaConfig.setJavaOutputDirectory(javaOutputDirectory);
+		javaConfig.setUmlPackages(reader.getPackagesMap().values());
+		javaConfig.setConverter(converter);
+		javaConfig.setEntities(entitiesPackagePartName);
+		javaConfig.setDaos(daosPackagePartName);
+		javaConfig.setPathToPackageInfoTemplate(pathToPackageInfoTemplate);
+		javaConfig.setPathToEntitiesTemplate(pathToEntitiesTemplate);
+		javaConfig.setPathToDaosTemplate(pathToDaosTemplate);
+		javaConfig.setCharset(charset);		
+		javaWriter.writeSourceCode(javaConfig);
+		
+		// Generation du sql
+		SQLWriterConfig sqlConfig = new SQLWriterConfig();
+		sqlConfig.setPackagesList(reader.getPackagesMap().values());
+		sqlConfig.setSqlOutputDirectory(sqlOutputDirectory);
+		sqlConfig.setCreateSqlTemplatePath(pathToCreateSQLTemplate);
+		sqlConfig.setDropSqlTemplatePath(pathToDropSQLTemplate);
+		sqlConfig.setConverter(converter);
+		sqlConfig.setCharset(charset);
+		sqlConfig.setExcludesClassesPrefixes(excludedPrefixes);
+
+		sqlWriter.writeSql(sqlConfig);
+	}
+
 	
 	/**
 	 * @param pathToModelFile the pathToModelFile to set
@@ -152,104 +251,38 @@ public class MdaGenerator {
 	}
 
 	/**
-	 * 
-	 * @param pathToModelFile
-	 * @param readerClass
+	 * @param pathToDropSQLTemplate the pathToDropSQLTemplate to set
 	 */
-	public void generate() {
-		// Instanciation du reader
-		ModelFileReaderInterface reader;
-		try {
-			reader = readerClass.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
-			LOG.error("Impossible d'instancier le reader" , e);		
-			throw new MdaGeneratorException("Impossible d'instancier le reader", e);
-		}
-		
-		// Instanciation du converter
-		ConverterInterface converter;
-		try {
-			converter = converterClass.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
-			LOG.error("Impossible d'instancier le converter" , e);		
-			throw new MdaGeneratorException("Impossible d'instancier le converter", e);
-		}
-		
-		// Instanciation du java writer
-		JavaWriterInterface javaWriter;
-		try {
-			javaWriter = javaWriterClass.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
-			LOG.error("Impossible d'instancier le java writer" , e);		
-			throw new MdaGeneratorException("Impossible d'instancier le java writer", e);
-		}
-		
-		// Instanciation du sql writer
-		SQLWriterInterface sqlWriter;
-		try {
-			sqlWriter = sqlWriterClass.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
-			LOG.error("Impossible d'instancier le sql writer" , e);		
-			throw new MdaGeneratorException("Impossible d'instancier le sql writer", e);
-		}
-		
-		// Display configuration in logs
-		logConfiguration();
-		
-		// Lecture du xmi
-		reader.extractObjects(pathToModelFile.toString(), pathToMetadataFile.toString());
-
-		// Logs de ce qui a été extrait
-		StringBuilder sbUmlObjects = new StringBuilder();
-
-		sbUmlObjects.append("\n\nDOMAINS (JAVA / DATABASE):\n-------------------------------------");
-		for(UmlDomain umlDomain : reader.getDomainsMap().values()) {
-			sbUmlObjects.append(umlDomain);
-			sbUmlObjects.append(" ").append(converter.getJavaType(umlDomain));
-			sbUmlObjects.append(" / ").append(converter.getDataBaseType(umlDomain));
-		}
-
-		sbUmlObjects.append("\n\nPACKAGES & CLASSES :\n-------------------------------------");		
-		for(UmlPackage xmiPackage : reader.getPackagesMap().values()) {
-			sbUmlObjects.append(xmiPackage);
-		}
-
-		LOG.info(sbUmlObjects);
-
-		// Generation du code java	
-		JavaWriterConfig javaConfig = new JavaWriterConfig();
-		javaConfig.setJavaOutputDirectory(javaOutputDirectory);
-		javaConfig.setUmlPackages(reader.getPackagesMap().values());
-		javaConfig.setConverter(converter);
-		javaConfig.setEntities(entitiesPackagePartName);
-		javaConfig.setDaos(daosPackagePartName);
-		javaConfig.setPathToPackageInfoTemplate(pathToPackageInfoTemplate);
-		javaConfig.setPathToEntitiesTemplate(pathToEntitiesTemplate);
-		javaConfig.setPathToDaosTemplate(pathToDaosTemplate);
-		
-		javaWriter.writeSourceCode(javaConfig);
-
-		
-		// Generation du sql
-		SQLWriterConfig sqlConfig = new SQLWriterConfig();
-		sqlConfig.setPackagesList(reader.getPackagesMap().values());
-		sqlConfig.setSqlOutputDirectory(sqlOutputDirectory);
-		sqlConfig.setSqlTemplatePath(pathToCreateSQLTemplate);
-		sqlConfig.setConverter(converter);
-		// TODO add exluded prefixes
-		
-		sqlWriter.writeSql(sqlConfig);
+	public void setPathToDropSQLTemplate(Path pathToDropSQLTemplate) {
+		this.pathToDropSQLTemplate = pathToDropSQLTemplate;
 	}
+
+	/**
+	 * @param charset the charset to set
+	 */
+	public void setCharset(Charset charset) {
+		this.charset = charset;
+	}
+	
+	/**
+	 * @param excludedPrefixes the excludedPrefixes to set
+	 */
+	public void setExcludedPrefixes(List<String> excludedPrefixes) {
+		this.excludedPrefixes = excludedPrefixes;
+	}
+
 
 	private void logConfiguration() {
 		StringBuilder msgConfig = new StringBuilder();
 		msgConfig.append("\nMDA GENERATOR CONFIGURATION :");
-		msgConfig.append("\n - Input file ").append(pathToModelFile).append(" will be parsed with ").append(readerClass.getName());
+		msgConfig.append("\n - Model file ").append(pathToModelFile).append(" will be parsed with ").append(readerClass.getName());
+		msgConfig.append("\n - Metadata file ").append(pathToMetadataFile).append(" will be parsed with ").append(readerClass.getName());
 		msgConfig.append("\n - Domains types will be converted with ").append(converterClass.getName());
 		msgConfig.append("\n - JAVA sources will be written with "+ javaWriterClass.getName() +" in ").append(javaOutputDirectory)
 			.append( " with '").append( entitiesPackagePartName ).append( "' as entities package part and '" )
 			.append( daosPackagePartName ).append( "' as daos package part");
-		msgConfig.append("\n - SQL files will be written with " + sqlWriterClass.getName()  +" in " + sqlOutputDirectory);	
+		msgConfig.append("\n - CREATE SQL will be written with '" + sqlWriterClass.getName() +"' and '" + pathToCreateSQLTemplate + "' template in " + sqlOutputDirectory);	
+		msgConfig.append("\n - DROP SQL will be written with '" + sqlWriterClass.getName() +"' and '" + pathToDropSQLTemplate + "' template in " + sqlOutputDirectory);	
 		msgConfig.append("\n\n");
 
 		LOG.info(msgConfig.toString());

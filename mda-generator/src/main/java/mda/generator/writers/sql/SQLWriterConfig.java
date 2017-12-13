@@ -1,28 +1,49 @@
 package mda.generator.writers.sql;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
 import mda.generator.beans.UmlPackage;
 import mda.generator.converters.ConverterInterface;
 
+/**
+ * Configuration for SQLWriter, alimented by MdaGenerator
+ * 
+ * @author Fabien Crapart
+ */
 public class SQLWriterConfig {
-	private Path sqlTemplatePath;
+	private Path createSqlTemplatePath;
+	private Path dropSqlTemplatePath;
 	private Path sqlOutputDirectory;
 	private Iterable<UmlPackage> packagesList;
 	private Iterable<String> excludesClassesPrefixes;
 	private ConverterInterface converter;
-	
+	private Charset charset = StandardCharsets.UTF_8;
 	/**
 	 * @return the sqlTemplatePath
 	 */
-	public Path getSqlTemplatePath() {
-		return sqlTemplatePath;
+	public Path getDropSqlTemplatePath() {
+		return dropSqlTemplatePath;
 	}
 	/**
 	 * @param sqlTemplatePath the sqlTemplatePath to set
 	 */
-	public void setSqlTemplatePath(Path sqlTemplatePath) {
-		this.sqlTemplatePath = sqlTemplatePath;
+	public void setDropSqlTemplatePath(Path sqlTemplatePath) {
+		this.dropSqlTemplatePath = sqlTemplatePath;
+	}
+	
+	/**
+	 * @return the sqlTemplatePath
+	 */
+	public Path getCreateSqlTemplatePath() {
+		return createSqlTemplatePath;
+	}
+	/**
+	 * @param sqlTemplatePath the sqlTemplatePath to set
+	 */
+	public void setCreateSqlTemplatePath(Path sqlTemplatePath) {
+		this.createSqlTemplatePath = sqlTemplatePath;
 	}
 	/**
 	 * @return the sqlOutputDirectory
@@ -73,6 +94,17 @@ public class SQLWriterConfig {
 		this.converter = convert;
 	}
 	
-	
+	/**
+	 * @return the charset
+	 */
+	public Charset getCharset() {
+		return charset;
+	}
+	/**
+	 * @param charset the charset to set
+	 */
+	public void setCharset(Charset charset) {
+		this.charset = charset;
+	}
 	
 }
