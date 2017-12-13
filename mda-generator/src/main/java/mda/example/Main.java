@@ -1,14 +1,7 @@
 package mda.example;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import mda.generator.MdaGenerator;
 import mda.generator.MdaGeneratorBuilder;
 import mda.generator.converters.DomainToOracleConverter;
-import mda.generator.exceptions.MdaGeneratorException;
-import mda.generator.readers.xmi.XmiReader;
 
 public class Main {
 	public static void main(String[] args) {

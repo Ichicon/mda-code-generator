@@ -77,7 +77,6 @@ public class OracleSQLWriter implements SQLWriterInterface {
 			context.put("fksList", fksList);
 			context.put("end_of_generated", END_OF_GENERATED);
 
-			// FIXME add charset to config
 			VelocityUtils.writeFileFromTemplate(filePath, templateToUse, context, config.getCharset());
 		}else {
 			LOG.debug(filePath + " will not be overwritten because '" + STOP_GENERATION + "' is present");

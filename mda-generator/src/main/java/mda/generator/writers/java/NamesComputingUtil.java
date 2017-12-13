@@ -69,7 +69,7 @@ public class NamesComputingUtil {
 		} else if(pks.size()==1) {
 			pkName = pks.get(0).getName();
 		} else {
-			// FIXME gérer cas pk multiple
+			// FIXME multiple PK name
 			return "compositeKeyNotImplemented";
 		}
 

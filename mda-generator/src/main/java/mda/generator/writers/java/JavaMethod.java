@@ -11,8 +11,6 @@ import java.util.List;
 public class JavaMethod {
 	private List<JavaAnnotation> annotationsList = new ArrayList<>();
 	
-	// TODO static, final ?
-
 	private final Visibility visibility;
 	private final String name;
 	private final String returnType;

@@ -153,7 +153,7 @@ public class JavaClass {
 	protected void managePKs(JavaPackage javaPackage, UmlClass umlClass, ConverterInterface converter) {
 
 		if(umlClass.getPKs().size() > 1) {
-			// FIXME cas pk multiple 
+			// FIXME Generate multiple PK class, attribute and annotations
 			// create class
 			// use it as attribute
 			// make getters/setters

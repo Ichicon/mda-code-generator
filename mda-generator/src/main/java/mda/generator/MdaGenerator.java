@@ -2,7 +2,6 @@ package mda.generator;
 
 import java.nio.charset.Charset;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -22,10 +21,9 @@ import mda.generator.writers.sql.SQLWriterInterface;
  * Java classes and SQL generator from model file
  * 
  * With standard JavaWriter add a comment line containing // NO GENERATION to prevent class from being erased.
- * TODO implements composite pk
- * TODO add simple spring DAO generation
- * TODO add sql generation
- * TODO manage default value from model
+ * FIXME implements composite pk
+ * TODO Get attributes default value from model
+ * TODO Add a properties file to configure
  * 
  * @author Fabien Crapart
  *
