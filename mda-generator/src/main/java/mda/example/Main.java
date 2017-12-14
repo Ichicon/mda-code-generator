@@ -1,4 +1,6 @@
 package mda.example;
+import java.util.Objects;
+
 import mda.generator.MdaGenerator;
 import mda.generator.MdaGeneratorBuilder;
 import mda.generator.converters.DomainToOracleConverter;

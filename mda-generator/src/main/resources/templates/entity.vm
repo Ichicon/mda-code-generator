@@ -1,6 +1,7 @@
 package $javaClass.getPackageName();
 
 ## IMPORTS
+import java.util.Objects;
 #foreach( $import in $javaClass.getImportsList() )
 import $import;
 #end
@@ -42,9 +43,43 @@ $annotation.getDisplay("    ")
 #foreach($contentLine in $method.getContentLines())
 		$contentLine;
 #end	 
-    }
-    
+    }  
 #end 
+
+## hashcode and equals
+	@Override
+	public int hashCode(){
+	 	// Start with a non-zero constant. Prime is preferred
+	    int result = 17;
+	
+		#foreach( $attribute in $javaClass.getAttributesList() )
+		result = 31 * result + ($attribute.getName() == null? 0 : ${attribute.getName()}.hashCode());
+		#end
+			
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object other){
+		// Same object
+	    if (this == other) {
+	        return true;
+	    }
+	
+		// Wrong type
+	    if (!(other instanceof $javaClass.getName())) {
+	        return false;
+	    }
+	
+		// Test all attributes
+	    $javaClass.getName() other$javaClass.getName() = ($javaClass.getName()) other;
+	    
+		return#foreach( $attribute in $javaClass.getAttributesList() )
+#if($foreach.count>1)			&&#end ($attribute.getName() == null ? $attribute.getName() == null:${attribute.getName()}.equals(other${javaClass.getName()}.$attribute.getName()))
+#end		;
+	}
+
+
 
 ## END OF CLASS
 $end_of_generated

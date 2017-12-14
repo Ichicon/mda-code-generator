@@ -19,19 +19,19 @@ CREATE SEQUENCE $sequence.getName() START WITH 1000 INCREMENT BY 1 NOCACHE NOCYC
 CREATE TABLE $table.getName() (
 ## GENERATE COLUMNS
 #foreach ( $column in $table.getColumnsList() )
-	$column.getName() $column.getType()#if( $column.isNotNull() ) is not null#end,
+	$column.getName() $column.getType()#if( $column.isNotNull() ) not null#end,
 #end
 ## PRIMARY KEY
 	CONSTRAINT PK_$table.getName().toUpperCase() PRIMARY KEY ($table.getPkValue())
 );
 ## TABLE COMMENT
 #if ($table.getComment() )
-COMMENT ON TABLE $table.getName() IS '$table.getComment().replaceAll("'","''")' 
+COMMENT ON TABLE $table.getName() IS '$table.getComment().replaceAll("'","''")';
 #end
 ## COLUMNS COMMENTS
 #foreach ( $column in $table.getColumnsList() )
 #if ($column.getComment() )
-COMMENT ON COLUMN $table.getName().$column.getName() IS '$column.getComment().replaceAll("'","''")'
+COMMENT ON COLUMN $table.getName().$column.getName() IS '$column.getComment().replaceAll("'","''")';
 #end
 #end
 
