@@ -69,8 +69,7 @@ public class NamesComputingUtil {
 		} else if(pks.size()==1) {
 			pkName = pks.get(0).getName();
 		} else {
-			// FIXME multiple PK name
-			return "compositeKeyNotImplemented";
+			return StringUtils.uncapitalize(umlClass.getName()+"Id");
 		}
 
 		return pkName;		

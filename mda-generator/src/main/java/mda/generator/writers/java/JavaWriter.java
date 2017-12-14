@@ -76,7 +76,12 @@ public class JavaWriter implements JavaWriterInterface {
 		for(JavaClass javaClass : javaPackage.getClasses()) {
 			try {
 				writeClass(entitiesPackagePath, javaClass);		
-				writeDao(daosPackagePath, javaClass);
+				// Class without pk fields are embeddable => no dao
+				if(javaClass.getPkField() != null) {
+					writeDao(daosPackagePath, javaClass);
+				} else {
+					LOG.warn(javaClass.getName() + " is a composite key, it's bad, not sure it will work well.");
+				}
 			} catch (IOException e) {
 				throw new MdaGeneratorException("Error while generating class "  + javaClass.getName(), e);
 			}

@@ -1,7 +1,11 @@
 package $javaClass.getPackageName();
 
 ## IMPORTS
-import java.util.Objects;
+## COMPOSITE KEY IMPORT
+#if($javaClass.getPkClass())
+import javax.persistence.EmbeddedId;
+import ${javaClass.getPackageName()}.${javaClass.getPkClass().getName()};
+#end
 #foreach( $import in $javaClass.getImportsList() )
 import $import;
 #end
@@ -19,10 +23,15 @@ import $import;
 $annotation.getDisplay("")
 #end 
 ## CLASS DECLARATION
-$javaClass.getVisibilite().toString() class $javaClass.getName() {
+$javaClass.getVisibilite().toString() class $javaClass.getName() #if($javaClass.getInterfaces())implements $javaClass.getInterfaces()#end{
+## COMPOSITE KEY
+#if($javaClass.getPkClass())	
+	@EmbeddedId 
+	$javaClass.getPkField().getJavaType() $javaClass.getPkField().getName();
+#end
 ## ATTRIBUTES
 #foreach( $attribute in $javaClass.getAttributesList() )
-	$attribute.getVisibility().toString() $attribute.getJavaType() $attribute.getName();
+	$attribute.getVisibility().toString() $attribute.getJavaType() $attribute.getName()#if($attribute.getDefaultValue()) = $attribute.getDefaultValue()#end;
 #end 
 
 ## METHODS
@@ -53,7 +62,9 @@ $annotation.getDisplay("    ")
 	    int result = 17;
 	
 		#foreach( $attribute in $javaClass.getAttributesList() )
+		#if(!$attribute.getName().equals("serialVersionUID"))
 		result = 31 * result + ($attribute.getName() == null? 0 : ${attribute.getName()}.hashCode());
+		#end
 		#end
 			
 		return result;
@@ -75,7 +86,11 @@ $annotation.getDisplay("    ")
 	    $javaClass.getName() other$javaClass.getName() = ($javaClass.getName()) other;
 	    
 		return#foreach( $attribute in $javaClass.getAttributesList() )
+		#if(!$attribute.getName().equals("serialVersionUID"))
 #if($foreach.count>1)			&&#end ($attribute.getName() == null ? $attribute.getName() == null:${attribute.getName()}.equals(other${javaClass.getName()}.$attribute.getName()))
+		#else 
+ true
+		#end
 #end		;
 	}
 

@@ -2,6 +2,9 @@ package $daoPackageName;
 
 import org.springframework.data.repository.CrudRepository;
 import $javaClass.getPackageName().$javaClass.getName();
+#if($javaClass.getPkClass())
+import ${javaClass.getPackageName()}.$javaClass.getPkClass().getName();
+#end
 
 /**
  * Data Access Object for $javaClass.getName() using Spring CrudRepository interface

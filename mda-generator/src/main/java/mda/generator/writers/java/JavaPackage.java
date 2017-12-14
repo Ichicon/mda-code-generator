@@ -75,4 +75,11 @@ public class JavaPackage {
 		return new ArrayList<>(classes);
 	}
 
+	/**
+	 * Adding a new class
+	 * @param javaClass new class to add
+	 */
+	public void addClass(JavaClass javaClass) {
+		classes.add(javaClass);
+	}
 }

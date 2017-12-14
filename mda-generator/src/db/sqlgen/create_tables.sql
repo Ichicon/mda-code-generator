@@ -18,61 +18,61 @@ CREATE SEQUENCE SEQ_PARAMETER START WITH 1000 INCREMENT BY 1 NOCACHE NOCYCLE;
 -- TABLES
 -- ================================
 CREATE TABLE function (
-	function_id NUMBER(12) is not null,
-	function_name VARCHAR2(50) is not null,
+	function_id NUMBER(12) not null,
+	function_name VARCHAR2(50) not null,
 	CONSTRAINT PK_FUNCTION PRIMARY KEY (function_id)
 );
 
 CREATE TABLE service (
-	service_id NUMBER(12) is not null,
-	service_name VARCHAR2(50) is not null,
-	parent_service_id NUMBER(12) is not null,
+	service_id NUMBER(12) not null,
+	service_name VARCHAR2(50) not null,
+	parent_service_id NUMBER(12) not null,
 	CONSTRAINT PK_SERVICE PRIMARY KEY (service_id)
 );
-COMMENT ON COLUMN service.parent_service_id IS 'ManyToOne FK service'
+COMMENT ON COLUMN service.parent_service_id IS 'ManyToOne FK service';
 
 CREATE TABLE appuser (
-	user_id NUMBER(12) is not null,
-	user_name VARCHAR2(250) is not null,
-	user_surname VARCHAR2(250) is not null,
-	workplace_service_id NUMBER(12) is not null,
-	service_id NUMBER(12) is not null,
-	type_id NUMBER(12) is not null,
+	user_id NUMBER(12) not null,
+	user_name VARCHAR2(250) not null,
+	user_surname VARCHAR2(250) not null,
+	workplace_service_id NUMBER(12) not null,
+	service_id NUMBER(12) not null,
+	type_id NUMBER(12) not null,
 	CONSTRAINT PK_APPUSER PRIMARY KEY (user_id)
 );
-COMMENT ON COLUMN appuser.workplace_service_id IS 'ManyToOne FK service'
-COMMENT ON COLUMN appuser.service_id IS 'ManyToOne FK service'
-COMMENT ON COLUMN appuser.type_id IS 'ManyToOne FK user_type'
+COMMENT ON COLUMN appuser.workplace_service_id IS 'ManyToOne FK service';
+COMMENT ON COLUMN appuser.service_id IS 'ManyToOne FK service';
+COMMENT ON COLUMN appuser.type_id IS 'ManyToOne FK user_type';
 
 CREATE TABLE user_function_assoc (
-	user_id NUMBER(12) is not null,
-	my_function_id NUMBER(12) is not null,
+	user_id NUMBER(12) not null,
+	my_function_id NUMBER(12) not null,
 	CONSTRAINT PK_USER_FUNCTION_ASSOC PRIMARY KEY (user_id,my_function_id)
 );
-COMMENT ON TABLE user_function_assoc IS 'ManyToMany appuser / function' 
-COMMENT ON COLUMN user_function_assoc.user_id IS 'ManyToMany FK appuser'
-COMMENT ON COLUMN user_function_assoc.my_function_id IS 'ManyToMany FK function'
+COMMENT ON TABLE user_function_assoc IS 'ManyToMany appuser / function';
+COMMENT ON COLUMN user_function_assoc.user_id IS 'ManyToMany FK appuser';
+COMMENT ON COLUMN user_function_assoc.my_function_id IS 'ManyToMany FK function';
 
 CREATE TABLE user_type (
-	type_id NUMBER(12) is not null,
-	name VARCHAR2(250) is not null,
+	type_id NUMBER(12) not null,
+	name VARCHAR2(250) not null,
 	CONSTRAINT PK_USER_TYPE PRIMARY KEY (type_id)
 );
 
 CREATE TABLE parameter (
-	param_id NUMBER(12) is not null,
-	version NUMBER(4) is not null,
-	pk_one NUMBER(12) is not null,
-	pk_two NUMBER(12) is not null,
+	param_id NUMBER(12) not null,
+	version NUMBER(4) not null,
+	pk_one NUMBER(12) not null,
+	pk_two NUMBER(12) not null,
 	CONSTRAINT PK_PARAMETER PRIMARY KEY (param_id)
 );
 COMMENT ON TABLE parameter IS 'Contient la version de l''application et d''autres paramètres technique non modifiables.
 
-Cette table ne doit contenir qu''une seule ligne' 
-COMMENT ON COLUMN parameter.param_id IS 'Identifiant de la ligne de parametrage'
-COMMENT ON COLUMN parameter.version IS 'Version de l''application'
-COMMENT ON COLUMN parameter.pk_one IS 'ManyToOne FK double_key'
-COMMENT ON COLUMN parameter.pk_two IS 'ManyToOne FK double_key'
+Cette table ne doit contenir qu''une seule ligne';
+COMMENT ON COLUMN parameter.param_id IS 'Identifiant de la ligne de parametrage';
+COMMENT ON COLUMN parameter.version IS 'Version de l''application';
+COMMENT ON COLUMN parameter.pk_one IS 'ManyToOne FK double_key';
+COMMENT ON COLUMN parameter.pk_two IS 'ManyToOne FK double_key';
 
 
 

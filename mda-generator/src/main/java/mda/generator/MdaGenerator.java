@@ -21,7 +21,6 @@ import mda.generator.writers.sql.SQLWriterInterface;
  * Java classes and SQL generator from model file
  * 
  * With standard JavaWriter add a comment line containing // NO GENERATION to prevent class from being erased.
- * FIXME implements composite pk
  * TODO Get attributes default value from model
  * TODO Add a properties file to configure
  * 

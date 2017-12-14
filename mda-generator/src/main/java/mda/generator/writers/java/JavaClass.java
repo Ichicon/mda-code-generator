@@ -27,7 +27,7 @@ public class JavaClass {
 	private final List<JavaAnnotation> annotationsList = new ArrayList<>();
 
 	private Visibility visibilite = Visibility.PUBLIC;
-	private String name;	
+	private final String name;	
 
 	private List<JavaAttribute> attributesList = new ArrayList<>();
 	private List<JavaMethod> methodsList = new ArrayList<>();
@@ -35,6 +35,18 @@ public class JavaClass {
 	private JavaClass pkClass;
 	private JavaAttribute pkField;
 	
+	private String interfaces;
+	
+	/**
+	 * 
+	 * @param name
+	 * @param packageName
+	 */
+	public JavaClass(String name, String packageName, String comments) {
+		this.name = name;
+		this.packageName = packageName;
+		this.commentsList.add(comments);
+	}
 	
 	/**
 	 * 
@@ -64,8 +76,12 @@ public class JavaClass {
 						)
 				);
 
-		// PKs
-		managePKs(javaPackage, umlClass, converter);
+		// Composite PK
+		if(umlClass.getPKs().size() > 1) {
+			createCompositePK(javaPackage, umlClass, converter);		
+		} else if(umlClass.getPKs().size() > 0){ // Standard single PK field
+			createPKField(javaPackage, umlClass, converter);
+		}
 
 		// Attributes, getter, setter
 		manageAttributes(umlClass, converter);
@@ -145,51 +161,93 @@ public class JavaClass {
 	}
 
 	/**
-	 * Generation des attributs et methodes (et classe si besoin) liées aux PKs
+	 * @return the interfaces
+	 */
+	public String getInterfaces() {
+		return interfaces;
+	}
+
+	protected void createPKField(JavaPackage javaPackage, UmlClass umlClass, ConverterInterface converter) {
+		UmlAttribute umlPK = umlClass.getPKs().get(0);
+		pkField = new JavaAttribute(umlPK, converter, importManager);
+		attributesList.add(pkField);
+
+		// Generate getter/setter			
+		JavaMethod getterPK = generateGetter(pkField);
+		String seqName = "\"" + NamesComputingUtil.computeSequenceName(umlClass) + "\"";
+
+		// Id annotation on PK field
+		getterPK.addAnnotations(new JavaAnnotation(importManager.getFinalName("javax.persistence.Id")));
+		// Annotation Sequence generator
+		getterPK.addAnnotations(new JavaAnnotation(
+			importManager.getFinalName("javax.persistence.SequenceGenerator"), 
+			new JavaAnnotationProperty("name",seqName),
+			new JavaAnnotationProperty("sequenceName",seqName),
+			new JavaAnnotationProperty("allocationSize","20")
+		));
+		// Annotation on PK field to use generator
+		getterPK.addAnnotations(new JavaAnnotation(
+			importManager.getFinalName("javax.persistence.GeneratedValue"),
+			new JavaAnnotationProperty("strategy",importManager.getFinalName("javax.persistence.GenerationType")+".SEQUENCE"),
+			new JavaAnnotationProperty("generator",seqName)
+		));	
+		// Annotation pour le nom de la colonne
+		getterPK.addAnnotations(new JavaAnnotation(
+			importManager.getFinalName("javax.persistence.Column"),
+			new JavaAnnotationProperty("name","\""+pkField.getColumnName() +"\""),
+			new JavaAnnotationProperty("nullable",pkField.isNotNull()?"false":"true")
+		));
+		methodsList.add(getterPK);
+		methodsList.add(generateSetter(pkField));
+	}
+	
+	/**
+	 * Create composite PK
 	 * @param javaPackage
 	 * @param umlClass
 	 * @param converter
 	 */
-	protected void managePKs(JavaPackage javaPackage, UmlClass umlClass, ConverterInterface converter) {
-
-		if(umlClass.getPKs().size() > 1) {
-			// FIXME Generate multiple PK class, attribute and annotations
-			// create class
-			// use it as attribute
-			// make getters/setters
-		} else if(umlClass.getPKs().size() > 0){
-			UmlAttribute umlPK = umlClass.getPKs().get(0);
-			pkField = new JavaAttribute(umlPK, converter, importManager);
-			attributesList.add(pkField);
-
-			// Generate getter/setter			
-			JavaMethod getterPK = generateGetter(pkField);
-			String seqName = "\"" + NamesComputingUtil.computeSequenceName(umlClass) + "\"";
-
-			// Id annotation on PK field
-			getterPK.addAnnotations(new JavaAnnotation(importManager.getFinalName("javax.persistence.Id")));
-			// Annotation Sequence generator
-			getterPK.addAnnotations(new JavaAnnotation(
-				importManager.getFinalName("javax.persistence.SequenceGenerator"), 
-				new JavaAnnotationProperty("name",seqName),
-				new JavaAnnotationProperty("sequenceName",seqName),
-				new JavaAnnotationProperty("allocationSize","20")
+	protected void createCompositePK(JavaPackage javaPackage, UmlClass umlClass, ConverterInterface converter) {
+		// Use an embedded class as attribute
+		pkClass = new JavaClass(this.getName()+"Id", javaPackage.getPackageName(),"Composite Key for " + this.getName());
+		// Embeddable needs to be serializble
+		pkClass.interfaces = pkClass.importManager.getFinalName("java.io.Serializable");
+		// Fake attribute for serial id
+		pkClass.attributesList.add(new JavaAttribute("serialVersionUID","static final long","1L"));
+		// Add embedabble annotation
+		pkClass.annotationsList.add(new JavaAnnotation(pkClass.importManager.getFinalName("javax.persistence.Embeddable")));
+				
+		// Add real pks in embeddable class
+		for(UmlAttribute pk : umlClass.getPKs()) {
+			// Attribute for pk
+			JavaAttribute compositeAttr = new JavaAttribute(pk, converter, importManager);
+			pkClass.attributesList.add(compositeAttr);
+			
+			// Getter with @Column
+			JavaMethod compositeAttrGetter = generateGetter(compositeAttr);
+			pkClass.methodsList.add(compositeAttrGetter);
+			
+			compositeAttrGetter.addAnnotations(new JavaAnnotation(
+					pkClass.importManager.getFinalName("javax.persistence.Column"),
+				new JavaAnnotationProperty("name","\""+compositeAttr.getColumnName() +"\""),
+				new JavaAnnotationProperty("nullable",compositeAttr.isNotNull()?"false":"true")
 			));
-			// Annotation on PK field to use generator
-			getterPK.addAnnotations(new JavaAnnotation(
-				importManager.getFinalName("javax.persistence.GeneratedValue"),
-				new JavaAnnotationProperty("strategy",importManager.getFinalName("javax.persistence.GenerationType")+".SEQUENCE"),
-				new JavaAnnotationProperty("generator",seqName)
-			));	
-			// Annotation pour le nom de la colonne
-			getterPK.addAnnotations(new JavaAnnotation(
-				importManager.getFinalName("javax.persistence.Column"),
-				new JavaAnnotationProperty("name","\""+pkField.getColumnName() +"\""),
-				new JavaAnnotationProperty("nullable",pkField.isNotNull()?"false":"true")
-			));
-			methodsList.add(getterPK);
-			methodsList.add(generateSetter(pkField));
-		}
+			
+			// Setter
+			JavaMethod compositeAttrSetter = generateSetter(compositeAttr);
+			pkClass.methodsList.add(compositeAttrSetter);			
+		}	
+		
+		// Create fake pkField for generation name
+		pkField = new JavaAttribute(StringUtils.uncapitalize(pkClass.getName()), pkClass.getName(), null);
+		// Create getter and setter in main class with fake attribute
+		methodsList.add(generateGetter(pkField));
+		methodsList.add(generateSetter(pkField));
+		
+		
+		
+		// Add composite Key as package class
+		javaPackage.addClass(pkClass);
 	}
 
 	/**
@@ -362,4 +420,6 @@ public class JavaClass {
 
 		return setter;
 	}
+	
+	
 }

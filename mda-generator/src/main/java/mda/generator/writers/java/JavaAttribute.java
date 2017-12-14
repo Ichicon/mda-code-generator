@@ -20,8 +20,23 @@ public class JavaAttribute {
 	private final String javaType;
 	private final boolean isNotNull;
 	private final boolean isPK;
+	
+	private String defaultValue;
 
 
+	/**
+	 * Special field (like serial id)
+	 * @param name
+	 * @param type
+	 */
+	public JavaAttribute(String name,String type, String defaultValue) {
+		this.name=name;
+		this.columnName = null;
+		this.javaType= type;
+		this.isPK = false;
+		this.isNotNull =false;
+		this.defaultValue =defaultValue;
+	}
 
 	/**
 	 * Creation of java attribute
@@ -116,4 +131,13 @@ public class JavaAttribute {
 	public String getColumnName() {
 		return columnName;
 	}
+
+	/**
+	 * @return the defaultValue
+	 */
+	public String getDefaultValue() {
+		return defaultValue;
+	}
+	
+	
 }
