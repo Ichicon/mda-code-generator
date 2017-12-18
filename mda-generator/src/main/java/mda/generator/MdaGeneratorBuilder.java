@@ -1,20 +1,23 @@
 package mda.generator;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
-import mda.example.Main;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import mda.generator.converters.ConverterInterface;
 import mda.generator.exceptions.MdaGeneratorException;
 import mda.generator.readers.ModelFileReaderInterface;
 import mda.generator.readers.xmi.XmiReader;
+import mda.generator.utils.file.PathUtils;
+import mda.generator.utils.file.PropertyUtils;
 import mda.generator.writers.java.JavaWriter;
 import mda.generator.writers.java.JavaWriterInterface;
 import mda.generator.writers.sql.OracleSQLWriter;
@@ -33,40 +36,95 @@ public class MdaGeneratorBuilder {
 	private Path pathToMetadata= null;	
 	/** Empalcement du fichier de model */
 	private Path pathToModel = null;	
-	
+
 	/** Classe pour convertir les domains en types java et bdd */
 	private Class<? extends ConverterInterface> typeConverter;
-	
+
 	/** Classe pour écrire les classes java*/
 	private Class<? extends JavaWriterInterface> javaWriter = JavaWriter.class;
-	
+
 	/** Classe pour écrire le sql */
 	private Class<? extends SQLWriterInterface> sqlWriter = OracleSQLWriter.class;
-	
+
 	/** Emplacement de sortie des packages et fichiers générés */
-	private Path javaOutputDirectory = getApplicationPath().getParent().getParent().resolve("src/main/javagen");
+	private Path javaOutputDirectory;
 	/** Emplacement du fichier SQL généré en sortie */
-	private Path sqlOutputDirectory = getApplicationPath().getParent().getParent().resolve("src/db/sqlgen");
-	
+	private Path sqlOutputDirectory;
+
 	/** Nom dans les packages qui correspond à l'emplacement des entities, permet de faire le path équivalent pour les daos */
 	private String entitiesPackagePartName = "entities";
 	private String daosPackagePartName = "daos";
-	
+
 	/** Package-info Velocity template */
-	private Path pathToPackageInfoTemplate = getApplicationPath().resolve("templates").resolve("package-info.vm");
+	private Path pathToPackageInfoTemplate = PathUtils.getPathForClassPathAndFs("/templates/package-info.vm");
 	/** JPA Entities Velocity template */
-	private Path pathToEntitiesTemplate = getApplicationPath().resolve("templates").resolve("entity.vm");
+	private Path pathToEntitiesTemplate = PathUtils.getApplicationPath().resolve("templates").resolve("entity.vm");
 	/** DAOs Velocity template */
-	private Path pathToDaosTemplate = getApplicationPath().resolve("templates").resolve("dao_spring.vm");
+	private Path pathToDaosTemplate = PathUtils.getApplicationPath().resolve("templates").resolve("dao_spring.vm");
 	/** Create SQL Velocity template */
-	private Path pathToCreateSQLTemplate = getApplicationPath().resolve("templates").resolve("createSQL_oracle.vm");
+	private Path pathToCreateSQLTemplate = PathUtils.getApplicationPath().resolve("templates").resolve("createSQL_oracle.vm");
 	/** DRop SQL Velocity template */
-	private Path pathToDropSQLTemplate = getApplicationPath().resolve("templates").resolve("dropSQL_oracle.vm");
+	private Path pathToDropSQLTemplate = PathUtils.getApplicationPath().resolve("templates").resolve("dropSQL_oracle.vm");
 	/** Charsets for writing files */
 	private Charset charset = StandardCharsets.UTF_8;
 	/** Class prefixes for which sql tables will not be generated */
 	private List<String> excludedPrefixes;
-	
+
+	/**
+	 * [RECOMMENDED] LOad the generator with a propertes file. You should call build() just after this call, yet you can still call withXxxx before building to overload parameters.
+	 * @param pathToProperties Path to property file
+	 * @return builder to re-use
+	 */
+	public MdaGeneratorBuilder fromPropertiesFile(final String pathToProperties) {
+		String finalPath;
+		if(pathToProperties == null) {
+			finalPath = "/mda-generator.properties";
+		} else {
+			finalPath = pathToProperties;
+		}
+
+		loadProperties(PathUtils.getPathForClassPathAndFs(finalPath));
+
+		return this;
+	}
+
+	/**
+	 * 
+	 * @param pathToProperties
+	 */
+	private void loadProperties(Path pathToProperties) {
+		Properties prop = new Properties();
+
+		try (InputStream input = Files.newInputStream(pathToProperties)){
+			prop.load(input);
+
+			PropertyUtils.loadClassFromProperty("readerClass", prop, this);
+			PropertyUtils.loadPathFromProperty("pathToModel", prop, this);
+			PropertyUtils.loadPathFromProperty("pathToMetadata", prop, this);
+			PropertyUtils.loadClassFromProperty("typeConverter", prop, this);
+
+			PropertyUtils.loadCharset("charset", prop, this);
+
+			PropertyUtils.loadClassFromProperty("javaWriter", prop, this);
+			PropertyUtils.loadPathFromProperty("javaOutputDirectory", prop, this);
+			PropertyUtils.loadString("entitiesPackagePartName", prop, this);
+			PropertyUtils.loadString("daosPackagePartName", prop, this);
+			PropertyUtils.loadPathFromProperty("pathToPackageInfoTemplate", prop, this);
+			PropertyUtils.loadPathFromProperty("pathToEntitiesTemplate", prop, this);
+			PropertyUtils.loadPathFromProperty("pathToDaosTemplate", prop, this);
+
+			PropertyUtils.loadClassFromProperty("sqlWriter", prop, this);
+			PropertyUtils.loadPathFromProperty("sqlOutputDirectory", prop, this);
+			PropertyUtils.loadPathFromProperty("pathToCreateSQLTemplate", prop, this);
+			PropertyUtils.loadPathFromProperty("pathToDropSQLTemplate", prop, this);
+			PropertyUtils.loadStringList("excludedPrefixes", prop, this);
+		} catch(Exception e) {
+			throw new MdaGeneratorException("Cannot load property file " + pathToProperties.toString(),e);
+		} 
+	}
+
+
+
 	/**
 	 * [MANDATORY] Path to model file to use for mda generation
 	 * @param modelPath /path/to/the/file Use MdaGeneratorBuilder.getApplicationPath() to use relative path easily, ex: MdaGeneratorBuilder.getApplicationPath().resolve("example.xmi")
@@ -85,7 +143,7 @@ public class MdaGeneratorBuilder {
 		this.pathToMetadata = metadataPath;		
 		return this;
 	}
-	
+
 	/**
 	 * [MANDATORY] Class to use for 'Domain -> java type' and 'Domain -> db type' conversion
 	 * @param typeConverter Class implementing DomainToTypeConverter interface
@@ -95,7 +153,7 @@ public class MdaGeneratorBuilder {
 		this.typeConverter = typeConverter;		
 		return this;
 	}
-	
+
 	/**
 	 * Path to output directory to write java packages, entities and daos, default "PROGRAM_ROOT"/../../src/main/javagen 
 	 * @param javaOutputDirPath /path/to/directory
@@ -105,7 +163,7 @@ public class MdaGeneratorBuilder {
 		this.javaOutputDirectory = javaOutputDirPath;		
 		return this;
 	}
-	
+
 	/**
 	 * Path to output directory to write sql creation script(s), default "PROGRAM_ROOT"/../../src/db/sqlgen
 	 * @param sqlOutputDirPath /path/to/directory
@@ -115,7 +173,7 @@ public class MdaGeneratorBuilder {
 		this.sqlOutputDirectory = sqlOutputDirPath;		
 		return this;
 	}
-	
+
 	/**
 	 * Name of the package part which is root for entities, default "entities". Ex : for the package "com.mycompany.myproject.entities.users" it's "entities"
 	 * @param entitiesPackagePartName name (ex: "entities")
@@ -125,8 +183,8 @@ public class MdaGeneratorBuilder {
 		this.entitiesPackagePartName = entitiesPackagePartName;		
 		return this;
 	}
-	
-	
+
+
 	/**
 	 * Package-info template file,  default "PROGRAM_ROOT"/package-info.vm
 	 * @param template path to template, ex: D:/myproject/templates/package-info.vm
@@ -136,7 +194,7 @@ public class MdaGeneratorBuilder {
 		this.pathToPackageInfoTemplate = template;		
 		return this;
 	}
-	
+
 	/**
 	 * Entities template file,  default "PROGRAM_ROOT"/entity.vm
 	 * @param template path to template ex: D:/myproject/templates/entities.vm
@@ -146,7 +204,7 @@ public class MdaGeneratorBuilder {
 		this.pathToEntitiesTemplate = template;		
 		return this;
 	}
-	
+
 	/**
 	 * DAOs template file,  default "PROGRAM_ROOT"/dao_spring.vm
 	 * @param template path to template ex: D:/myproject/templates/daos.vm
@@ -156,7 +214,7 @@ public class MdaGeneratorBuilder {
 		this.pathToDaosTemplate = template;		
 		return this;
 	}
-	
+
 	/**
 	 * create_tables.sql template file,  default "PROGRAM_ROOT"/createSQL_oracle.vm
 	 * @param template path to template ex: D:/myproject/templates/createSQL.vm
@@ -166,7 +224,7 @@ public class MdaGeneratorBuilder {
 		this.pathToCreateSQLTemplate = template;		
 		return this;
 	}	
-	
+
 	/**
 	 * drop_tables.sql template file,  default "PROGRAM_ROOT"/dropSQL_oracle.vm
 	 * @param template path to template ex: D:/myproject/templates/dropSQL.vm
@@ -176,7 +234,7 @@ public class MdaGeneratorBuilder {
 		this.pathToDropSQLTemplate = template;		
 		return this;
 	}
-	
+
 	/**
 	 * Name of the package part which is root for daos, default "daos". Ex (see withEntitiesPackagePartName example too) : the package "com.mycompany.myproject.entities.users" will become "com.mycompany.myproject.daos.users" 
 	 * @param daosPackagePartName name (ex: "daos"), can be the equals to entities
@@ -186,7 +244,7 @@ public class MdaGeneratorBuilder {
 		this.daosPackagePartName = daosPackagePartName;		
 		return this;
 	}
-	
+
 	/**
 	 * Class used to read the model file, default is mda.generator.readers.XmiReader
 	 * @param readerClass Class implementing ModelFileReader interface (to use instead of default XmiReader)
@@ -194,10 +252,10 @@ public class MdaGeneratorBuilder {
 	 */
 	public MdaGeneratorBuilder withReaderClass(Class<? extends ModelFileReaderInterface> readerClass){
 		this.readerClass = readerClass;
-		
+
 		return this;
 	}
-	
+
 	/**
 	 * Class used to write the java files
 	 * @param javaWriterClass Class implementing JavaWriterInterface interface (to use instead of default JavaWriter)
@@ -205,7 +263,7 @@ public class MdaGeneratorBuilder {
 	 */
 	public MdaGeneratorBuilder withJavaWriter(Class<? extends JavaWriterInterface> javaWriterClass){
 		this.javaWriter = javaWriterClass;
-		
+
 		return this;
 	}
 
@@ -216,10 +274,10 @@ public class MdaGeneratorBuilder {
 	 */
 	public MdaGeneratorBuilder withSqlWriter(Class<? extends SQLWriterInterface> slqWriterClass){
 		this.sqlWriter = slqWriterClass;
-		
+
 		return this;
 	}
-	
+
 	/**
 	 * Charset used to write the files
 	 * @param charset Charset to use to write files
@@ -227,10 +285,10 @@ public class MdaGeneratorBuilder {
 	 */
 	public MdaGeneratorBuilder withCharset(Charset charset){
 		this.charset = charset;
-		
+
 		return this;
 	}
-	
+
 	/**
 	 * List of class name prefixes for which sql will no be generated (shared db with other application)
 	 * @param excludedPrefixes List of prefix to exclude, can be a list of tables too. Ex: "otherapp_" or "tableToExclude"
@@ -240,8 +298,8 @@ public class MdaGeneratorBuilder {
 		this.excludedPrefixes = Arrays.asList(excludedPrefixes);
 		return this;
 	}
-	
-	
+
+
 
 	/**
 	 * Build the MdaGenerator from parameters
@@ -250,7 +308,7 @@ public class MdaGeneratorBuilder {
 	 */
 	public MdaGenerator build() {
 		MdaGenerator generator = new MdaGenerator();
-		
+
 		// Paramètres pour la lecture
 		if(pathToModel==null || !Files.exists(pathToModel)){
 			throw new MdaGeneratorException("MdaGenerator needs an input file, use mdaGeneratorBuilder.withModelPath(\"/path/to/model\")");
@@ -258,8 +316,8 @@ public class MdaGeneratorBuilder {
 		if(pathToMetadata==null || !Files.exists(pathToMetadata)){
 			throw new MdaGeneratorException("MdaGenerator needs a metadata input file, use mdaGeneratorBuilder.withMetadataPath(\"/path/to/metadata\")");
 		}
-		
-		
+
+
 		if(typeConverter == null){
 			throw new MdaGeneratorException("MdaGenerator needs a Domain -> Types converter, define a class implementing ConverterInterface interface and use mdaGeneratorBuilder.withTypeConverter(myTypeConverter.class)");
 		}
@@ -284,13 +342,13 @@ public class MdaGeneratorBuilder {
 		if(pathToDaosTemplate == null) {
 			throw new MdaGeneratorException("MdaGenerator needs a java daos template. Create a velocity template and bind it with mdaGeneratorBuilder.withDaoTemplate(\"path/to/template.vm\")");
 		}
-	
-		
-		
+
+
+
 		if(sqlWriter == null){
 			throw new MdaGeneratorException("MdaGenerator needs a sql writer, define a class implementing SqlWriterInterface interface and use mdaGeneratorBuilder.withSqlWriter(mySqlWriter.class)");
 		}
-	
+
 		if(sqlOutputDirectory == null) {
 			throw new MdaGeneratorException("MdaGenerator needs a sql root directory to write files, use mdaGeneratorBuilder.withSqlOutputDirectory(\"/path/to/directory\")");
 		}
@@ -303,7 +361,7 @@ public class MdaGeneratorBuilder {
 		if(charset == null) {
 			throw new MdaGeneratorException("MdaGenerator needs a charset defined to create files. Use mdaGeneratorBuilder.withCharset(StandardCharsets.UTF_8)");
 		}
-		
+
 
 		generator.setPathToModelFile(pathToModel);
 		generator.setPathToMetadataFile(pathToMetadata);
@@ -323,21 +381,7 @@ public class MdaGeneratorBuilder {
 		generator.setPathToPackageInfoTemplate(pathToPackageInfoTemplate);
 		generator.setCharset(charset);
 		generator.setExcludedPrefixes(excludedPrefixes);
-		
-		return generator;
-	}
-	
-	/**
-	 * @return Renvoie l'emplacement sur le fs de l'application
-	 */
-	public static Path getApplicationPath() {
 
-		URI currentUri;
-		try {
-			currentUri = Main.class.getProtectionDomain().getCodeSource().getLocation().toURI();
-		} catch (URISyntaxException e) {
-			throw new MdaGeneratorException("Erreur dans la récupération du path",e);
-		}
-		return Paths.get(currentUri);
+		return generator;
 	}
 }

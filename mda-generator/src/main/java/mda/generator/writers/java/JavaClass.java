@@ -338,7 +338,7 @@ public class JavaClass {
 
 		//  Bidirectionnal relation, mappedBy is enough
 		if(association.getOpposite().isTargetNavigable()) {
-			propertiesOneToMany.add(new JavaAnnotationProperty("mappedBy","\""+ NamesComputingUtil.computeFkObjectName(association.getOpposite()) + "List\""));
+			propertiesOneToMany.add(new JavaAnnotationProperty("mappedBy","\""+ NamesComputingUtil.computeFkObjectName(association.getOpposite()) + "\""));
 		} else {// Unidirectional, needs join column name and reference column name
 			JavaAnnotation joinColumn = new JavaAnnotation(
 					importManager.getFinalName("javax.persistence.JoinColumn"),
@@ -375,8 +375,8 @@ public class JavaClass {
 			assocGetter.addAnnotations(new JavaAnnotation(
 				importManager.getFinalName("javax.persistence.JoinTable"),
 				new JavaAnnotationProperty("name","\"" +  association.getName() + "\""),
-				new JavaAnnotationProperty("joinColumns","@JoinColumn(name = \""+ NamesComputingUtil.computeFKName(association.getOpposite())+"\")"),
-				new JavaAnnotationProperty("inverseJoinColumns","@JoinColumn(name = \""+  NamesComputingUtil.computeFKName(association)+ "\")")
+				new JavaAnnotationProperty("joinColumns","@"+importManager.getFinalName("javax.persistence.JoinColumn")+"(name = \""+ NamesComputingUtil.computeFKName(association.getOpposite())+"\")"),
+				new JavaAnnotationProperty("inverseJoinColumns","@"+importManager.getFinalName("javax.persistence.JoinColumn")+"(name = \""+  NamesComputingUtil.computeFKName(association)+ "\")")
 			));
 		} else { // Not "owner" of the manyToMany, mappedBy with opposite getter is enough
 			assocGetter.addAnnotations(new JavaAnnotation(
