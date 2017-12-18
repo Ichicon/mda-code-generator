@@ -58,13 +58,13 @@ public class MdaGeneratorBuilder {
 	/** Package-info Velocity template */
 	private Path pathToPackageInfoTemplate = PathUtils.getPathForClassPathAndFs("/templates/package-info.vm");
 	/** JPA Entities Velocity template */
-	private Path pathToEntitiesTemplate = PathUtils.getApplicationPath().resolve("templates").resolve("entity.vm");
+	private Path pathToEntitiesTemplate =PathUtils.getPathForClassPathAndFs("/templates/entity.vm");
 	/** DAOs Velocity template */
-	private Path pathToDaosTemplate = PathUtils.getApplicationPath().resolve("templates").resolve("dao_spring.vm");
+	private Path pathToDaosTemplate = PathUtils.getPathForClassPathAndFs("/templates/dao_spring.vm");
 	/** Create SQL Velocity template */
-	private Path pathToCreateSQLTemplate = PathUtils.getApplicationPath().resolve("templates").resolve("createSQL_oracle.vm");
+	private Path pathToCreateSQLTemplate =PathUtils.getPathForClassPathAndFs("/templates/createSQL_oracle.vm");
 	/** DRop SQL Velocity template */
-	private Path pathToDropSQLTemplate = PathUtils.getApplicationPath().resolve("templates").resolve("dropSQL_oracle.vm");
+	private Path pathToDropSQLTemplate =PathUtils.getPathForClassPathAndFs("/templates/dropSQL_oracle.vm");
 	/** Charsets for writing files */
 	private Charset charset = StandardCharsets.UTF_8;
 	/** Class prefixes for which sql tables will not be generated */
@@ -309,7 +309,31 @@ public class MdaGeneratorBuilder {
 	public MdaGenerator build() {
 		MdaGenerator generator = new MdaGenerator();
 
-		// Paramètres pour la lecture
+		checkParameters();
+
+		generator.setPathToModelFile(pathToModel);
+		generator.setPathToMetadataFile(pathToMetadata);
+		generator.setReaderClass(readerClass);
+		generator.setConverterClass(typeConverter);
+		generator.setJavaWriterClass(javaWriter);
+		generator.setSqlWriterClass(sqlWriter);
+		generator.setJavaOutputDirectory(javaOutputDirectory);
+		generator.setConverterClass(typeConverter);
+		generator.setSqlOutputDirectory(sqlOutputDirectory);
+		generator.setDaosPackagePartName(daosPackagePartName);
+		generator.setEntitiesPackagePartName(entitiesPackagePartName);
+		generator.setPathToCreateSQLTemplate(pathToCreateSQLTemplate);
+		generator.setPathToDropSQLTemplate(pathToDropSQLTemplate);
+		generator.setPathToEntitiesTemplate(pathToEntitiesTemplate);
+		generator.setPathToDaosTemplate(pathToDaosTemplate);
+		generator.setPathToPackageInfoTemplate(pathToPackageInfoTemplate);
+		generator.setCharset(charset);
+		generator.setExcludedPrefixes(excludedPrefixes);
+
+		return generator;
+	}
+	
+	protected void checkParameters() {
 		if(pathToModel==null || !Files.exists(pathToModel)){
 			throw new MdaGeneratorException("MdaGenerator needs an input file, use mdaGeneratorBuilder.withModelPath(\"/path/to/model\")");
 		}
@@ -361,27 +385,5 @@ public class MdaGeneratorBuilder {
 		if(charset == null) {
 			throw new MdaGeneratorException("MdaGenerator needs a charset defined to create files. Use mdaGeneratorBuilder.withCharset(StandardCharsets.UTF_8)");
 		}
-
-
-		generator.setPathToModelFile(pathToModel);
-		generator.setPathToMetadataFile(pathToMetadata);
-		generator.setReaderClass(readerClass);
-		generator.setConverterClass(typeConverter);
-		generator.setJavaWriterClass(javaWriter);
-		generator.setSqlWriterClass(sqlWriter);
-		generator.setJavaOutputDirectory(javaOutputDirectory);
-		generator.setConverterClass(typeConverter);
-		generator.setSqlOutputDirectory(sqlOutputDirectory);
-		generator.setDaosPackagePartName(daosPackagePartName);
-		generator.setEntitiesPackagePartName(entitiesPackagePartName);
-		generator.setPathToCreateSQLTemplate(pathToCreateSQLTemplate);
-		generator.setPathToDropSQLTemplate(pathToDropSQLTemplate);
-		generator.setPathToEntitiesTemplate(pathToEntitiesTemplate);
-		generator.setPathToDaosTemplate(pathToDaosTemplate);
-		generator.setPathToPackageInfoTemplate(pathToPackageInfoTemplate);
-		generator.setCharset(charset);
-		generator.setExcludedPrefixes(excludedPrefixes);
-
-		return generator;
 	}
 }

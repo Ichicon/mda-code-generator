@@ -1,6 +1,5 @@
 package mda.generator.utils.file;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -11,7 +10,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 
-import mda.example.Main;
 import mda.generator.exceptions.MdaGeneratorException;
 
 public class PathUtils {
@@ -41,7 +39,7 @@ public class PathUtils {
 				p = Paths.get(classPathOrFilePath);
 			}
 			
-			return p;
+			return p.toAbsolutePath();
 		}
 		catch(Exception e ) {
 			throw new MdaGeneratorException("Unable to understand the path " + classPathOrFilePath,e);
@@ -55,7 +53,7 @@ public class PathUtils {
 
 		URI currentUri;
 		try {
-			currentUri = Main.class.getProtectionDomain().getCodeSource().getLocation().toURI();
+			currentUri = PathUtils.class.getProtectionDomain().getCodeSource().getLocation().toURI();
 		} catch (URISyntaxException e) {
 			throw new MdaGeneratorException("Erreur dans la récupération du path",e);
 		}
