@@ -1,5 +1,6 @@
 package com.test.entities.secondpackage;
 
+import java.io.Serializable;
 import javax.persistence.EmbeddedId;
 import com.test.entities.secondpackage.DoubleKeyId;
 import javax.persistence.Entity;
@@ -13,7 +14,10 @@ import javax.persistence.Column;
  */
 @Entity
 @Table(name="double_key")
-public class DoubleKey {
+public class DoubleKey implements Serializable{
+	/** Serial ID */
+	private static final long serialVersionUID = 1L;
+
 	@EmbeddedId 
 	DoubleKeyId doubleKeyId;
 	private String stringData;
@@ -51,6 +55,7 @@ public class DoubleKey {
 	 	// Start with a non-zero constant. Prime is preferred
 	    int result = 17;
 	
+		// Calculating hashcode with all "primitives" attributes
 		result = 31 * result + (stringData == null? 0 : stringData.hashCode());
 			
 		return result;
@@ -58,20 +63,25 @@ public class DoubleKey {
 
 	@Override
 	public boolean equals(Object other){
+		// Null object
+	    if(other == null){
+	    	return false;
+	    }
+	
 		// Same object
 	    if (this == other) {
 	        return true;
 	    }
-	
+	    	
 		// Wrong type
-	    if (!(other instanceof DoubleKey)) {
+	    if (this.getClass() !=  other.getClass()) {
 	        return false;
 	    }
 	
-		// Test all attributes
+		// Test all "primitives" attributes
 	    DoubleKey otherDoubleKey = (DoubleKey) other;
 	    
-		return (stringData == null ? stringData == null:stringData.equals(otherDoubleKey.stringData))
+		return (stringData == null ?  (otherDoubleKey.stringData == null) : stringData.equals(otherDoubleKey.stringData))
 		;
 	}
 

@@ -1,5 +1,6 @@
 package com.test.entities.firstpackage;
 
+import java.io.Serializable;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -18,7 +19,10 @@ import javax.persistence.GenerationType;
  */
 @Entity
 @Table(name="function")
-public class Function {
+public class Function implements Serializable{
+	/** Serial ID */
+	private static final long serialVersionUID = 1L;
+
 	private Long functionId;
 	private String functionName;
 	private Set<Appuser> appuserList;
@@ -77,31 +81,35 @@ public class Function {
 	 	// Start with a non-zero constant. Prime is preferred
 	    int result = 17;
 	
+		// Calculating hashcode with all "primitives" attributes
 		result = 31 * result + (functionId == null? 0 : functionId.hashCode());
 		result = 31 * result + (functionName == null? 0 : functionName.hashCode());
-		result = 31 * result + (appuserList == null? 0 : appuserList.hashCode());
 			
 		return result;
 	}
 
 	@Override
 	public boolean equals(Object other){
+		// Null object
+	    if(other == null){
+	    	return false;
+	    }
+	
 		// Same object
 	    if (this == other) {
 	        return true;
 	    }
-	
+	    	
 		// Wrong type
-	    if (!(other instanceof Function)) {
+	    if (this.getClass() !=  other.getClass()) {
 	        return false;
 	    }
 	
-		// Test all attributes
+		// Test all "primitives" attributes
 	    Function otherFunction = (Function) other;
 	    
-		return (functionId == null ? functionId == null:functionId.equals(otherFunction.functionId))
-			&& (functionName == null ? functionName == null:functionName.equals(otherFunction.functionName))
-			&& (appuserList == null ? appuserList == null:appuserList.equals(otherFunction.appuserList))
+		return (functionId == null ?  (otherFunction.functionId == null) : functionId.equals(otherFunction.functionId))
+			&& (functionName == null ?  (otherFunction.functionName == null) : functionName.equals(otherFunction.functionName))
 		;
 	}
 

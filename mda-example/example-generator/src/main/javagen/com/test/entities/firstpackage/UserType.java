@@ -1,5 +1,6 @@
 package com.test.entities.firstpackage;
 
+import java.io.Serializable;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -15,7 +16,10 @@ import javax.persistence.GenerationType;
  */
 @Entity
 @Table(name="user_type")
-public class UserType {
+public class UserType implements Serializable{
+	/** Serial ID */
+	private static final long serialVersionUID = 1L;
+
 	private Long typeId;
 	private String name;
 
@@ -58,6 +62,7 @@ public class UserType {
 	 	// Start with a non-zero constant. Prime is preferred
 	    int result = 17;
 	
+		// Calculating hashcode with all "primitives" attributes
 		result = 31 * result + (typeId == null? 0 : typeId.hashCode());
 		result = 31 * result + (name == null? 0 : name.hashCode());
 			
@@ -66,21 +71,26 @@ public class UserType {
 
 	@Override
 	public boolean equals(Object other){
+		// Null object
+	    if(other == null){
+	    	return false;
+	    }
+	
 		// Same object
 	    if (this == other) {
 	        return true;
 	    }
-	
+	    	
 		// Wrong type
-	    if (!(other instanceof UserType)) {
+	    if (this.getClass() !=  other.getClass()) {
 	        return false;
 	    }
 	
-		// Test all attributes
+		// Test all "primitives" attributes
 	    UserType otherUserType = (UserType) other;
 	    
-		return (typeId == null ? typeId == null:typeId.equals(otherUserType.typeId))
-			&& (name == null ? name == null:name.equals(otherUserType.name))
+		return (typeId == null ?  (otherUserType.typeId == null) : typeId.equals(otherUserType.typeId))
+			&& (name == null ?  (otherUserType.name == null) : name.equals(otherUserType.name))
 		;
 	}
 

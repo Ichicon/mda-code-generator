@@ -1,5 +1,6 @@
 package com.test.entities.firstpackage;
 
+import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.util.Set;
@@ -24,7 +25,10 @@ import javax.persistence.JoinTable;
  */
 @Entity
 @Table(name="appuser")
-public class Appuser {
+public class Appuser implements Serializable{
+	/** Serial ID */
+	private static final long serialVersionUID = 1L;
+
 	private Long userId;
 	private String userName;
 	private String userSurname;
@@ -151,39 +155,37 @@ public class Appuser {
 	 	// Start with a non-zero constant. Prime is preferred
 	    int result = 17;
 	
+		// Calculating hashcode with all "primitives" attributes
 		result = 31 * result + (userId == null? 0 : userId.hashCode());
 		result = 31 * result + (userName == null? 0 : userName.hashCode());
 		result = 31 * result + (userSurname == null? 0 : userSurname.hashCode());
-		result = 31 * result + (myFunctionList == null? 0 : myFunctionList.hashCode());
-		result = 31 * result + (workplaceService == null? 0 : workplaceService.hashCode());
-		result = 31 * result + (userService == null? 0 : userService.hashCode());
-		result = 31 * result + (userType == null? 0 : userType.hashCode());
 			
 		return result;
 	}
 
 	@Override
 	public boolean equals(Object other){
+		// Null object
+	    if(other == null){
+	    	return false;
+	    }
+	
 		// Same object
 	    if (this == other) {
 	        return true;
 	    }
-	
+	    	
 		// Wrong type
-	    if (!(other instanceof Appuser)) {
+	    if (this.getClass() !=  other.getClass()) {
 	        return false;
 	    }
 	
-		// Test all attributes
+		// Test all "primitives" attributes
 	    Appuser otherAppuser = (Appuser) other;
 	    
-		return (userId == null ? userId == null:userId.equals(otherAppuser.userId))
-			&& (userName == null ? userName == null:userName.equals(otherAppuser.userName))
-			&& (userSurname == null ? userSurname == null:userSurname.equals(otherAppuser.userSurname))
-			&& (myFunctionList == null ? myFunctionList == null:myFunctionList.equals(otherAppuser.myFunctionList))
-			&& (workplaceService == null ? workplaceService == null:workplaceService.equals(otherAppuser.workplaceService))
-			&& (userService == null ? userService == null:userService.equals(otherAppuser.userService))
-			&& (userType == null ? userType == null:userType.equals(otherAppuser.userType))
+		return (userId == null ?  (otherAppuser.userId == null) : userId.equals(otherAppuser.userId))
+			&& (userName == null ?  (otherAppuser.userName == null) : userName.equals(otherAppuser.userName))
+			&& (userSurname == null ?  (otherAppuser.userSurname == null) : userSurname.equals(otherAppuser.userSurname))
 		;
 	}
 

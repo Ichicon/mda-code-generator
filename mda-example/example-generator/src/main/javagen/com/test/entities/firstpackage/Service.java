@@ -1,5 +1,6 @@
 package com.test.entities.firstpackage;
 
+import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.util.Set;
@@ -21,7 +22,10 @@ import javax.persistence.Id;
  */
 @Entity
 @Table(name="service")
-public class Service {
+public class Service implements Serializable{
+	/** Serial ID */
+	private static final long serialVersionUID = 1L;
+
 	private Long serviceId;
 	private String serviceName;
 	private Service parentService;
@@ -129,37 +133,35 @@ public class Service {
 	 	// Start with a non-zero constant. Prime is preferred
 	    int result = 17;
 	
+		// Calculating hashcode with all "primitives" attributes
 		result = 31 * result + (serviceId == null? 0 : serviceId.hashCode());
 		result = 31 * result + (serviceName == null? 0 : serviceName.hashCode());
-		result = 31 * result + (parentService == null? 0 : parentService.hashCode());
-		result = 31 * result + (serviceList == null? 0 : serviceList.hashCode());
-		result = 31 * result + (usersOnSiteList == null? 0 : usersOnSiteList.hashCode());
-		result = 31 * result + (membersList == null? 0 : membersList.hashCode());
 			
 		return result;
 	}
 
 	@Override
 	public boolean equals(Object other){
+		// Null object
+	    if(other == null){
+	    	return false;
+	    }
+	
 		// Same object
 	    if (this == other) {
 	        return true;
 	    }
-	
+	    	
 		// Wrong type
-	    if (!(other instanceof Service)) {
+	    if (this.getClass() !=  other.getClass()) {
 	        return false;
 	    }
 	
-		// Test all attributes
+		// Test all "primitives" attributes
 	    Service otherService = (Service) other;
 	    
-		return (serviceId == null ? serviceId == null:serviceId.equals(otherService.serviceId))
-			&& (serviceName == null ? serviceName == null:serviceName.equals(otherService.serviceName))
-			&& (parentService == null ? parentService == null:parentService.equals(otherService.parentService))
-			&& (serviceList == null ? serviceList == null:serviceList.equals(otherService.serviceList))
-			&& (usersOnSiteList == null ? usersOnSiteList == null:usersOnSiteList.equals(otherService.usersOnSiteList))
-			&& (membersList == null ? membersList == null:membersList.equals(otherService.membersList))
+		return (serviceId == null ?  (otherService.serviceId == null) : serviceId.equals(otherService.serviceId))
+			&& (serviceName == null ?  (otherService.serviceName == null) : serviceName.equals(otherService.serviceName))
 		;
 	}
 

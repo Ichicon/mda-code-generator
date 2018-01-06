@@ -1,5 +1,6 @@
 package com.test.entities.firstpackage;
 
+import java.io.Serializable;
 import javax.persistence.GeneratedValue;
 import java.time.LocalDateTime;
 import javax.persistence.Entity;
@@ -18,7 +19,10 @@ import javax.persistence.GenerationType;
  */
 @Entity
 @Table(name="test_domain")
-public class TestDomain {
+public class TestDomain implements Serializable{
+	/** Serial ID */
+	private static final long serialVersionUID = 1L;
+
 	private Long id;
 	private String code;
 	private String libelle;
@@ -285,6 +289,7 @@ public class TestDomain {
 	 	// Start with a non-zero constant. Prime is preferred
 	    int result = 17;
 	
+		// Calculating hashcode with all "primitives" attributes
 		result = 31 * result + (id == null? 0 : id.hashCode());
 		result = 31 * result + (code == null? 0 : code.hashCode());
 		result = 31 * result + (libelle == null? 0 : libelle.hashCode());
@@ -307,35 +312,40 @@ public class TestDomain {
 
 	@Override
 	public boolean equals(Object other){
+		// Null object
+	    if(other == null){
+	    	return false;
+	    }
+	
 		// Same object
 	    if (this == other) {
 	        return true;
 	    }
-	
+	    	
 		// Wrong type
-	    if (!(other instanceof TestDomain)) {
+	    if (this.getClass() !=  other.getClass()) {
 	        return false;
 	    }
 	
-		// Test all attributes
+		// Test all "primitives" attributes
 	    TestDomain otherTestDomain = (TestDomain) other;
 	    
-		return (id == null ? id == null:id.equals(otherTestDomain.id))
-			&& (code == null ? code == null:code.equals(otherTestDomain.code))
-			&& (libelle == null ? libelle == null:libelle.equals(otherTestDomain.libelle))
-			&& (aDoDate == null ? aDoDate == null:aDoDate.equals(otherTestDomain.aDoDate))
-			&& (aDoCommentaire == null ? aDoCommentaire == null:aDoCommentaire.equals(otherTestDomain.aDoCommentaire))
-			&& (aDoFichier == null ? aDoFichier == null:aDoFichier.equals(otherTestDomain.aDoFichier))
-			&& (aDoLibelleCourt == null ? aDoLibelleCourt == null:aDoLibelleCourt.equals(otherTestDomain.aDoLibelleCourt))
-			&& (aDoLibelleLong == null ? aDoLibelleLong == null:aDoLibelleLong.equals(otherTestDomain.aDoLibelleLong))
-			&& (aDoMotPasse == null ? aDoMotPasse == null:aDoMotPasse.equals(otherTestDomain.aDoMotPasse))
-			&& (aDoNom == null ? aDoNom == null:aDoNom.equals(otherTestDomain.aDoNom))
-			&& (aDoNombreCourt == null ? aDoNombreCourt == null:aDoNombreCourt.equals(otherTestDomain.aDoNombreCourt))
-			&& (aDoNombreLong == null ? aDoNombreLong == null:aDoNombreLong.equals(otherTestDomain.aDoNombreLong))
-			&& (aDoOrdreRepartition == null ? aDoOrdreRepartition == null:aDoOrdreRepartition.equals(otherTestDomain.aDoOrdreRepartition))
-			&& (aDoOuiNon == null ? aDoOuiNon == null:aDoOuiNon.equals(otherTestDomain.aDoOuiNon))
-			&& (aDoTexteRiche == null ? aDoTexteRiche == null:aDoTexteRiche.equals(otherTestDomain.aDoTexteRiche))
-			&& (aDoDateHeure == null ? aDoDateHeure == null:aDoDateHeure.equals(otherTestDomain.aDoDateHeure))
+		return (id == null ?  (otherTestDomain.id == null) : id.equals(otherTestDomain.id))
+			&& (code == null ?  (otherTestDomain.code == null) : code.equals(otherTestDomain.code))
+			&& (libelle == null ?  (otherTestDomain.libelle == null) : libelle.equals(otherTestDomain.libelle))
+			&& (aDoDate == null ?  (otherTestDomain.aDoDate == null) : aDoDate.equals(otherTestDomain.aDoDate))
+			&& (aDoCommentaire == null ?  (otherTestDomain.aDoCommentaire == null) : aDoCommentaire.equals(otherTestDomain.aDoCommentaire))
+			&& (aDoFichier == null ?  (otherTestDomain.aDoFichier == null) : aDoFichier.equals(otherTestDomain.aDoFichier))
+			&& (aDoLibelleCourt == null ?  (otherTestDomain.aDoLibelleCourt == null) : aDoLibelleCourt.equals(otherTestDomain.aDoLibelleCourt))
+			&& (aDoLibelleLong == null ?  (otherTestDomain.aDoLibelleLong == null) : aDoLibelleLong.equals(otherTestDomain.aDoLibelleLong))
+			&& (aDoMotPasse == null ?  (otherTestDomain.aDoMotPasse == null) : aDoMotPasse.equals(otherTestDomain.aDoMotPasse))
+			&& (aDoNom == null ?  (otherTestDomain.aDoNom == null) : aDoNom.equals(otherTestDomain.aDoNom))
+			&& (aDoNombreCourt == null ?  (otherTestDomain.aDoNombreCourt == null) : aDoNombreCourt.equals(otherTestDomain.aDoNombreCourt))
+			&& (aDoNombreLong == null ?  (otherTestDomain.aDoNombreLong == null) : aDoNombreLong.equals(otherTestDomain.aDoNombreLong))
+			&& (aDoOrdreRepartition == null ?  (otherTestDomain.aDoOrdreRepartition == null) : aDoOrdreRepartition.equals(otherTestDomain.aDoOrdreRepartition))
+			&& (aDoOuiNon == null ?  (otherTestDomain.aDoOuiNon == null) : aDoOuiNon.equals(otherTestDomain.aDoOuiNon))
+			&& (aDoTexteRiche == null ?  (otherTestDomain.aDoTexteRiche == null) : aDoTexteRiche.equals(otherTestDomain.aDoTexteRiche))
+			&& (aDoDateHeure == null ?  (otherTestDomain.aDoDateHeure == null) : aDoDateHeure.equals(otherTestDomain.aDoDateHeure))
 		;
 	}
 

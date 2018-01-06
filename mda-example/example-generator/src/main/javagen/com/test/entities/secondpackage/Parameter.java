@@ -1,5 +1,6 @@
 package com.test.entities.secondpackage;
 
+import java.io.Serializable;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -20,7 +21,10 @@ import javax.persistence.GenerationType;
  */
 @Entity
 @Table(name="parameter")
-public class Parameter {
+public class Parameter implements Serializable{
+	/** Serial ID */
+	private static final long serialVersionUID = 1L;
+
 	private Long paramId;
 	private Integer version;
 	private DoubleKey doubleKey;
@@ -80,31 +84,35 @@ public class Parameter {
 	 	// Start with a non-zero constant. Prime is preferred
 	    int result = 17;
 	
+		// Calculating hashcode with all "primitives" attributes
 		result = 31 * result + (paramId == null? 0 : paramId.hashCode());
 		result = 31 * result + (version == null? 0 : version.hashCode());
-		result = 31 * result + (doubleKey == null? 0 : doubleKey.hashCode());
 			
 		return result;
 	}
 
 	@Override
 	public boolean equals(Object other){
+		// Null object
+	    if(other == null){
+	    	return false;
+	    }
+	
 		// Same object
 	    if (this == other) {
 	        return true;
 	    }
-	
+	    	
 		// Wrong type
-	    if (!(other instanceof Parameter)) {
+	    if (this.getClass() !=  other.getClass()) {
 	        return false;
 	    }
 	
-		// Test all attributes
+		// Test all "primitives" attributes
 	    Parameter otherParameter = (Parameter) other;
 	    
-		return (paramId == null ? paramId == null:paramId.equals(otherParameter.paramId))
-			&& (version == null ? version == null:version.equals(otherParameter.version))
-			&& (doubleKey == null ? doubleKey == null:doubleKey.equals(otherParameter.doubleKey))
+		return (paramId == null ?  (otherParameter.paramId == null) : paramId.equals(otherParameter.paramId))
+			&& (version == null ?  (otherParameter.version == null) : version.equals(otherParameter.version))
 		;
 	}
 

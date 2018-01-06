@@ -11,7 +11,9 @@ import javax.persistence.Embeddable;
  */
 @Embeddable
 public class DoubleKeyId implements Serializable{
+	/** Serial ID */
 	private static final long serialVersionUID = 1L;
+
 	private Long pkOne;
 	private Long pkTwo;
 
@@ -51,6 +53,7 @@ public class DoubleKeyId implements Serializable{
 	 	// Start with a non-zero constant. Prime is preferred
 	    int result = 17;
 	
+		// Calculating hashcode with all "primitives" attributes
 		result = 31 * result + (pkOne == null? 0 : pkOne.hashCode());
 		result = 31 * result + (pkTwo == null? 0 : pkTwo.hashCode());
 			
@@ -59,22 +62,26 @@ public class DoubleKeyId implements Serializable{
 
 	@Override
 	public boolean equals(Object other){
+		// Null object
+	    if(other == null){
+	    	return false;
+	    }
+	
 		// Same object
 	    if (this == other) {
 	        return true;
 	    }
-	
+	    	
 		// Wrong type
-	    if (!(other instanceof DoubleKeyId)) {
+	    if (this.getClass() !=  other.getClass()) {
 	        return false;
 	    }
 	
-		// Test all attributes
+		// Test all "primitives" attributes
 	    DoubleKeyId otherDoubleKeyId = (DoubleKeyId) other;
 	    
-		return true
-			&& (pkOne == null ? pkOne == null:pkOne.equals(otherDoubleKeyId.pkOne))
-			&& (pkTwo == null ? pkTwo == null:pkTwo.equals(otherDoubleKeyId.pkTwo))
+		return (pkOne == null ?  (otherDoubleKeyId.pkOne == null) : pkOne.equals(otherDoubleKeyId.pkOne))
+			&& (pkTwo == null ?  (otherDoubleKeyId.pkTwo == null) : pkTwo.equals(otherDoubleKeyId.pkTwo))
 		;
 	}
 
