@@ -2,7 +2,6 @@ package mda.generator.utils.file;
 
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Properties;
 

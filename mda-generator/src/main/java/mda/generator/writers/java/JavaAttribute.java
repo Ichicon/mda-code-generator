@@ -22,6 +22,19 @@ public class JavaAttribute {
 	private final boolean isPK;
 	
 	private String defaultValue;
+	
+	private static List<String> PRIMITIVE_TYPES = new ArrayList<>();
+	static {	
+		PRIMITIVE_TYPES.add("String");
+		PRIMITIVE_TYPES.add("Long");
+		PRIMITIVE_TYPES.add("Integer");
+		PRIMITIVE_TYPES.add("Boolean");
+		PRIMITIVE_TYPES.add("Double");
+		PRIMITIVE_TYPES.add("Float");
+		PRIMITIVE_TYPES.add("LocalDateTime");
+		PRIMITIVE_TYPES.add("LocalDate");
+		PRIMITIVE_TYPES.add("Blob");
+	}
 
 
 	/**
@@ -139,5 +152,12 @@ public class JavaAttribute {
 		return defaultValue;
 	}
 	
+	/**
+	 * Indique si le type est primitif
+	 * @return
+	 */
+	public boolean isPrimitive(){
+		return PRIMITIVE_TYPES.contains(this.javaType);
+	}
 	
 }

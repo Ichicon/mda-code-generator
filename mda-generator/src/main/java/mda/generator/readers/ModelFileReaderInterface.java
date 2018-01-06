@@ -2,7 +2,6 @@ package mda.generator.readers;
 
 import java.util.Map;
 
-import mda.generator.beans.UmlAssociation;
 import mda.generator.beans.UmlClass;
 import mda.generator.beans.UmlDomain;
 import mda.generator.beans.UmlPackage;

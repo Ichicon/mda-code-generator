@@ -10,7 +10,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hibernate.sql.ordering.antlr.GeneratedOrderByLexer;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -336,7 +335,6 @@ public class XmiReader implements ModelFileReaderInterface {
 		
 		// Facultatif, récupérer le nom de la colonne FK <style value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Navigable;alias=workplace_service_id;"/>
 		String stylesValues = XmiUtil.getAttribute(XmiUtil.getFirstChildsNodeWithTagName(targetNode, "style"), "value");
-		String fkColumNanme =  null;
 		for(String styleValue : stylesValues.split(";")) {
 			if(styleValue != null && styleValue.startsWith("alias=")) {
 				umlAssoc.setFkName(styleValue.split("=")[1]);

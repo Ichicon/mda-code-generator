@@ -126,6 +126,7 @@ public class OracleSQLWriter implements SQLWriterInterface {
 							
 							// PK 1
 							UmlAttribute attrPk1 = umlAssociation.getSource().getPKs().get(0);
+													
 							SQLColumn pk1 = new SQLColumn(NamesComputingUtil.computeFKName(umlAssociation.getOpposite()),attrPk1.getDomain(),true,"ManyToMany FK " + umlAssociation.getSource().getName(), config.getConverter());
 							manyToManyTable.addColumn(pk1);
 							
@@ -152,7 +153,7 @@ public class OracleSQLWriter implements SQLWriterInterface {
                             SQLColumn fk;                       
                             // Use fk column name defined in association
                             if(umlAssociation.getTarget().getPKs().size() == 1) {
-                                fk = new SQLColumn(NamesComputingUtil.computeFKName(umlAssociation),pkX.getDomain(),true,"ManyToOne FK " + umlAssociation.getTarget().getName(), config.getConverter());
+                                fk = new SQLColumn(NamesComputingUtil.computeFKName(umlAssociation),pkX.getDomain(), !umlAssociation.isTargetNullable(),"ManyToOne FK " + umlAssociation.getTarget().getName(), config.getConverter());
                             } else { // Generate name from pk because it's a composite key
                                 fk = new SQLColumn(pkX.getName(),pkX.getDomain(),true,"ManyToOne FK " + umlAssociation.getTarget().getName(), config.getConverter());       
                             }

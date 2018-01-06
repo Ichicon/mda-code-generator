@@ -1,6 +1,7 @@
 package $javaClass.getPackageName();
 
 ## IMPORTS
+import java.io.Serializable;
 ## COMPOSITE KEY IMPORT
 #if($javaClass.getPkClass())
 import javax.persistence.EmbeddedId;
@@ -23,7 +24,10 @@ import $import;
 $annotation.getDisplay("")
 #end 
 ## CLASS DECLARATION
-$javaClass.getVisibilite().toString() class $javaClass.getName() #if($javaClass.getInterfaces())implements $javaClass.getInterfaces()#end{
+$javaClass.getVisibilite().toString() class $javaClass.getName() implements Serializable{
+	/** Serial ID */
+	private static final long serialVersionUID = 1L;
+
 ## COMPOSITE KEY
 #if($javaClass.getPkClass())	
 	@EmbeddedId 
@@ -62,7 +66,7 @@ $annotation.getDisplay("    ")
 	    int result = 17;
 	
 		#foreach( $attribute in $javaClass.getAttributesList() )
-		#if(!$attribute.getName().equals("serialVersionUID"))
+		#if(!$attribute.getName().equals("serialVersionUID") && $attribute.isPrimitive())
 		result = 31 * result + ($attribute.getName() == null? 0 : ${attribute.getName()}.hashCode());
 		#end
 		#end
@@ -78,7 +82,7 @@ $annotation.getDisplay("    ")
 	    }
 	
 		// Wrong type
-	    if (!(other instanceof $javaClass.getName())) {
+	    if (this.getClass() !=  other.getClass()) {
 	        return false;
 	    }
 	
@@ -86,10 +90,8 @@ $annotation.getDisplay("    ")
 	    $javaClass.getName() other$javaClass.getName() = ($javaClass.getName()) other;
 	    
 		return#foreach( $attribute in $javaClass.getAttributesList() )
-		#if(!$attribute.getName().equals("serialVersionUID"))
-#if($foreach.count>1)			&&#end ($attribute.getName() == null ? $attribute.getName() == null:${attribute.getName()}.equals(other${javaClass.getName()}.$attribute.getName()))
-		#else 
- true
+		#if(!$attribute.getName().equals("serialVersionUID") && $attribute.isPrimitive())
+#if($foreach.count>1)			&&#end ($attribute.getName() == null ?  other${javaClass.getName()}.$attribute.getName() == null:${attribute.getName()}.equals(other${javaClass.getName()}.$attribute.getName()))
 		#end
 #end		;
 	}

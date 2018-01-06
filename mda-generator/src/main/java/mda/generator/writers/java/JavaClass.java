@@ -1,6 +1,5 @@
 package mda.generator.writers.java;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,9 +33,6 @@ public class JavaClass {
 
 	private JavaClass pkClass;
 	private JavaAttribute pkField;
-	
-	private String interfaces;
-	
 	/**
 	 * 
 	 * @param name
@@ -160,12 +156,7 @@ public class JavaClass {
 		return pkField;
 	}
 
-	/**
-	 * @return the interfaces
-	 */
-	public String getInterfaces() {
-		return interfaces;
-	}
+
 
 	protected void createPKField(JavaPackage javaPackage, UmlClass umlClass, ConverterInterface converter) {
 		UmlAttribute umlPK = umlClass.getPKs().get(0);
@@ -210,10 +201,6 @@ public class JavaClass {
 	protected void createCompositePK(JavaPackage javaPackage, UmlClass umlClass, ConverterInterface converter) {
 		// Use an embedded class as attribute
 		pkClass = new JavaClass(this.getName()+"Id", javaPackage.getPackageName(),"Composite Key for " + this.getName());
-		// Embeddable needs to be serializble
-		pkClass.interfaces = pkClass.importManager.getFinalName("java.io.Serializable");
-		// Fake attribute for serial id
-		pkClass.attributesList.add(new JavaAttribute("serialVersionUID","static final long","1L"));
 		// Add embedabble annotation
 		pkClass.annotationsList.add(new JavaAnnotation(pkClass.importManager.getFinalName("javax.persistence.Embeddable")));
 				
