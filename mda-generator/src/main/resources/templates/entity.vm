@@ -90,7 +90,7 @@ $annotation.getDisplay("    ")
 	    $javaClass.getName() other$javaClass.getName() = ($javaClass.getName()) other;
 	    
 		return#foreach( $attribute in $javaClass.getAttributesList() )
-		#if(!$attribute.getName().equals("serialVersionUID") && $attribute.isPrimitive())
+		#if($attribute.isPrimitive())
 #if($foreach.count>1)			&&#end ($attribute.getName() == null ?  other${javaClass.getName()}.$attribute.getName() == null:${attribute.getName()}.equals(other${javaClass.getName()}.$attribute.getName()))
 		#end
 #end		;
