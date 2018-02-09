@@ -16,6 +16,7 @@ import javax.persistence.GenerationType;
  */
 @Entity
 @Table(name="user_type")
+@org.hibernate.annotations.Cache(usage = org.hibernate.annotations.CacheConcurrencyStrategy.READ_ONLY)
 public class UserType implements Serializable{
 	/** Serial ID */
 	private static final long serialVersionUID = 1L;
@@ -28,7 +29,7 @@ public class UserType implements Serializable{
      * @return value of typeId
      */
     @Id
-    @SequenceGenerator(name="SEQ_USER_TYPE", sequenceName="SEQ_USER_TYPE", allocationSize=20)
+    @SequenceGenerator(name="SEQ_USER_TYPE", sequenceName="SEQ_USER_TYPE", allocationSize=1)
     @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="SEQ_USER_TYPE")
     @Column(name="type_id", nullable=false)
 	public Long getTypeId(){

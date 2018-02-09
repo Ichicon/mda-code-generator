@@ -24,6 +24,7 @@ public class JavaClass {
 
 	private final List<String> commentsList  = new ArrayList<>();	
 	private final List<JavaAnnotation> annotationsList = new ArrayList<>();
+	private List<String> userDefinedAnnotations = new ArrayList<>();
 
 	private Visibility visibilite = Visibility.PUBLIC;
 	private final String name;	
@@ -156,7 +157,19 @@ public class JavaClass {
 		return pkField;
 	}
 
+	/**
+	 * @param userDefinedAnnotations the userDefinedAnnotations to set
+	 */
+	public void setUserDefinedAnnotations(List<String> userDefinedAnnotations) {
+		this.userDefinedAnnotations = userDefinedAnnotations;
+	}
 
+	/**
+	 * @return the userDefinedAnnotations
+	 */
+	public List<String> getUserDefinedAnnotations() {
+		return userDefinedAnnotations;
+	}
 
 	protected void createPKField(JavaPackage javaPackage, UmlClass umlClass, ConverterInterface converter) {
 		UmlAttribute umlPK = umlClass.getPKs().get(0);
@@ -174,7 +187,7 @@ public class JavaClass {
 			importManager.getFinalName("javax.persistence.SequenceGenerator"), 
 			new JavaAnnotationProperty("name",seqName),
 			new JavaAnnotationProperty("sequenceName",seqName),
-			new JavaAnnotationProperty("allocationSize","20")
+			new JavaAnnotationProperty("allocationSize","1") // sequence always 1 because sql increment must have the same value 
 		));
 		// Annotation on PK field to use generator
 		getterPK.addAnnotations(new JavaAnnotation(
@@ -368,7 +381,7 @@ public class JavaClass {
 		} else { // Not "owner" of the manyToMany, mappedBy with opposite getter is enough
 			assocGetter.addAnnotations(new JavaAnnotation(
 					importManager.getFinalName("javax.persistence.ManyToMany"),
-					new JavaAnnotationProperty("mappedBy","\""+ association.getOpposite().getFkObjectName() + "List\"")
+					new JavaAnnotationProperty("mappedBy","\""+ NamesComputingUtil.computeFkObjectName(association.getOpposite()) + "List\"")
 			));
 		}
 	}
@@ -407,6 +420,8 @@ public class JavaClass {
 
 		return setter;
 	}
+	
+	
 	
 	
 }

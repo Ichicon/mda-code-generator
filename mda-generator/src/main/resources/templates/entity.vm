@@ -23,6 +23,12 @@ import $import;
 #foreach( $annotation in $javaClass.getAnnotationsList() )
 $annotation.getDisplay("")
 #end 
+## USER DEFINED ANNOTATIONS
+#if($javaClass.getUserDefinedAnnotations())
+#foreach( $annotation in $javaClass.getUserDefinedAnnotations() )
+$annotation
+#end
+#end
 ## CLASS DECLARATION
 $javaClass.getVisibilite().toString() class $javaClass.getName() implements Serializable{
 	/** Serial ID */

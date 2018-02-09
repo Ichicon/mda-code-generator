@@ -45,7 +45,7 @@ public class TestDomain implements Serializable{
      * @return value of id
      */
     @Id
-    @SequenceGenerator(name="SEQ_TEST_DOMAIN", sequenceName="SEQ_TEST_DOMAIN", allocationSize=20)
+    @SequenceGenerator(name="SEQ_TEST_DOMAIN", sequenceName="SEQ_TEST_DOMAIN", allocationSize=1)
     @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="SEQ_TEST_DOMAIN")
     @Column(name="id", nullable=false)
 	public Long getId(){

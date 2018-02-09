@@ -32,7 +32,7 @@ public class Function implements Serializable{
      * @return value of functionId
      */
     @Id
-    @SequenceGenerator(name="SEQ_FUNCTION", sequenceName="SEQ_FUNCTION", allocationSize=20)
+    @SequenceGenerator(name="SEQ_FUNCTION", sequenceName="SEQ_FUNCTION", allocationSize=1)
     @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="SEQ_FUNCTION")
     @Column(name="function_id", nullable=false)
 	public Long getFunctionId(){

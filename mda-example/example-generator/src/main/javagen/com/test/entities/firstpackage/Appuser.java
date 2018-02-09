@@ -42,7 +42,7 @@ public class Appuser implements Serializable{
      * @return value of userId
      */
     @Id
-    @SequenceGenerator(name="SEQ_APPUSER", sequenceName="SEQ_APPUSER", allocationSize=20)
+    @SequenceGenerator(name="SEQ_APPUSER", sequenceName="SEQ_APPUSER", allocationSize=1)
     @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="SEQ_APPUSER")
     @Column(name="user_id", nullable=false)
 	public Long getUserId(){

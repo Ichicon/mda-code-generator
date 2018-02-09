@@ -3,6 +3,7 @@ package mda.generator;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -46,6 +47,8 @@ public class MdaGenerator {
 	/** Nom dans les packages qui correspond à l'emplacement des entities, permet de conserver un path équivalent pour les daos */
 	private String entitiesPackagePartName = "entities";
 	private String daosPackagePartName = "daos";
+	/** Annotations supplémentaires pour les classes (Map<NomClasse,List<Annotation>) */
+	private Map<String, List<String>> annotationsForClasses;
 
 	/** Emplacement du fichier SQL généré en sortie */
 	private Path sqlOutputDirectory = null;
@@ -53,6 +56,7 @@ public class MdaGenerator {
 	private Path pathToCreateSQLTemplate;
 	private Path pathToDropSQLTemplate;
 	private List<String> excludedPrefixes;
+	
 	
 	/** Charset */
 	private Charset charset;
@@ -127,6 +131,7 @@ public class MdaGenerator {
 		javaConfig.setJavaOutputDirectory(javaOutputDirectory);
 		javaConfig.setUmlPackages(reader.getPackagesMap().values());
 		javaConfig.setConverter(converter);
+		javaConfig.setAnnotationsForClasses(annotationsForClasses);
 		javaConfig.setEntities(entitiesPackagePartName);
 		javaConfig.setDaos(daosPackagePartName);
 		javaConfig.setPathToPackageInfoTemplate(pathToPackageInfoTemplate);
@@ -261,11 +266,20 @@ public class MdaGenerator {
 		this.charset = charset;
 	}
 	
+	
 	/**
 	 * @param excludedPrefixes the excludedPrefixes to set
 	 */
 	public void setExcludedPrefixes(List<String> excludedPrefixes) {
 		this.excludedPrefixes = excludedPrefixes;
+	}
+
+
+	/**
+	 * @param annotationsForClasses the annotationsForClasses to set
+	 */
+	public void setAnnotationsForClasses(Map<String, List<String>> annotationsForClasses) {
+		this.annotationsForClasses = annotationsForClasses;
 	}
 
 

@@ -75,6 +75,9 @@ public class JavaWriter implements JavaWriterInterface {
 		// Writing classes and daos
 		for(JavaClass javaClass : javaPackage.getClasses()) {
 			try {
+				// Add user defined annotations if provided
+				javaClass.setUserDefinedAnnotations(config.getAnnotationsForClasses().get(javaClass.getName()));
+				
 				writeClass(entitiesPackagePath, javaClass);		
 				// Class without pk fields are embeddable => no dao
 				if(javaClass.getPkField() != null) {

@@ -22,6 +22,7 @@ import javax.persistence.Id;
  */
 @Entity
 @Table(name="service")
+@org.hibernate.annotations.Cache(usage = org.hibernate.annotations.CacheConcurrencyStrategy.READ_ONLY)
 public class Service implements Serializable{
 	/** Serial ID */
 	private static final long serialVersionUID = 1L;
@@ -38,7 +39,7 @@ public class Service implements Serializable{
      * @return value of serviceId
      */
     @Id
-    @SequenceGenerator(name="SEQ_SERVICE", sequenceName="SEQ_SERVICE", allocationSize=20)
+    @SequenceGenerator(name="SEQ_SERVICE", sequenceName="SEQ_SERVICE", allocationSize=1)
     @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="SEQ_SERVICE")
     @Column(name="service_id", nullable=false)
 	public Long getServiceId(){

@@ -5,8 +5,11 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import mda.generator.converters.ConverterInterface;
@@ -42,6 +45,9 @@ public class MdaGeneratorBuilder {
 
 	/** Classe pour écrire le sql */
 	private Class<? extends SQLWriterInterface> sqlWriter = OracleSQLWriter.class;
+	
+	/** Annotations à ajouter aux classes */
+	private Map<String, List<String>> annotationsForClasses = new HashMap<>();
 
 	/** Emplacement de sortie des packages et fichiers générés */
 	private Path javaOutputDirectory;
@@ -68,7 +74,8 @@ public class MdaGeneratorBuilder {
 	private List<String> excludedPrefixes;
 
 	/**
-	 * [RECOMMENDED] LOad the generator with a propertes file. You should call build() just after this call, yet you can still call withXxxx before building to overload parameters.
+	 * [RECOMMENDED] Load the generator with a propertes file. You should call build() just after this call, yet you can still call withXxxx before building to overload parameters.
+	 * /!\ Annotations cannot be added with property files, you have to call withAnnotation(...)
 	 * @param pathToProperties Path to property file
 	 * @return builder to re-use
 	 */
@@ -296,8 +303,28 @@ public class MdaGeneratorBuilder {
 		return this;
 	}
 
+	/**
+	 * Add an annotation to liste of class (simple name). Call multiple times to add multiple annotations. 
+	 * @param annotation Annotation text. Ex: "@Cacheable(true)" 
+	 * @param classNames Simple names of class which will have this annotation. Ex : "Organisme"
+	 * @return
+	 */
+	public MdaGeneratorBuilder withAnnotation(String annotation, String ... classNames) {
+		for(String className : classNames) {
+			List<String> listeAnnots = annotationsForClasses.get(className);
+			if(listeAnnots == null) {
+				listeAnnots = new ArrayList<>();
+				annotationsForClasses.put(className, listeAnnots);
+			}
+			
+			listeAnnots.add(annotation);
+		}
+		
+		
+		return this;
+	}
 
-
+	
 	/**
 	 * Build the MdaGenerator from parameters
 	 * @return MdaGenerator object built
@@ -315,6 +342,7 @@ public class MdaGeneratorBuilder {
 		generator.setJavaWriterClass(javaWriter);
 		generator.setSqlWriterClass(sqlWriter);
 		generator.setJavaOutputDirectory(javaOutputDirectory);
+		generator.setAnnotationsForClasses(annotationsForClasses);
 		generator.setConverterClass(typeConverter);
 		generator.setSqlOutputDirectory(sqlOutputDirectory);
 		generator.setDaosPackagePartName(daosPackagePartName);

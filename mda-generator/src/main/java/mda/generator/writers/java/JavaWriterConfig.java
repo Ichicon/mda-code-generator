@@ -4,6 +4,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import mda.generator.beans.UmlPackage;
 import mda.generator.converters.ConverterInterface;
@@ -22,6 +24,8 @@ public class JavaWriterConfig {
 	private Path pathToDaosTemplate;
 	private String entities;
 	private String daos;
+	/** Added annotations for classes Map<ClassName, List<AnnotationString>>*/
+	private Map<String,List<String>> annotationsForClasses;
 	private Charset charset = StandardCharsets.UTF_8;
 	
 	/**
@@ -131,6 +135,18 @@ public class JavaWriterConfig {
 	 */
 	public void setPathToPackageInfoTemplate(Path pathToPackageInfoTemplate) {
 		this.pathToPackageInfoTemplate = pathToPackageInfoTemplate;
+	}
+	/**
+	 * @return the annotationsForClasses
+	 */
+	public Map<String, List<String>> getAnnotationsForClasses() {
+		return annotationsForClasses;
+	}
+	/**
+	 * @param annotationsForClasses the annotationsForClasses to set
+	 */
+	public void setAnnotationsForClasses(Map<String, List<String>> annotationsForClasses) {
+		this.annotationsForClasses = annotationsForClasses;
 	}
 	
 }
