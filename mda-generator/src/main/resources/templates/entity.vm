@@ -2,11 +2,6 @@ package $javaClass.getPackageName();
 
 ## IMPORTS
 import java.io.Serializable;
-## COMPOSITE KEY IMPORT
-#if($javaClass.getPkClass())
-import javax.persistence.EmbeddedId;
-import ${javaClass.getPackageName()}.${javaClass.getPkClass().getName()};
-#end
 #foreach( $import in $javaClass.getImportsList() )
 import $import;
 #end

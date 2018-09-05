@@ -7,7 +7,6 @@ import javax.persistence.Table;
 import javax.persistence.JoinColumn;
 import javax.persistence.Column;
 import javax.persistence.SequenceGenerator;
-import com.test.entities.secondpackage.DoubleKey;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.GenerationType;

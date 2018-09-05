@@ -1,11 +1,10 @@
 package com.test.entities.secondpackage;
 
 import java.io.Serializable;
-import javax.persistence.EmbeddedId;
-import com.test.entities.secondpackage.DoubleKeyId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
 
 /**
  * No comment found in model diagram

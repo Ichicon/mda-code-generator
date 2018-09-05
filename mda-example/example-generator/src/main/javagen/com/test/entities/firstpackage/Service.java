@@ -1,19 +1,18 @@
 package com.test.entities.firstpackage;
 
 import java.io.Serializable;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.JoinColumn;
 import java.util.Set;
+import javax.persistence.Column;
 import javax.persistence.SequenceGenerator;
-import com.test.entities.firstpackage.Service;
+import javax.persistence.CascadeType;
+import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.GenerationType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.JoinColumn;
-import javax.persistence.Column;
-import com.test.entities.firstpackage.Appuser;
-import javax.persistence.Id;
 
 /**
  * No comment found in model diagram
@@ -87,7 +86,7 @@ public class Service implements Serializable{
      * Association service_service_parent to Service
      * @return value of serviceList
      */
-    @OneToMany(mappedBy="parentService", orphanRemoval=true)
+    @OneToMany(cascade=CascadeType.ALL, mappedBy="parentService", orphanRemoval=true)
 	public Set<Service> getServiceList(){
 		return serviceList;
     }  
@@ -102,7 +101,7 @@ public class Service implements Serializable{
      * Association service_workplace_id to Appuser
      * @return value of usersOnSiteList
      */
-    @OneToMany(mappedBy="workplaceService", orphanRemoval=true)
+    @OneToMany(cascade=CascadeType.ALL, mappedBy="workplaceService", orphanRemoval=true)
 	public Set<Appuser> getUsersOnSiteList(){
 		return usersOnSiteList;
     }  
@@ -117,7 +116,7 @@ public class Service implements Serializable{
      * Association user_service to Appuser
      * @return value of membersList
      */
-    @OneToMany(mappedBy="userService", orphanRemoval=true)
+    @OneToMany(cascade=CascadeType.ALL, mappedBy="userService", orphanRemoval=true)
 	public Set<Appuser> getMembersList(){
 		return membersList;
     }  

@@ -6,16 +6,13 @@ import javax.persistence.Table;
 import java.util.Set;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.ManyToMany;
-import com.test.entities.firstpackage.Service;
 import javax.persistence.ManyToOne;
 import javax.persistence.GenerationType;
 import javax.persistence.GeneratedValue;
-import com.test.entities.firstpackage.Function;
 import javax.persistence.JoinColumn;
 import javax.persistence.Column;
 import javax.persistence.CascadeType;
 import javax.persistence.Id;
-import com.test.entities.firstpackage.UserType;
 import javax.persistence.JoinTable;
 
 /**

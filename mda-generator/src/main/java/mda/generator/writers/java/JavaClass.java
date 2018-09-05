@@ -20,7 +20,7 @@ import mda.generator.exceptions.MdaGeneratorException;
 public class JavaClass {
 	private final String packageName;
 
-	private ImportManager importManager = new ImportManager();
+	private final ImportManager importManager;
 
 	private final List<String> commentsList  = new ArrayList<>();	
 	private final List<JavaAnnotation> annotationsList = new ArrayList<>();
@@ -43,6 +43,7 @@ public class JavaClass {
 		this.name = name;
 		this.packageName = packageName;
 		this.commentsList.add(comments);
+		importManager = new ImportManager(packageName);
 	}
 	
 	/**
@@ -62,6 +63,7 @@ public class JavaClass {
 		}
 
 		this.packageName = javaPackage.getPackageName();
+		this.importManager = new ImportManager(packageName);
 
 		// Annotation entity
 		annotationsList.add(new JavaAnnotation(importManager.getFinalName("javax.persistence.Entity")));
@@ -214,7 +216,10 @@ public class JavaClass {
 	protected void createCompositePK(JavaPackage javaPackage, UmlClass umlClass, ConverterInterface converter) {
 		// Use an embedded class as attribute
 		pkClass = new JavaClass(this.getName()+"Id", javaPackage.getPackageName(),"Composite Key for " + this.getName());
-		// Add embedabble annotation
+		// Add embedded annotation in imports
+		importManager.getFinalName("javax.persistence.EmbeddedId");		
+		
+		// Add embedabble annotation into pkClass
 		pkClass.annotationsList.add(new JavaAnnotation(pkClass.importManager.getFinalName("javax.persistence.Embeddable")));
 				
 		// Add real pks in embeddable class

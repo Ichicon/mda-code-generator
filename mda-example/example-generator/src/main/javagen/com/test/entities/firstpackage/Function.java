@@ -7,7 +7,7 @@ import javax.persistence.Table;
 import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.SequenceGenerator;
-import com.test.entities.firstpackage.Appuser;
+import javax.persistence.CascadeType;
 import javax.persistence.ManyToMany;
 import javax.persistence.Id;
 import javax.persistence.GenerationType;
@@ -64,7 +64,7 @@ public class Function implements Serializable{
      * Association user_function_assoc to Appuser
      * @return value of appuserList
      */
-    @ManyToMany(mappedBy="myFunctionList")
+    @ManyToMany(mappedBy="myFunctionList", cascade={CascadeType.PERSIST,CascadeType.MERGE})
 	public Set<Appuser> getAppuserList(){
 		return appuserList;
     }  
