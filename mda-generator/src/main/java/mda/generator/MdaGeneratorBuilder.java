@@ -72,6 +72,8 @@ public class MdaGeneratorBuilder {
 	private Charset charset = StandardCharsets.UTF_8;
 	/** Class prefixes for which sql tables will not be generated */
 	private List<String> excludedPrefixes;
+	/** Prefix to add before sql sequence name */
+	private String sqlSequencePrefixName = "SEQ_";
 
 	/**
 	 * [RECOMMENDED] Load the generator with a propertes file. You should call build() just after this call, yet you can still call withXxxx before building to overload parameters.
@@ -122,6 +124,7 @@ public class MdaGeneratorBuilder {
 			PropertyUtils.loadPathFromProperty("pathToCreateSQLTemplate", prop, this);
 			PropertyUtils.loadPathFromProperty("pathToDropSQLTemplate", prop, this);
 			PropertyUtils.loadStringList("excludedPrefixes", prop, this);
+			PropertyUtils.loadString("sqlSequencePrefixName", prop, this);
 		} catch(Exception e) {
 			throw new MdaGeneratorException("Cannot load property file " + pathToProperties.toString(),e);
 		} 
@@ -302,6 +305,16 @@ public class MdaGeneratorBuilder {
 		this.excludedPrefixes = Arrays.asList(excludedPrefixes);
 		return this;
 	}
+	
+	/**
+	 * Charset used to write the files
+	 * @param sqlSequencePrefixName SQL Sequence prefix name to use (can be empty)
+	 * @return builder to re-use
+	 */
+	public MdaGeneratorBuilder withSqlSequencePrefixName(String sqlSequencePrefixName){
+		this.sqlSequencePrefixName = sqlSequencePrefixName;
+		return this;
+	}
 
 	/**
 	 * Add an annotation to liste of class (simple name). Call multiple times to add multiple annotations. 
@@ -354,6 +367,7 @@ public class MdaGeneratorBuilder {
 		generator.setPathToPackageInfoTemplate(pathToPackageInfoTemplate);
 		generator.setCharset(charset);
 		generator.setExcludedPrefixes(excludedPrefixes);
+		generator.setSqlSequencePrefixName(sqlSequencePrefixName);
 
 		return generator;
 	}

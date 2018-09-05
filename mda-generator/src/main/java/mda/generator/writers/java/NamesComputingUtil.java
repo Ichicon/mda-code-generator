@@ -10,12 +10,15 @@ import mda.generator.beans.UmlClass;
 import mda.generator.exceptions.MdaGeneratorException;
 
 /**
- * Util to compute FK and PK anmes
+ * Util to compute FK and PK names
  * @author Fabien Crapart
  *
  */
 public class NamesComputingUtil {
-	public static String SEQUENCE_PREFIX ="SEQ_";
+	/** Default prefix for sql sequence name */
+	public static final String DEFAULT_SEQUENCE_PREFIX ="SEQ_";
+	/** Actual sql sequence name prefix */
+	private static String sequencePrefix = DEFAULT_SEQUENCE_PREFIX;
 	
 	/**
 	 * Compute sequence name for a table with unique PK
@@ -23,7 +26,7 @@ public class NamesComputingUtil {
 	 * @return Sequence name
 	 */
 	public static String computeSequenceName(UmlClass umlClass) {
-		return SEQUENCE_PREFIX + umlClass.getName().toUpperCase();
+		return sequencePrefix + umlClass.getName().toUpperCase();
 	}
 	
 	/**
@@ -103,5 +106,13 @@ public class NamesComputingUtil {
 		
 		return pkValue.toString();
 	}
-
+	
+	/**
+	 * Change sequence prefix, default prefix is SEQ_
+	 * @param newPrefix new value for prefix
+	 * @return 
+	 */
+	public static void changeSequencePrefix(String newPrefix) {
+		sequencePrefix = newPrefix;
+	}
 }

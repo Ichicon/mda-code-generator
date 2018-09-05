@@ -42,6 +42,11 @@ public class OracleSQLWriter implements SQLWriterInterface {
 		}		
 		this.config = config;
 		
+		// Change SQL prefix name if provided
+		if(config.getSequencePrefixName() != null) {
+			NamesComputingUtil.changeSequencePrefix(config.getSequencePrefixName());
+		}
+		
 		// Create the root directory for sql if doesn't exists
 		try {
 			Files.createDirectories(config.getSqlOutputDirectory());

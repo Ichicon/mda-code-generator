@@ -56,6 +56,7 @@ public class MdaGenerator {
 	private Path pathToCreateSQLTemplate;
 	private Path pathToDropSQLTemplate;
 	private List<String> excludedPrefixes;
+	private String sequencePrefixName;
 	
 	
 	/** Charset */
@@ -149,7 +150,8 @@ public class MdaGenerator {
 		sqlConfig.setConverter(converter);
 		sqlConfig.setCharset(charset);
 		sqlConfig.setExcludesClassesPrefixes(excludedPrefixes);
-
+		sqlConfig.setSequencePrefixName(sequencePrefixName);
+		
 		sqlWriter.writeSql(sqlConfig);
 	}
 
@@ -274,6 +276,12 @@ public class MdaGenerator {
 		this.excludedPrefixes = excludedPrefixes;
 	}
 
+	/**
+	 * @param sqlSequencePrefixName the sqlSequencePrefixName so sequence name = PREFIX + Table Name, default is SEQ_
+	 */
+	public void setSqlSequencePrefixName(String sqlSequencePrefixName) {
+		this.sequencePrefixName = sqlSequencePrefixName;
+	}
 
 	/**
 	 * @param annotationsForClasses the annotationsForClasses to set
