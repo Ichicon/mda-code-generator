@@ -15,6 +15,7 @@ import mda.generator.exceptions.MdaGeneratorException;
 import mda.generator.readers.ModelFileReaderInterface;
 import mda.generator.writers.java.JavaWriterConfig;
 import mda.generator.writers.java.JavaWriterInterface;
+import mda.generator.writers.java.NamesComputingUtil;
 import mda.generator.writers.sql.SQLWriterConfig;
 import mda.generator.writers.sql.SQLWriterInterface;
 
@@ -126,6 +127,12 @@ public class MdaGenerator {
 		}
 
 		LOG.info(sbUmlObjects);
+		
+		
+		// Change SQL prefix name if provided, to be used for java and sql generation
+		if(sequencePrefixName != null) {
+			NamesComputingUtil.changeSequencePrefix(sequencePrefixName);
+		}
 
 		// Generation du code java	
 		JavaWriterConfig javaConfig = new JavaWriterConfig();
@@ -138,7 +145,8 @@ public class MdaGenerator {
 		javaConfig.setPathToPackageInfoTemplate(pathToPackageInfoTemplate);
 		javaConfig.setPathToEntitiesTemplate(pathToEntitiesTemplate);
 		javaConfig.setPathToDaosTemplate(pathToDaosTemplate);
-		javaConfig.setCharset(charset);		
+		javaConfig.setCharset(charset);
+		
 		javaWriter.writeSourceCode(javaConfig);
 		
 		// Generation du sql
@@ -150,8 +158,7 @@ public class MdaGenerator {
 		sqlConfig.setConverter(converter);
 		sqlConfig.setCharset(charset);
 		sqlConfig.setExcludesClassesPrefixes(excludedPrefixes);
-		sqlConfig.setSequencePrefixName(sequencePrefixName);
-		
+
 		sqlWriter.writeSql(sqlConfig);
 	}
 

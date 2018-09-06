@@ -20,7 +20,6 @@ public class SQLWriterConfig {
 	private Iterable<String> excludesClassesPrefixes;
 	private ConverterInterface converter;
 	private Charset charset = StandardCharsets.UTF_8;
-	private String sequencePrefixName ;
 	
 	/**
 	 * @return the sqlTemplatePath
@@ -108,16 +107,5 @@ public class SQLWriterConfig {
 	public void setCharset(Charset charset) {
 		this.charset = charset;
 	}
-	/**
-	 * @return the sequencePrefixName
-	 */
-	public String getSequencePrefixName() {
-		return sequencePrefixName;
-	}
-	/**
-	 * @param sequencePrefixName the sequencePrefixName to set
-	 */
-	public void setSequencePrefixName(String sequencePrefixName) {
-		this.sequencePrefixName = sequencePrefixName;
-	}
+
 }

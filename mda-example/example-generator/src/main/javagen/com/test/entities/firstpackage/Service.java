@@ -38,8 +38,8 @@ public class Service implements Serializable{
      * @return value of serviceId
      */
     @Id
-    @SequenceGenerator(name="SEQ_SERVICE", sequenceName="SEQ_SERVICE", allocationSize=1)
-    @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="SEQ_SERVICE")
+    @SequenceGenerator(name="S_SERVICE", sequenceName="S_SERVICE", allocationSize=1)
+    @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="S_SERVICE")
     @Column(name="service_id", nullable=false)
 	public Long getServiceId(){
 		return serviceId;

@@ -29,8 +29,8 @@ public class UserType implements Serializable{
      * @return value of typeId
      */
     @Id
-    @SequenceGenerator(name="SEQ_USER_TYPE", sequenceName="SEQ_USER_TYPE", allocationSize=1)
-    @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="SEQ_USER_TYPE")
+    @SequenceGenerator(name="S_USER_TYPE", sequenceName="S_USER_TYPE", allocationSize=1)
+    @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="S_USER_TYPE")
     @Column(name="type_id", nullable=false)
 	public Long getTypeId(){
 		return typeId;

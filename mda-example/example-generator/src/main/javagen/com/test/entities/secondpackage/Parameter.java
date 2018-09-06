@@ -33,8 +33,8 @@ public class Parameter implements Serializable{
      * @return value of paramId
      */
     @Id
-    @SequenceGenerator(name="SEQ_PARAMETER", sequenceName="SEQ_PARAMETER", allocationSize=1)
-    @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="SEQ_PARAMETER")
+    @SequenceGenerator(name="S_PARAMETER", sequenceName="S_PARAMETER", allocationSize=1)
+    @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="S_PARAMETER")
     @Column(name="param_id", nullable=false)
 	public Long getParamId(){
 		return paramId;
