@@ -309,7 +309,7 @@ public class JavaClass {
 					if(association.getOpposite().isTargetMultiple()) {				
 						buildManyToOne(association, assocGetter);		
 					} else { // OneToOne is too complicated to generate, use a "false" n -> 1 instead
-						throw new MdaGeneratorException("This generator doesn't support 1 -> 1 for association " + association.getName() + ", use n -> 1 instead");
+						buildOneToOne(association, assocGetter);	
 					}
 				}
 
@@ -325,7 +325,12 @@ public class JavaClass {
 	 * @param assocGetter Getter for the many to one
 	 */
 	protected void buildManyToOne(UmlAssociation association, JavaMethod assocGetter) {
-		assocGetter.addAnnotations(new JavaAnnotation(importManager.getFinalName("javax.persistence.ManyToOne")));	
+		assocGetter.addAnnotations(new JavaAnnotation(
+				importManager.getFinalName("javax.persistence.ManyToOne"),
+				// ManyToOne is eager by default, which is bad :/
+				new JavaAnnotationProperty("fetch",importManager.getFinalName("javax.persistence.FetchType")+".LAZY")
+			)	
+		);	
 		assocGetter.addAnnotations(new JavaAnnotation(
 				importManager.getFinalName("javax.persistence.JoinColumn"),
 				new JavaAnnotationProperty("name","\"" + NamesComputingUtil.computeFKName(association) + "\""),
@@ -371,21 +376,22 @@ public class JavaClass {
 	 * @param association association with data
 	 * @param assocGetter Getter for the many to many
 	 */
-	protected void buildManyToMany(UmlAssociation association, JavaMethod assocGetter) {
+	protected void buildManyToMany(UmlAssociation association, JavaMethod assocGetter) {			
 		// The "owner" have the annotation with join columns and intermediate table name
-		if(association.isOwner() || !association.getOpposite().isTargetNavigable()) {
+		// Or owner has no navigability
+		if(!association.isOwned() || !association.getOpposite().isTargetNavigable()) {		
 			assocGetter.addAnnotations(new JavaAnnotation(
-				importManager.getFinalName("javax.persistence.ManyToMany"),
-				new JavaAnnotationProperty("cascade","{"
-						+ importManager.getFinalName("javax.persistence.CascadeType")+".PERSIST,"
-						+ importManager.getFinalName("javax.persistence.CascadeType")+".MERGE}")
-			));
-			assocGetter.addAnnotations(new JavaAnnotation(
-				importManager.getFinalName("javax.persistence.JoinTable"),
-				new JavaAnnotationProperty("name","\"" +  association.getName() + "\""),
-				new JavaAnnotationProperty("joinColumns","@"+importManager.getFinalName("javax.persistence.JoinColumn")+"(name = \""+ NamesComputingUtil.computeFKName(association.getOpposite())+"\")"),
-				new JavaAnnotationProperty("inverseJoinColumns","@"+importManager.getFinalName("javax.persistence.JoinColumn")+"(name = \""+  NamesComputingUtil.computeFKName(association)+ "\")")
-			));
+					importManager.getFinalName("javax.persistence.ManyToMany"),
+					new JavaAnnotationProperty("cascade","{"
+							+ importManager.getFinalName("javax.persistence.CascadeType")+".PERSIST,"
+							+ importManager.getFinalName("javax.persistence.CascadeType")+".MERGE}")
+				));
+				assocGetter.addAnnotations(new JavaAnnotation(
+					importManager.getFinalName("javax.persistence.JoinTable"),
+					new JavaAnnotationProperty("name","\"" +  association.getName() + "\""),
+					new JavaAnnotationProperty("joinColumns","@"+importManager.getFinalName("javax.persistence.JoinColumn")+"(name = \""+ NamesComputingUtil.computeFKName(association.getOpposite())+"\")"),
+					new JavaAnnotationProperty("inverseJoinColumns","@"+importManager.getFinalName("javax.persistence.JoinColumn")+"(name = \""+  NamesComputingUtil.computeFKName(association)+ "\")")
+				));						
 		} else { // Not "owner" of the manyToMany, mappedBy with opposite getter is enough
 			assocGetter.addAnnotations(new JavaAnnotation(
 					importManager.getFinalName("javax.persistence.ManyToMany"),
@@ -395,6 +401,62 @@ public class JavaClass {
 							+ importManager.getFinalName("javax.persistence.CascadeType")+".MERGE}")
 			));
 		}
+	}
+	
+	/**
+	 * Build One to One annotations
+	 * @param association association with data
+	 * @param assocGetter Getter for the One to One
+	 */
+	protected void buildOneToOne(UmlAssociation association, JavaMethod assocGetter) {	
+		// Only ref to owned pk
+		if(association.isOwned()) {
+			// One to one with fetch = lazy
+			assocGetter.addAnnotations(
+				new JavaAnnotation(
+					importManager.getFinalName("javax.persistence.OneToOne"),
+					// OneToOne is eager by default, which is bad :/
+					new JavaAnnotationProperty("fetch",importManager.getFinalName("javax.persistence.FetchType")+".LAZY")					
+				)	
+			);	
+			// Reference to owner PK
+			assocGetter.addAnnotations(new JavaAnnotation(
+					importManager.getFinalName("javax.persistence.JoinColumn"),
+					new JavaAnnotationProperty("name","\"" + NamesComputingUtil.computeFKName(association) + "\""),
+					new JavaAnnotationProperty("referencedColumnName","\"" + NamesComputingUtil.computePKName(association.getTarget()) + "\"")	
+			));	
+		}else { // If is owner, cascading to delete the owned object 
+			// Can't use mapped by if other OneToOne doesn't exists
+			if(!association.getOpposite().isTargetNavigable()) {
+				assocGetter.addAnnotations(
+					new JavaAnnotation(
+						importManager.getFinalName("javax.persistence.OneToOne"),
+						// OneToOne is eager by default, which is bad :/
+						new JavaAnnotationProperty("fetch",importManager.getFinalName("javax.persistence.FetchType")+".LAZY"),
+						// cascading all
+						new JavaAnnotationProperty("cascade","{"+ importManager.getFinalName("javax.persistence.CascadeType")+".ALL}")
+					)	
+				);
+				assocGetter.addAnnotations(new JavaAnnotation(
+					importManager.getFinalName("javax.persistence.JoinTable"),
+					new JavaAnnotationProperty("name","\"" +  association.getName() + "\""),
+					new JavaAnnotationProperty("inverseJoinColumns","@"+importManager.getFinalName("javax.persistence.JoinColumn")+"(name = \""+  NamesComputingUtil.computeFKName(association)+ "\")")
+				));	
+			} else {
+				assocGetter.addAnnotations(
+					new JavaAnnotation(
+						importManager.getFinalName("javax.persistence.OneToOne"),
+						// OneToOne is eager by default, which is bad :/
+						new JavaAnnotationProperty("fetch",importManager.getFinalName("javax.persistence.FetchType")+".LAZY"),
+						// mapped by
+						new JavaAnnotationProperty("mappedBy","\""+ NamesComputingUtil.computeFkObjectName(association.getOpposite())  + "\""),
+						// cascading all
+						new JavaAnnotationProperty("cascade","{"+ importManager.getFinalName("javax.persistence.CascadeType")+".ALL}")
+					)	
+				);	
+			}
+		}
+	
 	}
 	
 

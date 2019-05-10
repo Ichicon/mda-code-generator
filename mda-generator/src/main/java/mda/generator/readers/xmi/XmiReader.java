@@ -278,11 +278,20 @@ public class XmiReader implements ModelFileReaderInterface {
 			String assocName = XmiUtil.getAttribute(labels, "mt");
 
 			UmlClass classSource = classesMap.get(XmiUtil.getElementIdRef(source));		
-			UmlClass classTarget = classesMap.get(XmiUtil.getElementIdRef(target));	
+			UmlClass classTarget = classesMap.get(XmiUtil.getElementIdRef(target));		
+			if(assocName == null) {
+				throw new MdaGeneratorException("Association between "+ classSource.getName() +" and " + classTarget.getName() + " has no name");
+			}
 
 			UmlAssociation sourceToTarget = extraireAssociation(assocName, classSource, classTarget, target);
-			sourceToTarget.setOwner(true); // arbitraire mais nécessaire pour les n:m
+
 			UmlAssociation targetToSource = extraireAssociation(assocName, classTarget, classSource, source);
+			if((sourceToTarget.isOwned() && targetToSource.isOwned())  || 
+					(!sourceToTarget.isOwned() && !targetToSource.isOwned())) {
+				// Si aucun n'est owner (ou les deux), on choisit arbitrairement la sources (utile pour n:m et 1:1)
+				sourceToTarget.setOwned(true); 
+			}
+			
 			
 			// On partage les infos entre les associations
 			sourceToTarget.setOpposite(targetToSource);			
@@ -336,8 +345,16 @@ public class XmiReader implements ModelFileReaderInterface {
 		// Facultatif, récupérer le nom de la colonne FK <style value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Navigable;alias=workplace_service_id;"/>
 		String stylesValues = XmiUtil.getAttribute(XmiUtil.getFirstChildsNodeWithTagName(targetNode, "style"), "value");
 		for(String styleValue : stylesValues.split(";")) {
-			if(styleValue != null && styleValue.startsWith("alias=")) {
-				umlAssoc.setFkName(styleValue.split("=")[1]);
+			if(styleValue != null ) {
+				// Nom de la FK
+				if(styleValue.startsWith("alias=")) {
+					umlAssoc.setFkName(styleValue.split("=")[1]);
+				}
+				// Owner de la relation (pour 1:1 et n:m)
+				else if(styleValue.startsWith("Owned=")) {					
+					// Si owned vaut 1, c'est l'autre qui est owner de l'association
+					umlAssoc.setOwned(styleValue.split("=")[1].equals("1")? true: false);
+				}
 			}
 		}
 		

@@ -8,9 +8,10 @@
 -- SEQUENCES
 -- ================================
 CREATE SEQUENCE S_FUNCTION START WITH 1000 INCREMENT BY 1 NOCACHE NOCYCLE;
+CREATE SEQUENCE S_FUNCTION_BODY START WITH 1000 INCREMENT BY 1 NOCACHE NOCYCLE;
 CREATE SEQUENCE S_SERVICE START WITH 1000 INCREMENT BY 1 NOCACHE NOCYCLE;
 CREATE SEQUENCE S_TEST_DOMAIN START WITH 1000 INCREMENT BY 1 NOCACHE NOCYCLE;
-CREATE SEQUENCE S_APPUSER START WITH 1000 INCREMENT BY 1 NOCACHE NOCYCLE;
+CREATE SEQUENCE S_USER START WITH 1000 INCREMENT BY 1 NOCACHE NOCYCLE;
 CREATE SEQUENCE S_USER_TYPE START WITH 1000 INCREMENT BY 1 NOCACHE NOCYCLE;
 CREATE SEQUENCE S_PARAMETER START WITH 1000 INCREMENT BY 1 NOCACHE NOCYCLE;
  
@@ -21,8 +22,18 @@ CREATE SEQUENCE S_PARAMETER START WITH 1000 INCREMENT BY 1 NOCACHE NOCYCLE;
 CREATE TABLE function (
 	function_id NUMBER(12) not null,
 	function_name VARCHAR2(50) not null,
+	function_body_id NUMBER(12) not null,
 	CONSTRAINT PK_FUNCTION PRIMARY KEY (function_id)
 );
+COMMENT ON COLUMN function.function_body_id IS 'ManyToOne FK function_body';
+
+CREATE TABLE function_body (
+	function_body_id NUMBER(12) not null,
+	body_content VARCHAR2(50) not null,
+	function_id NUMBER(12) not null,
+	CONSTRAINT PK_FUNCTION_BODY PRIMARY KEY (function_body_id)
+);
+COMMENT ON COLUMN function_body.function_id IS 'ManyToOne FK function';
 
 CREATE TABLE service (
 	service_id NUMBER(12) not null,
@@ -55,26 +66,26 @@ COMMENT ON COLUMN test_domain.id IS 'Identifiant';
 COMMENT ON COLUMN test_domain.code IS 'Code';
 COMMENT ON COLUMN test_domain.libelle IS 'Libellé';
 
-CREATE TABLE appuser (
+CREATE TABLE user (
 	user_id NUMBER(12) not null,
 	user_name VARCHAR2(250) not null,
 	user_surname VARCHAR2(250) not null,
 	workplace_service_id NUMBER(12) not null,
 	service_id NUMBER(12) not null,
 	type_id NUMBER(12) not null,
-	CONSTRAINT PK_APPUSER PRIMARY KEY (user_id)
+	CONSTRAINT PK_USER PRIMARY KEY (user_id)
 );
-COMMENT ON COLUMN appuser.workplace_service_id IS 'ManyToOne FK service';
-COMMENT ON COLUMN appuser.service_id IS 'ManyToOne FK service';
-COMMENT ON COLUMN appuser.type_id IS 'ManyToOne FK user_type';
+COMMENT ON COLUMN user.workplace_service_id IS 'ManyToOne FK service';
+COMMENT ON COLUMN user.service_id IS 'ManyToOne FK service';
+COMMENT ON COLUMN user.type_id IS 'ManyToOne FK user_type';
 
 CREATE TABLE user_function_assoc (
 	user_id NUMBER(12) not null,
 	my_function_id NUMBER(12) not null,
 	CONSTRAINT PK_USER_FUNCTION_ASSOC PRIMARY KEY (user_id,my_function_id)
 );
-COMMENT ON TABLE user_function_assoc IS 'ManyToMany appuser / function';
-COMMENT ON COLUMN user_function_assoc.user_id IS 'ManyToMany FK appuser';
+COMMENT ON TABLE user_function_assoc IS 'ManyToMany user / function';
+COMMENT ON COLUMN user_function_assoc.user_id IS 'ManyToMany FK user';
 COMMENT ON COLUMN user_function_assoc.my_function_id IS 'ManyToMany FK function';
 
 CREATE TABLE user_type (
@@ -110,24 +121,28 @@ COMMENT ON COLUMN parameter.pk_two IS 'ManyToOne FK double_key';
 -- ================================
 -- FOREIGN KEYS
 -- ================================
+ALTER TABLE function ADD CONSTRAINT FK_function_function_body FOREIGN KEY (function_body_id) REFERENCES function_body(function_body_id);
+ALTER TABLE function_body ADD CONSTRAINT FK_function_function_body FOREIGN KEY (function_id) REFERENCES function(function_id);
 ALTER TABLE service ADD CONSTRAINT FK_service_service_parent FOREIGN KEY (parent_service_id) REFERENCES service(service_id);
-ALTER TABLE user_function_assoc ADD CONSTRAINT FK_user_function_assoc_1 FOREIGN KEY (user_id) REFERENCES appuser(user_id);
+ALTER TABLE user_function_assoc ADD CONSTRAINT FK_user_function_assoc_1 FOREIGN KEY (user_id) REFERENCES user(user_id);
 ALTER TABLE user_function_assoc ADD CONSTRAINT FK_user_function_assoc_2 FOREIGN KEY (my_function_id) REFERENCES function(my_function_id);
-ALTER TABLE appuser ADD CONSTRAINT FK_service_workplace_id FOREIGN KEY (workplace_service_id) REFERENCES service(service_id);
-ALTER TABLE appuser ADD CONSTRAINT FK_user_service FOREIGN KEY (service_id) REFERENCES service(service_id);
-ALTER TABLE appuser ADD CONSTRAINT FK_user_usertype FOREIGN KEY (type_id) REFERENCES user_type(type_id);
+ALTER TABLE user ADD CONSTRAINT FK_service_workplace_id FOREIGN KEY (workplace_service_id) REFERENCES service(service_id);
+ALTER TABLE user ADD CONSTRAINT FK_user_service FOREIGN KEY (service_id) REFERENCES service(service_id);
+ALTER TABLE user ADD CONSTRAINT FK_user_usertype FOREIGN KEY (type_id) REFERENCES user_type(type_id);
 ALTER TABLE parameter ADD CONSTRAINT FK_DOUBLE_PK FOREIGN KEY (pk_one, pk_two) REFERENCES double_key(pk_one, pk_two);
 
 
 -- ================================
 -- FOREIGN KEYS INDEXES
 -- ================================
+CREATE INDEX IDX_function_function_body ON function (function_body_id);
+CREATE INDEX IDX_function_function_body ON function_body (function_id);
 CREATE INDEX IDX_service_service_parent ON service (parent_service_id);
 CREATE INDEX IDX_user_function_assoc_1 ON user_function_assoc (user_id);
 CREATE INDEX IDX_user_function_assoc_2 ON user_function_assoc (my_function_id);
-CREATE INDEX IDX_service_workplace_id ON appuser (workplace_service_id);
-CREATE INDEX IDX_user_service ON appuser (service_id);
-CREATE INDEX IDX_user_usertype ON appuser (type_id);
+CREATE INDEX IDX_service_workplace_id ON user (workplace_service_id);
+CREATE INDEX IDX_user_service ON user (service_id);
+CREATE INDEX IDX_user_usertype ON user (type_id);
 CREATE INDEX IDX_DOUBLE_PK ON parameter (pk_one, pk_two);
 
 -- END OF GENERATED CODE - YOU CAN EDIT THE FILE AFTER THIS LINE, DO NOT EDIT THIS LINE OR BEFORE THIS LINE

@@ -1,16 +1,20 @@
 package com.test.entities.firstpackage;
 
 import java.io.Serializable;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.util.Set;
-import javax.persistence.Column;
+import javax.persistence.FetchType;
 import javax.persistence.SequenceGenerator;
-import javax.persistence.CascadeType;
 import javax.persistence.ManyToMany;
-import javax.persistence.Id;
 import javax.persistence.GenerationType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.OneToOne;
+import javax.persistence.JoinColumn;
+import javax.persistence.Column;
+import javax.persistence.CascadeType;
+import javax.persistence.Id;
+import javax.persistence.JoinTable;
 
 /**
  * No comment found in model diagram
@@ -25,7 +29,8 @@ public class Function implements Serializable{
 
 	private Long functionId;
 	private String functionName;
-	private Set<Appuser> appuserList;
+	private FunctionBody functionBody;
+	private Set<User> userList;
 
     /**
      * No comment found in model diagram
@@ -61,19 +66,36 @@ public class Function implements Serializable{
 		this.functionName = functionName;
     }  
     /**
-     * Association user_function_assoc to Appuser
-     * @return value of appuserList
+     * Association function_function_body to FunctionBody
+     * @return value of functionBody
      */
-    @ManyToMany(mappedBy="myFunctionList", cascade={CascadeType.PERSIST,CascadeType.MERGE})
-	public Set<Appuser> getAppuserList(){
-		return appuserList;
+    @OneToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="function_body_id", referencedColumnName="function_body_id")
+	public FunctionBody getFunctionBody(){
+		return functionBody;
     }  
     /**
-     * Association user_function_assoc to Appuser
-     * @param appuserList new value to give to appuserList
+     * Association function_function_body to FunctionBody
+     * @param functionBody new value to give to functionBody
      */
-	public void setAppuserList(final Set<Appuser> appuserList){
-		this.appuserList = appuserList;
+	public void setFunctionBody(final FunctionBody functionBody){
+		this.functionBody = functionBody;
+    }  
+    /**
+     * Association user_function_assoc to User
+     * @return value of userList
+     */
+    @ManyToMany(cascade={CascadeType.PERSIST,CascadeType.MERGE})
+    @JoinTable(name="user_function_assoc", joinColumns=@JoinColumn(name = "my_function_id"), inverseJoinColumns=@JoinColumn(name = "user_id"))
+	public Set<User> getUserList(){
+		return userList;
+    }  
+    /**
+     * Association user_function_assoc to User
+     * @param userList new value to give to userList
+     */
+	public void setUserList(final Set<User> userList){
+		this.userList = userList;
     }  
 
 	@Override

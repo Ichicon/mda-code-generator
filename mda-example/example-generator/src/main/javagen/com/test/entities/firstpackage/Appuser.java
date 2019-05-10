@@ -2,6 +2,7 @@ package com.test.entities.firstpackage;
 
 import java.io.Serializable;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Table;
 import java.util.Set;
 import javax.persistence.SequenceGenerator;
@@ -102,7 +103,7 @@ public class Appuser implements Serializable{
      * Association service_workplace_id to Service
      * @return value of workplaceService
      */
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="workplace_service_id", referencedColumnName="service_id")
 	public Service getWorkplaceService(){
 		return workplaceService;

@@ -1,18 +1,19 @@
 package com.test.entities.firstpackage;
 
 import java.io.Serializable;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import javax.persistence.JoinColumn;
 import java.util.Set;
-import javax.persistence.Column;
+import javax.persistence.FetchType;
 import javax.persistence.SequenceGenerator;
-import javax.persistence.CascadeType;
-import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.GenerationType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.JoinColumn;
+import javax.persistence.Column;
+import javax.persistence.CascadeType;
+import javax.persistence.Id;
 
 /**
  * No comment found in model diagram
@@ -30,8 +31,8 @@ public class Service implements Serializable{
 	private String serviceName;
 	private Service parentService;
 	private Set<Service> serviceList;
-	private Set<Appuser> usersOnSiteList;
-	private Set<Appuser> membersList;
+	private Set<User> usersOnSiteList;
+	private Set<User> membersList;
 
     /**
      * No comment found in model diagram
@@ -70,7 +71,7 @@ public class Service implements Serializable{
      * Association service_service_parent to Service
      * @return value of parentService
      */
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="parent_service_id", referencedColumnName="service_id")
 	public Service getParentService(){
 		return parentService;
@@ -98,33 +99,33 @@ public class Service implements Serializable{
 		this.serviceList = serviceList;
     }  
     /**
-     * Association service_workplace_id to Appuser
+     * Association service_workplace_id to User
      * @return value of usersOnSiteList
      */
     @OneToMany(cascade=CascadeType.ALL, mappedBy="workplaceService", orphanRemoval=true)
-	public Set<Appuser> getUsersOnSiteList(){
+	public Set<User> getUsersOnSiteList(){
 		return usersOnSiteList;
     }  
     /**
-     * Association service_workplace_id to Appuser
+     * Association service_workplace_id to User
      * @param usersOnSiteList new value to give to usersOnSiteList
      */
-	public void setUsersOnSiteList(final Set<Appuser> usersOnSiteList){
+	public void setUsersOnSiteList(final Set<User> usersOnSiteList){
 		this.usersOnSiteList = usersOnSiteList;
     }  
     /**
-     * Association user_service to Appuser
+     * Association user_service to User
      * @return value of membersList
      */
     @OneToMany(cascade=CascadeType.ALL, mappedBy="userService", orphanRemoval=true)
-	public Set<Appuser> getMembersList(){
+	public Set<User> getMembersList(){
 		return membersList;
     }  
     /**
-     * Association user_service to Appuser
+     * Association user_service to User
      * @param membersList new value to give to membersList
      */
-	public void setMembersList(final Set<Appuser> membersList){
+	public void setMembersList(final Set<User> membersList){
 		this.membersList = membersList;
     }  
 

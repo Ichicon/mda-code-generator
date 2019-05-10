@@ -113,7 +113,7 @@ public class OracleSQLWriter implements SQLWriterInterface {
 				for(UmlAssociation umlAssociation : umlClass.getAssociations()) {
 					if(umlAssociation.isTargetMultiple()) {
 						// ManyToMany, need intermediate table
-						if(umlAssociation.getOpposite().isTargetMultiple() && umlAssociation.isOwner()) {
+						if(umlAssociation.getOpposite().isTargetMultiple() && umlAssociation.isOwned()) {
 							if(umlAssociation.getSource().getPKs().size() > 1 || umlAssociation.getTarget().getPKs().size() > 1) {
 								throw new MdaGeneratorException("Cannot create table for " + umlAssociation.getName() + " association, composite pk forbidden in many to many");
 							}

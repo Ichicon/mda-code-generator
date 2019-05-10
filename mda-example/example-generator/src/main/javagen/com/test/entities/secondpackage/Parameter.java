@@ -6,6 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.JoinColumn;
 import javax.persistence.Column;
+import javax.persistence.FetchType;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
@@ -65,7 +66,7 @@ public class Parameter implements Serializable{
      * Association DOUBLE_PK to DoubleKey
      * @return value of doubleKey
      */
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="double_keyId", referencedColumnName="double_keyId")
 	public DoubleKey getDoubleKey(){
 		return doubleKey;

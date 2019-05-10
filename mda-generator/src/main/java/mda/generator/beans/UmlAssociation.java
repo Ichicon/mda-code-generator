@@ -12,7 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 public class UmlAssociation {
 	private String id;
 	private String name;
-	private boolean owner; // pour les manyToMany on a besoin d'un côté principal
+	private boolean owned; // pour les manyToMany on a besoin d'un côté principal
 	
 	private UmlAssociation opposite;
 		
@@ -114,17 +114,17 @@ public class UmlAssociation {
 	}
 
 	/**
-	 * @return the owner
+	 * @return the owned
 	 */
-	public boolean isOwner() {
-		return owner;
+	public boolean isOwned() {
+		return owned;
 	}
 
 	/**
-	 * @param owner the owner to set
+	 * @param owned the owned to set
 	 */
-	public void setOwner(boolean owner) {
-		this.owner = owner;
+	public void setOwned(boolean owned) {
+		this.owned = owned;
 	}
 
 	/**
