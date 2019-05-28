@@ -25,15 +25,13 @@ CREATE TABLE function (
 	function_body_id NUMBER(12) not null,
 	CONSTRAINT PK_FUNCTION PRIMARY KEY (function_id)
 );
-COMMENT ON COLUMN function.function_body_id IS 'ManyToOne FK function_body';
+COMMENT ON COLUMN function.function_body_id IS 'OneToOne FK function_body';
 
 CREATE TABLE function_body (
 	function_body_id NUMBER(12) not null,
 	body_content VARCHAR2(50) not null,
-	function_id NUMBER(12) not null,
 	CONSTRAINT PK_FUNCTION_BODY PRIMARY KEY (function_body_id)
 );
-COMMENT ON COLUMN function_body.function_id IS 'ManyToOne FK function';
 
 CREATE TABLE service (
 	service_id NUMBER(12) not null,
@@ -122,7 +120,6 @@ COMMENT ON COLUMN parameter.pk_two IS 'ManyToOne FK double_key';
 -- FOREIGN KEYS
 -- ================================
 ALTER TABLE function ADD CONSTRAINT FK_function_function_body FOREIGN KEY (function_body_id) REFERENCES function_body(function_body_id);
-ALTER TABLE function_body ADD CONSTRAINT FK_function_function_body FOREIGN KEY (function_id) REFERENCES function(function_id);
 ALTER TABLE service ADD CONSTRAINT FK_service_service_parent FOREIGN KEY (parent_service_id) REFERENCES service(service_id);
 ALTER TABLE user_function_assoc ADD CONSTRAINT FK_user_function_assoc_1 FOREIGN KEY (user_id) REFERENCES user(user_id);
 ALTER TABLE user_function_assoc ADD CONSTRAINT FK_user_function_assoc_2 FOREIGN KEY (my_function_id) REFERENCES function(my_function_id);
@@ -136,7 +133,6 @@ ALTER TABLE parameter ADD CONSTRAINT FK_DOUBLE_PK FOREIGN KEY (pk_one, pk_two) R
 -- FOREIGN KEYS INDEXES
 -- ================================
 CREATE INDEX IDX_function_function_body ON function (function_body_id);
-CREATE INDEX IDX_function_function_body ON function_body (function_id);
 CREATE INDEX IDX_service_service_parent ON service (parent_service_id);
 CREATE INDEX IDX_user_function_assoc_1 ON user_function_assoc (user_id);
 CREATE INDEX IDX_user_function_assoc_2 ON user_function_assoc (my_function_id);

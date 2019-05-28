@@ -308,7 +308,7 @@ public class JavaClass {
 					// ManyToOne
 					if(association.getOpposite().isTargetMultiple()) {				
 						buildManyToOne(association, assocGetter);		
-					} else { // OneToOne is too complicated to generate, use a "false" n -> 1 instead
+					} else { // OneToOne
 						buildOneToOne(association, assocGetter);	
 					}
 				}
@@ -379,7 +379,7 @@ public class JavaClass {
 	protected void buildManyToMany(UmlAssociation association, JavaMethod assocGetter) {			
 		// The "owner" have the annotation with join columns and intermediate table name
 		// Or owner has no navigability
-		if(!association.isOwned() || !association.getOpposite().isTargetNavigable()) {		
+		if(!association.isTargetOwned() || !association.getOpposite().isTargetNavigable()) {		
 			assocGetter.addAnnotations(new JavaAnnotation(
 					importManager.getFinalName("javax.persistence.ManyToMany"),
 					new JavaAnnotationProperty("cascade","{"
@@ -410,7 +410,7 @@ public class JavaClass {
 	 */
 	protected void buildOneToOne(UmlAssociation association, JavaMethod assocGetter) {	
 		// Only ref to owned pk
-		if(association.isOwned()) {
+		if(association.isTargetOwned()) {
 			// One to one with fetch = lazy
 			assocGetter.addAnnotations(
 				new JavaAnnotation(

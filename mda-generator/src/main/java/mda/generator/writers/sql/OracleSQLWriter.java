@@ -111,9 +111,11 @@ public class OracleSQLWriter implements SQLWriterInterface {
 				
 				// Compute association columns and FKs
 				for(UmlAssociation umlAssociation : umlClass.getAssociations()) {
+					// xToMany
 					if(umlAssociation.isTargetMultiple()) {
 						// ManyToMany, need intermediate table
-						if(umlAssociation.getOpposite().isTargetMultiple() && umlAssociation.isOwned()) {
+						// Using the owned side is a trick because we only need to create the intermediate table once, there is always one and only one owned side
+						if(umlAssociation.getOpposite().isTargetMultiple() && umlAssociation.isTargetOwned()) {
 							if(umlAssociation.getSource().getPKs().size() > 1 || umlAssociation.getTarget().getPKs().size() > 1) {
 								throw new MdaGeneratorException("Cannot create table for " + umlAssociation.getName() + " association, composite pk forbidden in many to many");
 							}
@@ -145,22 +147,48 @@ public class OracleSQLWriter implements SQLWriterInterface {
 							// FK2		
 							SQLForeignKey fk2 = new SQLForeignKey(umlAssociation.getName()+"_2", manyToManyTable.getName(), umlAssociation.getTarget().getName(), pk2.getName(), pk2.getName());
 							fksList.add(fk2);
+						} else {
+							// OneToMany, nothing to do, Key is on the "many" side
 						}
-						// oneToMany, no FK
-					} else { // ManyToOne, create FK
-                        // Columns for FK
-                        for(UmlAttribute pkX : umlAssociation.getTarget().getPKs()){
-                            SQLColumn fk;                       
-                            // Use fk column name defined in association
-                            if(umlAssociation.getTarget().getPKs().size() == 1) {
-                                fk = new SQLColumn(NamesComputingUtil.computeFKName(umlAssociation),pkX.getDomain(), !umlAssociation.isTargetNullable(),"ManyToOne FK " + umlAssociation.getTarget().getName(), config.getConverter());
-                            } else { // Generate name from pk because it's a composite key
-                                fk = new SQLColumn(pkX.getName(),pkX.getDomain(),true,"ManyToOne FK " + umlAssociation.getTarget().getName(), config.getConverter());       
-                            }
-                            table.addColumn(fk);                       
-                        }
-                        
-						fksList.add(new SQLForeignKey(umlAssociation));
+						
+					} 
+					// xToOne
+					else {	
+						// ManyToOne, create FK
+						if(umlAssociation.getOpposite().isTargetMultiple()) {							
+	                        // Columns for FK
+	                        for(UmlAttribute pkX : umlAssociation.getTarget().getPKs()){
+	                            SQLColumn fk;                       
+	                            // Use fk column name defined in association
+	                            if(umlAssociation.getTarget().getPKs().size() == 1) {
+	                                fk = new SQLColumn(NamesComputingUtil.computeFKName(umlAssociation),pkX.getDomain(), !umlAssociation.isTargetNullable(),"ManyToOne FK " + umlAssociation.getTarget().getName(), config.getConverter());
+	                            } else { // Generate name from pk because it's a composite key
+	                                fk = new SQLColumn(pkX.getName(),pkX.getDomain(),true,"ManyToOne FK " + umlAssociation.getTarget().getName(), config.getConverter());       
+	                            }
+	                            table.addColumn(fk);                       
+	                        }
+	                        
+							fksList.add(new SQLForeignKey(umlAssociation));							
+						}
+						// OneToOne, create FK if owned
+						else {
+							// The key is on the owner side (we only know owned and not owner so if target is owned we are owner)
+							if(umlAssociation.isTargetOwned()) {
+								// Columns for FK
+		                        for(UmlAttribute pkX : umlAssociation.getTarget().getPKs()){
+		                            SQLColumn fk;                       
+		                            // Use fk column name defined in association
+		                            if(umlAssociation.getTarget().getPKs().size() == 1) {
+		                                fk = new SQLColumn(NamesComputingUtil.computeFKName(umlAssociation),pkX.getDomain(), !umlAssociation.isTargetNullable(),"OneToOne FK " + umlAssociation.getTarget().getName(), config.getConverter());
+		                            } else { // Generate name from pk because it's a composite key
+		                                fk = new SQLColumn(pkX.getName(),pkX.getDomain(),true,"OneToOne FK " + umlAssociation.getTarget().getName(), config.getConverter());       
+		                            }
+		                            table.addColumn(fk);                       
+		                        }
+		                        
+								fksList.add(new SQLForeignKey(umlAssociation));			
+							}							
+						}
 					}
 				}
 			}

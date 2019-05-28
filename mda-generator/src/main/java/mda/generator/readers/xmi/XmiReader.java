@@ -286,10 +286,10 @@ public class XmiReader implements ModelFileReaderInterface {
 			UmlAssociation sourceToTarget = extraireAssociation(assocName, classSource, classTarget, target);
 
 			UmlAssociation targetToSource = extraireAssociation(assocName, classTarget, classSource, source);
-			if((sourceToTarget.isOwned() && targetToSource.isOwned())  || 
-					(!sourceToTarget.isOwned() && !targetToSource.isOwned())) {
+			if((sourceToTarget.isTargetOwned() && targetToSource.isTargetOwned())  || 
+					(!sourceToTarget.isTargetOwned() && !targetToSource.isTargetOwned())) {
 				// Si aucun n'est owner (ou les deux), on choisit arbitrairement la sources (utile pour n:m et 1:1)
-				sourceToTarget.setOwned(true); 
+				sourceToTarget.setTargetOwned(true); 
 			}
 			
 			
@@ -353,7 +353,7 @@ public class XmiReader implements ModelFileReaderInterface {
 				// Owner de la relation (pour 1:1 et n:m)
 				else if(styleValue.startsWith("Owned=")) {					
 					// Si owned vaut 1, c'est l'autre qui est owner de l'association
-					umlAssoc.setOwned(styleValue.split("=")[1].equals("1")? true: false);
+					umlAssoc.setTargetOwned(styleValue.split("=")[1].equals("1")? true: false);
 				}
 			}
 		}

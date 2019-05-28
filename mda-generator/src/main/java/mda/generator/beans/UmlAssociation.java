@@ -116,14 +116,14 @@ public class UmlAssociation {
 	/**
 	 * @return the owned
 	 */
-	public boolean isOwned() {
+	public boolean isTargetOwned() {
 		return owned;
 	}
 
 	/**
 	 * @param owned the owned to set
 	 */
-	public void setOwned(boolean owned) {
+	public void setTargetOwned(boolean owned) {
 		this.owned = owned;
 	}
 

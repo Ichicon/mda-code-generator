@@ -19,7 +19,6 @@ DROP SEQUENCE S_PARAMETER;
 -- DROP FOREIGN KEY
 -- ================================
 ALTER TABLE function DROP CONSTRAINT FK_function_function_body;
-ALTER TABLE function_body DROP CONSTRAINT FK_function_function_body;
 ALTER TABLE service DROP CONSTRAINT FK_service_service_parent;
 ALTER TABLE user_function_assoc DROP CONSTRAINT FK_user_function_assoc_1;
 ALTER TABLE user_function_assoc DROP CONSTRAINT FK_user_function_assoc_2;
@@ -31,7 +30,6 @@ ALTER TABLE parameter DROP CONSTRAINT FK_DOUBLE_PK;
 -- ================================
 -- DROP FOREIGN KEYS INDEXES
 -- ================================
-DROP INDEX IDX_function_function_body;
 DROP INDEX IDX_function_function_body;
 DROP INDEX IDX_service_service_parent;
 DROP INDEX IDX_user_function_assoc_1;
