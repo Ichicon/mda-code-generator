@@ -9,12 +9,16 @@ import org.apache.commons.text.WordUtils;
  *
  */
 public class UmlAttribute {
+	/** Id in xml schema */
+	private String id;
+	
 	private boolean isPK;
 	private String name;
 	private String camelCaseName;
 	private UmlDomain domain;
 	private String comment;
 	private Boolean isNotNull;
+	private Boolean isUpdatable = true;
 
 	/**
 	 * @return the isPK
@@ -90,9 +94,44 @@ public class UmlAttribute {
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
+	
+
+	/**
+	 * @return the isUpdatable
+	 */
+	public Boolean isUpdatable() {
+		return isUpdatable;
+	}
+
+	/**
+	 * @param isUpdatable the isUpdatable to set
+	 */
+	public void setUpdatable(Boolean isUpdatable) {
+		this.isUpdatable = isUpdatable;
+	}
 
 	@Override
 	public String toString() {
-		return camelCaseName + " => " + name + " " + (isPK?"(PK)":"") + " " +domain.getName()+" " + (isNotNull?"not null":"nullable");
+		return camelCaseName + " => " +
+			name + " " + (isPK?"(PK)":"") + " " +
+			domain.getName()+" " +
+			(isNotNull?"not null":"nullable") +
+			(isUpdatable!=null && !isUpdatable?" NOT UPDATABLE":"");
 	}
+
+	/**
+	 * @return the id
+	 */
+	public String getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(String id) {
+		this.id = id;
+	}
+	
+	
 }

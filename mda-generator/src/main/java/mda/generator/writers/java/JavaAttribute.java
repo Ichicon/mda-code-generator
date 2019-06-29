@@ -19,6 +19,7 @@ public class JavaAttribute {
 	private final List<String> comments = new ArrayList<>(); 
 	private final String javaType;
 	private final boolean isNotNull;
+	private final boolean isUpdatable;
 	private final boolean isPK;
 	
 	private String defaultValue;
@@ -48,6 +49,7 @@ public class JavaAttribute {
 		this.javaType= type;
 		this.isPK = false;
 		this.isNotNull =false;
+		this.isUpdatable = true;
 		this.defaultValue =defaultValue;
 	}
 
@@ -69,6 +71,7 @@ public class JavaAttribute {
 		}
 
 		this.isNotNull = umlAttribute.getIsNotNull();
+		this.isUpdatable = umlAttribute.isUpdatable() == null ? true : umlAttribute.isUpdatable() ;
 	}
 
 	/**
@@ -91,6 +94,7 @@ public class JavaAttribute {
 		}
 
 		this.isNotNull = umlAssociation.isTargetNullable();
+		this.isUpdatable  = true;
 
 		this.comments.add("Association " + umlAssociation.getName() + " to " + umlAssociation.getTarget().getCamelCaseName());
 	}
@@ -159,5 +163,12 @@ public class JavaAttribute {
 	public boolean isPrimitive(){
 		return PRIMITIVE_TYPES.contains(this.javaType);
 	}
-	
+
+	/**
+	 * @return the isUpdatable
+	 */
+	public boolean isUpdatable() {
+		return isUpdatable;
+	}
+
 }

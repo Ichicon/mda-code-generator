@@ -33,7 +33,7 @@ public class XmiReader implements ModelFileReaderInterface {
 	private Map<String, UmlClass> classesMap = new HashMap<>(); // by id
 	private Map<String, UmlDomain> domainsMap = new HashMap<>();  // by name
 	private Map<String, UmlPackage> packagesMap = new HashMap<>(); // by name
-
+	
 	/**
 	 * @return the classesMap
 	 */
@@ -163,22 +163,64 @@ public class XmiReader implements ModelFileReaderInterface {
 			}
 			xmiPackage.setComment(sbCommentaires.toString());
 		}	
+		
+		// On veut extraite des métadonnées sur les classes et leur attribut
+		List<Node> classeNodes = XmiUtil.getChildsWithTagNameAndType(packageNode, "packagedElement", XmiElementType.CLASS);
+		for(Node classNode : classeNodes) {
+			initClassExtraction(classNode);
+		}
 
 		// Ajout dans la map des packages par nom
 		packagesMap.put(xmiPackage.getName(), xmiPackage);
 	}
-
+	
+	/**
+	 * Initialise la classe avec quelques données
+	 * @param classNode
+	 */
+	protected void initClassExtraction(Node classNode) {
+		UmlClass classeUml =  new UmlClass();
+		classeUml.setId(XmiUtil.getElementId(classNode));		
+		classesMap.put(classeUml.getId(), classeUml);
+		
+		List<Node> attributesNodes = XmiUtil.getChildsWithTagNameAndType(classNode, "ownedAttribute", XmiElementType.PROPERTY);
+		for(Node attributeNode : attributesNodes) {
+			initAttributeExtraction(classeUml, attributeNode);
+		}
+	}
+	
+	/**
+	 * Initialise un attribut d'une classe avec quelques données
+	 * @param attributeNode
+	 */
+	protected void initAttributeExtraction(UmlClass classeUml, Node attributeNode) {
+		// Il s'agit d'un attribut généré via une association, on ne l'intialise
+		if(XmiUtil.getAttribute(attributeNode, "association") != null) {
+			return;
+		}
+			
+		UmlAttribute attributUml =  new UmlAttribute();
+		attributUml.setId(XmiUtil.getElementId(attributeNode));		
+		classeUml.addAttribute(attributUml);
+		
+		// Lecture de métadonnées
+		attributUml.setUpdatable(XmiUtil.getAttributeIsReadonly(attributeNode));
+	}
+	
+	/**
+	 * Extraction des métadonnées de domaine (typage)
+	 * @param domainNode
+	 */
 	protected void extraireDomaine(Node domainNode) {
 		UmlDomain xmiDomain = new UmlDomain();
 		xmiDomain.setName(XmiUtil.getElementName(domainNode));
-
 
 		// Ajout dans la map des domaines
 		domainsMap.put(xmiDomain.getName(), xmiDomain);
 	}
 
 	/**
-	 * Parcour des classes
+	 * Parcours des classes et complétion des classes avec métadonnées extraites
 	 * @param doc
 	 */
 	protected void parcourirClasses(Document doc) {
@@ -204,8 +246,15 @@ public class XmiReader implements ModelFileReaderInterface {
 		}
 	}
 
+	/**
+	 * Extraction des données d'une classe (qui existe déjà  car métadonnées extraites en amont)
+	 * 
+	 * @param classNode
+	 */
 	protected void extraireClasse(Node classNode) {
-		UmlClass xmiClass = new UmlClass();
+		// On récupère la classe dans la map des classes		
+		UmlClass xmiClass = classesMap.get(XmiUtil.getElementIdRef(classNode));
+		
 		xmiClass.setId(XmiUtil.getElementIdRef(classNode));
 		xmiClass.setName(XmiUtil.getElementName(classNode));
 
@@ -230,12 +279,18 @@ public class XmiReader implements ModelFileReaderInterface {
 			}
 		}
 
-		// Ajout dans la map des classes
-		classesMap.put(xmiClass.getId(), xmiClass);
+
 	}
 
-	private void extractAttribute(Node attribut, UmlClass xmiClass) {
-		UmlAttribute xmiAttribut = new UmlAttribute();
+	/**
+	 * Extraction des données d'un attribut (qui existe déjà, car métadonnées extraites en amont)
+	 * @param attribut
+	 * @param xmiClass
+	 */
+	protected void extractAttribute(Node attribut, UmlClass xmiClass) {
+		// On récupère l'attribut dans la classe		
+		UmlAttribute xmiAttribut =  xmiClass.getAttributeById(XmiUtil.getElementIdRef(attribut));
+		
 		xmiAttribut.setName(XmiUtil.getElementName(attribut));
 		// Domain ex:  <properties type="DO_ID" derived="0" collection="false" duplicates="0" changeability="changeable"/>
 		Node properties = XmiUtil.getFirstChildsNodeWithTagName(attribut, "properties");

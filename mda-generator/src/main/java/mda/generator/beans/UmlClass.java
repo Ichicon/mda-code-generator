@@ -1,7 +1,9 @@
 package mda.generator.beans;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
@@ -12,9 +14,9 @@ public class UmlClass {
 	private String camelCaseName;
 	private String name;
 	private String comment;
-
+	
 	private UmlPackage xmiPackage;
-	private List<UmlAttribute> attributs = new ArrayList<>();
+	private Map<String,UmlAttribute> attributs = new LinkedHashMap<>();
 	private List<UmlAssociation> associations = new ArrayList<>();
 
 	/**
@@ -44,6 +46,11 @@ public class UmlClass {
 		this.camelCaseName = StringUtils.remove(WordUtils.capitalizeFully(name, '_'), "_");
 	}
 
+	
+	public void addAttribute(UmlAttribute attribute) {
+		attributs.put(attribute.getId(), attribute);
+	}
+	
 	/**
 	 * @return the rawName
 	 */
@@ -77,11 +84,21 @@ public class UmlClass {
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
+	
 	/**
 	 * @return the attribut
 	 */
 	public List<UmlAttribute> getAttributes() {
-		return attributs;
+		return new ArrayList<>(attributs.values());
+	}
+	
+	/**
+	 * Récupération d'un attribut par son id unique
+	 * @param id
+	 * @return
+	 */
+	public UmlAttribute getAttributeById(String id) {
+		return attributs.get(id);
 	}
 	
 	/**
@@ -90,7 +107,7 @@ public class UmlClass {
 	 */
 	public List<UmlAttribute> getPKs(){
 		List<UmlAttribute> pks = new ArrayList<>();
-		for(UmlAttribute attr : attributs) {
+		for(UmlAttribute attr : attributs.values()) {
 			if(attr.isPK()) {
 				pks.add(attr);
 			}
@@ -110,7 +127,7 @@ public class UmlClass {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\n\t. ").append(camelCaseName).append(" (").append(name).append(")").append(" : ");
 
-		for(UmlAttribute attribut : attributs) {
+		for(UmlAttribute attribut : attributs.values()) {
 			sb.append("\n\t\t- ").append(attribut);
 		}
 		
@@ -120,4 +137,6 @@ public class UmlClass {
 
 		return sb.toString(); 
 	}
+	
+
 }

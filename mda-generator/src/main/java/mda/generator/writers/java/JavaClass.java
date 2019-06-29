@@ -269,11 +269,19 @@ public class JavaClass {
 
 				// Generate getter/setter
 				JavaMethod getter = generateGetter(javaAttribute);
+				
+				// Liste property pour @Column
+				List<JavaAnnotationProperty> columnProperties = new ArrayList<>();
+				columnProperties.add(new JavaAnnotationProperty("name","\""+javaAttribute.getColumnName() +"\""));
+				columnProperties.add(new JavaAnnotationProperty("nullable",javaAttribute.isNotNull()?"false":"true"));
+				if(!javaAttribute.isUpdatable()) {
+					columnProperties.add(new JavaAnnotationProperty("updatable","false"));
+				}
+				
 				// Annotation pour le nom de la colonne
 				getter.addAnnotations(new JavaAnnotation(
 					importManager.getFinalName("javax.persistence.Column"),
-					new JavaAnnotationProperty("name","\""+javaAttribute.getColumnName() +"\""),
-					new JavaAnnotationProperty("nullable",javaAttribute.isNotNull()?"false":"true")
+					columnProperties.toArray(new JavaAnnotationProperty[0])
 				));
 
 				methodsList.add(getter);
