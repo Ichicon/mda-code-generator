@@ -51,7 +51,7 @@ public class Parameter implements Serializable{
      * Version de l'application
      * @return value of version
      */
-    @Column(name="version", nullable=false)
+    @Column(name="version", nullable=false, updatable=false)
 	public Integer getVersion(){
 		return version;
     }  

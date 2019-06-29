@@ -102,7 +102,7 @@
 							<upperValue xmi:type="uml:LiteralInteger" xmi:id="EAID_LI000028_3519_4b66_BFC2_B2837E4FF65C" value="1"/>
 							<type xmi:idref="EAJava_DO_ID"/>
 						</ownedAttribute>
-						<ownedAttribute xmi:type="uml:Property" xmi:id="EAID_DE98F526_3114_46cb_9671_09808D80E72F" name="code" visibility="private" isStatic="false" isReadOnly="false" isDerived="false" isOrdered="false" isUnique="true" isDerivedUnion="false">
+						<ownedAttribute xmi:type="uml:Property" xmi:id="EAID_DE98F526_3114_46cb_9671_09808D80E72F" name="code" visibility="private" isStatic="false" isReadOnly="true" isDerived="false" isOrdered="false" isUnique="true" isDerivedUnion="false">
 							<lowerValue xmi:type="uml:LiteralInteger" xmi:id="EAID_LI000029_3114_46cb_9671_09808D80E72F" value="1"/>
 							<upperValue xmi:type="uml:LiteralInteger" xmi:id="EAID_LI000030_3114_46cb_9671_09808D80E72F" value="1"/>
 							<type xmi:idref="EAJava_DO_VARCHAR_50"/>

@@ -56,7 +56,7 @@ public class User implements Serializable{
      * No comment found in model diagram
      * @return value of userName
      */
-    @Column(name="user_name", nullable=false)
+    @Column(name="user_name", nullable=false, updatable=false)
 	public String getUserName(){
 		return userName;
     }  
@@ -71,7 +71,7 @@ public class User implements Serializable{
      * No comment found in model diagram
      * @return value of userSurname
      */
-    @Column(name="user_surname", nullable=false)
+    @Column(name="user_surname", nullable=false, updatable=false)
 	public String getUserSurname(){
 		return userSurname;
     }  

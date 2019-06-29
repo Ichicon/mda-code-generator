@@ -71,7 +71,7 @@ public class JavaAttribute {
 		}
 
 		this.isNotNull = umlAttribute.getIsNotNull();
-		this.isUpdatable = umlAttribute.isUpdatable() == null ? true : umlAttribute.isUpdatable() ;
+		this.isUpdatable = umlAttribute.isReadonly() == null ? true : !umlAttribute.isReadonly() ;
 	}
 
 	/**

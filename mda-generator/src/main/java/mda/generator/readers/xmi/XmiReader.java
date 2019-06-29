@@ -204,7 +204,7 @@ public class XmiReader implements ModelFileReaderInterface {
 		classeUml.addAttribute(attributUml);
 		
 		// Lecture de métadonnées
-		attributUml.setUpdatable(XmiUtil.getAttributeIsReadonly(attributeNode));
+		attributUml.setReadonly(XmiUtil.getAttributeIsReadonly(attributeNode));
 	}
 	
 	/**

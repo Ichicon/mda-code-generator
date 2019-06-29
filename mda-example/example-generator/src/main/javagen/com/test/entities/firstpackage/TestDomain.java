@@ -77,7 +77,7 @@ public class TestDomain implements Serializable{
      * Libellé
      * @return value of libelle
      */
-    @Column(name="libelle", nullable=true)
+    @Column(name="libelle", nullable=true, updatable=false)
 	public String getLibelle(){
 		return libelle;
     }  
@@ -92,7 +92,7 @@ public class TestDomain implements Serializable{
      * No comment found in model diagram
      * @return value of aDoDate
      */
-    @Column(name="a_do_date", nullable=true)
+    @Column(name="a_do_date", nullable=true, updatable=false)
 	public LocalDate getADoDate(){
 		return aDoDate;
     }  
@@ -107,7 +107,7 @@ public class TestDomain implements Serializable{
      * No comment found in model diagram
      * @return value of aDoCommentaire
      */
-    @Column(name="a_do_commentaire", nullable=true)
+    @Column(name="a_do_commentaire", nullable=true, updatable=false)
 	public String getADoCommentaire(){
 		return aDoCommentaire;
     }  
@@ -122,7 +122,7 @@ public class TestDomain implements Serializable{
      * No comment found in model diagram
      * @return value of aDoFichier
      */
-    @Column(name="a_do_fichier", nullable=true)
+    @Column(name="a_do_fichier", nullable=true, updatable=false)
 	public Blob getADoFichier(){
 		return aDoFichier;
     }  
@@ -137,7 +137,7 @@ public class TestDomain implements Serializable{
      * No comment found in model diagram
      * @return value of aDoLibelleCourt
      */
-    @Column(name="a_do_libelle_court", nullable=true)
+    @Column(name="a_do_libelle_court", nullable=true, updatable=false)
 	public String getADoLibelleCourt(){
 		return aDoLibelleCourt;
     }  
@@ -152,7 +152,7 @@ public class TestDomain implements Serializable{
      * No comment found in model diagram
      * @return value of aDoLibelleLong
      */
-    @Column(name="a_do_libelle_long", nullable=true)
+    @Column(name="a_do_libelle_long", nullable=true, updatable=false)
 	public String getADoLibelleLong(){
 		return aDoLibelleLong;
     }  
@@ -167,7 +167,7 @@ public class TestDomain implements Serializable{
      * No comment found in model diagram
      * @return value of aDoMotPasse
      */
-    @Column(name="a_do_mot_passe", nullable=true)
+    @Column(name="a_do_mot_passe", nullable=true, updatable=false)
 	public String getADoMotPasse(){
 		return aDoMotPasse;
     }  
@@ -182,7 +182,7 @@ public class TestDomain implements Serializable{
      * No comment found in model diagram
      * @return value of aDoNom
      */
-    @Column(name="a_do_nom", nullable=true)
+    @Column(name="a_do_nom", nullable=true, updatable=false)
 	public String getADoNom(){
 		return aDoNom;
     }  
@@ -197,7 +197,7 @@ public class TestDomain implements Serializable{
      * No comment found in model diagram
      * @return value of aDoNombreCourt
      */
-    @Column(name="a_do_nombre_court", nullable=true)
+    @Column(name="a_do_nombre_court", nullable=true, updatable=false)
 	public Integer getADoNombreCourt(){
 		return aDoNombreCourt;
     }  
@@ -212,7 +212,7 @@ public class TestDomain implements Serializable{
      * No comment found in model diagram
      * @return value of aDoNombreLong
      */
-    @Column(name="a_do_nombre_long", nullable=true)
+    @Column(name="a_do_nombre_long", nullable=true, updatable=false)
 	public Long getADoNombreLong(){
 		return aDoNombreLong;
     }  
@@ -227,7 +227,7 @@ public class TestDomain implements Serializable{
      * No comment found in model diagram
      * @return value of aDoOrdreRepartition
      */
-    @Column(name="a_do_ordre_repartition", nullable=true)
+    @Column(name="a_do_ordre_repartition", nullable=true, updatable=false)
 	public String getADoOrdreRepartition(){
 		return aDoOrdreRepartition;
     }  
@@ -242,7 +242,7 @@ public class TestDomain implements Serializable{
      * No comment found in model diagram
      * @return value of aDoOuiNon
      */
-    @Column(name="a_do_oui_non", nullable=true)
+    @Column(name="a_do_oui_non", nullable=true, updatable=false)
 	public Boolean getADoOuiNon(){
 		return aDoOuiNon;
     }  
@@ -257,7 +257,7 @@ public class TestDomain implements Serializable{
      * No comment found in model diagram
      * @return value of aDoTexteRiche
      */
-    @Column(name="a_do_texte_riche", nullable=true)
+    @Column(name="a_do_texte_riche", nullable=true, updatable=false)
 	public String getADoTexteRiche(){
 		return aDoTexteRiche;
     }  
@@ -272,7 +272,7 @@ public class TestDomain implements Serializable{
      * No comment found in model diagram
      * @return value of aDoDateHeure
      */
-    @Column(name="a_do_date_heure", nullable=false)
+    @Column(name="a_do_date_heure", nullable=false, updatable=false)
 	public LocalDateTime getADoDateHeure(){
 		return aDoDateHeure;
     }  

@@ -45,7 +45,7 @@ public class FunctionBody implements Serializable{
      * No comment found in model diagram
      * @return value of bodyContent
      */
-    @Column(name="body_content", nullable=false)
+    @Column(name="body_content", nullable=false, updatable=false)
 	public String getBodyContent(){
 		return bodyContent;
     }  

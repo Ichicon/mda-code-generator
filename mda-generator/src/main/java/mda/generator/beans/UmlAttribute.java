@@ -18,7 +18,7 @@ public class UmlAttribute {
 	private UmlDomain domain;
 	private String comment;
 	private Boolean isNotNull;
-	private Boolean isUpdatable = true;
+	private Boolean isReadonly = true;
 
 	/**
 	 * @return the isPK
@@ -97,17 +97,17 @@ public class UmlAttribute {
 	
 
 	/**
-	 * @return the isUpdatable
+	 * @return the isReadonly
 	 */
-	public Boolean isUpdatable() {
-		return isUpdatable;
+	public Boolean isReadonly() {
+		return isReadonly;
 	}
 
 	/**
-	 * @param isUpdatable the isUpdatable to set
+	 * @param isReadonly the isReadonly to set
 	 */
-	public void setUpdatable(Boolean isUpdatable) {
-		this.isUpdatable = isUpdatable;
+	public void setReadonly(Boolean isReadonly) {
+		this.isReadonly = isReadonly;
 	}
 
 	@Override
@@ -116,7 +116,7 @@ public class UmlAttribute {
 			name + " " + (isPK?"(PK)":"") + " " +
 			domain.getName()+" " +
 			(isNotNull?"not null":"nullable") +
-			(isUpdatable!=null && !isUpdatable?" NOT UPDATABLE":"");
+			(isReadonly!=null && isReadonly?" NOT UPDATABLE":"");
 	}
 
 	/**
