@@ -46,7 +46,7 @@ public class UserType implements Serializable{
      * No comment found in model diagram
      * @return value of name
      */
-    @Column(name="name", nullable=false, updatable=false)
+    @Column(name="name", nullable=false)
 	public String getName(){
 		return name;
     }  

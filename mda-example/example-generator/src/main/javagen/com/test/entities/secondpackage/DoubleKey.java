@@ -37,7 +37,7 @@ public class DoubleKey implements Serializable{
      * No comment found in model diagram
      * @return value of stringData
      */
-    @Column(name="string_data", nullable=false, updatable=false)
+    @Column(name="string_data", nullable=false)
 	public String getStringData(){
 		return stringData;
     }  

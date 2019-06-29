@@ -56,7 +56,7 @@ public class Service implements Serializable{
      * No comment found in model diagram
      * @return value of serviceName
      */
-    @Column(name="service_name", nullable=false, updatable=false)
+    @Column(name="service_name", nullable=false)
 	public String getServiceName(){
 		return serviceName;
     }  

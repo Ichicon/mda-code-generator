@@ -54,7 +54,7 @@ public class Function implements Serializable{
      * No comment found in model diagram
      * @return value of functionName
      */
-    @Column(name="function_name", nullable=false, updatable=false)
+    @Column(name="function_name", nullable=false)
 	public String getFunctionName(){
 		return functionName;
     }  
