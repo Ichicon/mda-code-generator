@@ -58,6 +58,7 @@ public class MdaGenerator {
 	private Path pathToDropSQLTemplate;
 	private List<String> excludedPrefixes;
 	private String sequencePrefixName;
+	private String sqlSchemaName;
 	
 	
 	/** Charset */
@@ -158,7 +159,8 @@ public class MdaGenerator {
 		sqlConfig.setConverter(converter);
 		sqlConfig.setCharset(charset);
 		sqlConfig.setExcludesClassesPrefixes(excludedPrefixes);
-
+		sqlConfig.setSqlSchemaName(sqlSchemaName);
+		
 		sqlWriter.writeSql(sqlConfig);
 	}
 
@@ -297,7 +299,20 @@ public class MdaGenerator {
 		this.annotationsForClasses = annotationsForClasses;
 	}
 
+	/**
+	 * @return the schema
+	 */
+	public String getSqlSchemaName() {
+		return sqlSchemaName;
+	}
 
+	/**
+	 * @param schema the schema to set
+	 */
+	public void setSqlSchemaName(String schema) {
+		this.sqlSchemaName = schema;
+	}
+	
 	private void logConfiguration() {
 		StringBuilder msgConfig = new StringBuilder();
 		msgConfig.append("\nMDA GENERATOR CONFIGURATION :");

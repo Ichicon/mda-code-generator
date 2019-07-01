@@ -22,9 +22,9 @@ import mda.generator.writers.java.NamesComputingUtil;
  * Create SQL files for Oracle
  * @author Fabien Crapart
  */
-public class OracleSQLWriter implements SQLWriterInterface {
+public class StandardSQLWriter implements SQLWriterInterface {
 	/** Logger */
-	private static final Logger LOG = LogManager.getLogger(OracleSQLWriter.class);
+	private static final Logger LOG = LogManager.getLogger(StandardSQLWriter.class);
 
 	private static final String STOP_GENERATION = "-- STOP GENERATION";
 	private static final String END_OF_GENERATED = "-- END OF GENERATED CODE - YOU CAN EDIT THE FILE AFTER THIS LINE, DO NOT EDIT THIS LINE OR BEFORE THIS LINE";
@@ -75,6 +75,7 @@ public class OracleSQLWriter implements SQLWriterInterface {
 			context.put("sequencesList", sequencesList);
 			context.put("tablesList", tablesList);
 			context.put("fksList", fksList);
+			context.put("sqlSchemaName", config.getSqlSchemaName());
 			context.put("end_of_generated", END_OF_GENERATED);
 
 			VelocityUtils.writeFileFromTemplate(filePath, templateToUse, context, config.getCharset());

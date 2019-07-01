@@ -21,7 +21,7 @@ public interface ModelFileReaderInterface {
 	void extractObjects(String pathToModelFile, String pathToMetadataFile);
 	
 	/**
-	 * @return Map by name of domains in the file 
+	 * @return Map by name of domains (type) in the file 
 	 */
 	Map<String, UmlDomain> getDomainsMap();	
 	/**

@@ -7,6 +7,11 @@ import java.util.Properties;
 
 import mda.generator.exceptions.MdaGeneratorException;
 
+/**
+ * Utility class to fill an object from a property file (names must be coherent)
+ * @author Fabien Crapart
+ *
+ */
 public final class PropertyUtils {
 	private PropertyUtils () {
 		

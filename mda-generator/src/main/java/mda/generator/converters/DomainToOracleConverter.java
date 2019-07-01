@@ -2,6 +2,10 @@ package mda.generator.converters;
 
 import mda.generator.beans.UmlDomain;
 
+/**
+ * Convert JAVA types to ORACLE DB types
+ * @author Fabien Crapart
+ */
 public class DomainToOracleConverter extends AbstractDomainToJavaConverter {
 
 	@Override

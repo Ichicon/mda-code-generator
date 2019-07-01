@@ -20,8 +20,8 @@ import mda.generator.utils.file.PathUtils;
 import mda.generator.utils.file.PropertyUtils;
 import mda.generator.writers.java.JavaWriter;
 import mda.generator.writers.java.JavaWriterInterface;
-import mda.generator.writers.sql.OracleSQLWriter;
 import mda.generator.writers.sql.SQLWriterInterface;
+import mda.generator.writers.sql.StandardSQLWriter;
 
 
 /**
@@ -44,7 +44,7 @@ public class MdaGeneratorBuilder {
 	private Class<? extends JavaWriterInterface> javaWriter = JavaWriter.class;
 
 	/** Classe pour écrire le sql */
-	private Class<? extends SQLWriterInterface> sqlWriter = OracleSQLWriter.class;
+	private Class<? extends SQLWriterInterface> sqlWriter = StandardSQLWriter.class;
 	
 	/** Annotations à ajouter aux classes */
 	private Map<String, List<String>> annotationsForClasses = new HashMap<>();
@@ -74,9 +74,12 @@ public class MdaGeneratorBuilder {
 	private List<String> excludedPrefixes;
 	/** Prefix to add before sql sequence name */
 	private String sqlSequencePrefixName = "SEQ_";
+	/** Schéma */
+	private String sqlSchemaName;
+
 
 	/**
-	 * [RECOMMENDED] Load the generator with a propertes file. You should call build() just after this call, yet you can still call withXxxx before building to overload parameters.
+	 * [RECOMMENDED] Load the generator with a properties file. You should call build() just after this call, yet you can still call withXxxx before building to overload parameters.
 	 * /!\ Annotations cannot be added with property files, you have to call withAnnotation(...)
 	 * @param pathToProperties Path to property file
 	 * @return builder to re-use
@@ -95,49 +98,15 @@ public class MdaGeneratorBuilder {
 	}
 
 	/**
-	 * 
-	 * @param pathToProperties
-	 */
-	private void loadProperties(Path pathToProperties) {
-		Properties prop = new Properties();
-
-		try (InputStream input = Files.newInputStream(pathToProperties)){
-			prop.load(input);
-
-			PropertyUtils.loadClassFromProperty("readerClass", prop, this);
-			PropertyUtils.loadPathFromProperty("pathToModel", prop, this);
-			PropertyUtils.loadPathFromProperty("pathToMetadata", prop, this);
-			PropertyUtils.loadClassFromProperty("typeConverter", prop, this);
-
-			PropertyUtils.loadCharset("charset", prop, this);
-
-			PropertyUtils.loadClassFromProperty("javaWriter", prop, this);
-			PropertyUtils.loadPathFromProperty("javaOutputDirectory", prop, this);
-			PropertyUtils.loadString("entitiesPackagePartName", prop, this);
-			PropertyUtils.loadString("daosPackagePartName", prop, this);
-			PropertyUtils.loadPathFromProperty("pathToPackageInfoTemplate", prop, this);
-			PropertyUtils.loadPathFromProperty("pathToEntitiesTemplate", prop, this);
-			PropertyUtils.loadPathFromProperty("pathToDaosTemplate", prop, this);
-
-			PropertyUtils.loadClassFromProperty("sqlWriter", prop, this);
-			PropertyUtils.loadPathFromProperty("sqlOutputDirectory", prop, this);
-			PropertyUtils.loadPathFromProperty("pathToCreateSQLTemplate", prop, this);
-			PropertyUtils.loadPathFromProperty("pathToDropSQLTemplate", prop, this);
-			PropertyUtils.loadStringList("excludedPrefixes", prop, this);
-			PropertyUtils.loadString("sqlSequencePrefixName", prop, this);
-		} catch(Exception e) {
-			throw new MdaGeneratorException("Cannot load property file " + pathToProperties.toString(),e);
-		} 
-	}
-
-
-
-	/**
 	 * [MANDATORY] Path to model file to use for mda generation
 	 * @param modelPath /path/to/the/file Use MdaGeneratorBuilder.getApplicationPath() to use relative path easily, ex: MdaGeneratorBuilder.getApplicationPath().resolve("example.xmi")
 	 * @return builder to re-use
 	 */
 	public MdaGeneratorBuilder withModelPath(Path modelPath) {
+		if(!Files.exists(modelPath)){
+			throw new MdaGeneratorException("Le fichier de modèle n'a pas été trouvé à l'emplacemen fourni : "  + modelPath);
+		}
+		
 		this.pathToModel = modelPath;		
 		return this;
 	}
@@ -317,10 +286,10 @@ public class MdaGeneratorBuilder {
 	}
 
 	/**
-	 * Add an annotation to liste of class (simple name). Call multiple times to add multiple annotations. 
+	 * Add an annotation to list of class (simple name). Call multiple times to add multiple annotations. 
 	 * @param annotation Annotation text. Ex: "@Cacheable(true)" 
 	 * @param classNames Simple names of class which will have this annotation. Ex : "Organisme"
-	 * @return
+	 * @return builder to re-use
 	 */
 	public MdaGeneratorBuilder withAnnotation(String annotation, String ... classNames) {
 		for(String className : classNames) {
@@ -337,7 +306,16 @@ public class MdaGeneratorBuilder {
 		return this;
 	}
 
-	
+	/**
+	 * Add a schema name to use into SQL templates
+	 * @param sqlSchemaName name of sql schema
+	 * @return builder to re-use
+	 */
+	public MdaGeneratorBuilder withSqlSchemaName(String sqlSchemaName) {
+		this.sqlSchemaName = sqlSchemaName;
+		return this;
+	}
+		
 	/**
 	 * Build the MdaGenerator from parameters
 	 * @return MdaGenerator object built
@@ -368,10 +346,14 @@ public class MdaGeneratorBuilder {
 		generator.setCharset(charset);
 		generator.setExcludedPrefixes(excludedPrefixes);
 		generator.setSqlSequencePrefixName(sqlSequencePrefixName);
-
+		generator.setSqlSchemaName(sqlSchemaName);
+		
 		return generator;
 	}
 	
+	/**
+	 * Vérifie la validité des paramètres fournis
+	 */
 	protected void checkParameters() {
 		if(pathToModel==null || !Files.exists(pathToModel)){
 			throw new MdaGeneratorException("MdaGenerator needs an input file, use mdaGeneratorBuilder.withModelPath(\"/path/to/model\")");
@@ -425,4 +407,43 @@ public class MdaGeneratorBuilder {
 			throw new MdaGeneratorException("MdaGenerator needs a charset defined to create files. Use mdaGeneratorBuilder.withCharset(StandardCharsets.UTF_8)");
 		}
 	}
+	
+	/**
+	 * 
+	 * @param pathToProperties
+	 */
+	private void loadProperties(Path pathToProperties) {
+		Properties prop = new Properties();
+
+		try (InputStream input = Files.newInputStream(pathToProperties)){
+			prop.load(input);
+
+			PropertyUtils.loadClassFromProperty("readerClass", prop, this);
+			PropertyUtils.loadPathFromProperty("pathToModel", prop, this);
+			PropertyUtils.loadPathFromProperty("pathToMetadata", prop, this);
+			PropertyUtils.loadClassFromProperty("typeConverter", prop, this);
+
+			PropertyUtils.loadCharset("charset", prop, this);
+
+			PropertyUtils.loadClassFromProperty("javaWriter", prop, this);
+			PropertyUtils.loadPathFromProperty("javaOutputDirectory", prop, this);
+			PropertyUtils.loadString("entitiesPackagePartName", prop, this);
+			PropertyUtils.loadString("daosPackagePartName", prop, this);
+			PropertyUtils.loadPathFromProperty("pathToPackageInfoTemplate", prop, this);
+			PropertyUtils.loadPathFromProperty("pathToEntitiesTemplate", prop, this);
+			PropertyUtils.loadPathFromProperty("pathToDaosTemplate", prop, this);
+
+			PropertyUtils.loadClassFromProperty("sqlWriter", prop, this);
+			PropertyUtils.loadPathFromProperty("sqlOutputDirectory", prop, this);
+			PropertyUtils.loadPathFromProperty("pathToCreateSQLTemplate", prop, this);
+			PropertyUtils.loadPathFromProperty("pathToDropSQLTemplate", prop, this);
+			PropertyUtils.loadStringList("excludedPrefixes", prop, this);
+			PropertyUtils.loadString("sqlSequencePrefixName", prop, this);
+			PropertyUtils.loadString("sqlSchemaName", prop, this);
+		} catch(Exception e) {
+			throw new MdaGeneratorException("Cannot load property file " + pathToProperties.toString(),e);
+		} 
+	}
+
+
 }

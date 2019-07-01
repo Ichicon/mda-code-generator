@@ -3,6 +3,12 @@ package mda.generator.beans;
 import java.util.ArrayList;
 import java.util.List;
 
+
+/**
+ * A java package (containing classes).
+ * 
+ * @author Fabien Crapart
+ */
 public class UmlPackage {
 	private String id;
 	private String name;

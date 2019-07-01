@@ -1,5 +1,12 @@
 package mda.generator.exceptions;
 
+
+/**
+ * Exception occuring during generation
+ * 
+ * @author Fabien Crapart
+ *
+ */
 public class MdaGeneratorException extends RuntimeException {
 
 	/**

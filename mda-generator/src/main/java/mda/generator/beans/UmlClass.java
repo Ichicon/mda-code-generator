@@ -8,7 +8,12 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 
-
+/**
+ * Class inside a package (containing attributes and associations with other classes)
+ * 
+ * @author Fabien Crapart
+ *
+ */
 public class UmlClass {	
 	private String id;
 	private String camelCaseName;

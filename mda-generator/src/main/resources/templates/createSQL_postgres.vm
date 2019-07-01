@@ -1,0 +1,59 @@
+-- *********************************************
+-- CREATE TABLES FOR POSTGRES
+--
+-- This file has been automatically generated
+-- *********************************************
+SET search_path TO $sqlSchemaName;
+
+-- ================================
+-- SEQUENCES
+-- ================================
+#foreach( $sequence in $sequencesList )
+CREATE SEQUENCE $sequence.getName() START WITH 1000 CACHE 20; 
+#end
+ 
+ 
+-- ================================
+-- TABLES
+-- ================================
+#foreach( $table in $tablesList )
+CREATE TABLE $table.getName() (
+## GENERATE COLUMNS
+#foreach ( $column in $table.getColumnsList() )
+	$column.getName() $column.getType()#if( $column.isNotNull() ) not null#end,
+#end
+## PRIMARY KEY
+	CONSTRAINT PK_$table.getName().toUpperCase() PRIMARY KEY ($table.getPkValue())
+);
+## TABLE COMMENT
+#if ($table.getComment() )
+COMMENT ON TABLE $table.getName() IS '$table.getComment().replaceAll("'","''")';
+#end
+## COLUMNS COMMENTS
+#foreach ( $column in $table.getColumnsList() )
+#if ($column.getComment() )
+COMMENT ON COLUMN $table.getName().$column.getName() IS '$column.getComment().replaceAll("'","''")';
+#end
+#end
+
+#end
+
+
+-- ================================
+-- FOREIGN KEYS
+-- ================================
+#foreach( $fk in $fksList )
+ALTER TABLE $fk.getSourceName() ADD CONSTRAINT FK_$fk.getName() FOREIGN KEY ($fk.getFkValue()) REFERENCES $fk.getTargetName()($fk.getPkValue());
+#end
+
+
+-- ================================
+-- FOREIGN KEYS INDEXES
+-- ================================
+#foreach( $fk in $fksList )
+CREATE INDEX IDX_$fk.getName() ON $fk.getSourceName() ($fk.getFkValue());
+#end
+
+## END OF GENERATED SQL
+$end_of_generated
+#if ( $keep_content )$content_to_keep#end

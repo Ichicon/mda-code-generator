@@ -3,11 +3,10 @@ package mda.generator.beans;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * Association unidirectionnelle entre deux classes, contient une référence vers son opposée.
- * Fournit les informations de nullabilité, multiplicité et navigabilité.
+ * Unidirectional association between two classes. Contains a reference to its opposite association
+ * Provide informations about nullability, multiplicity and navigability.
  * 
- * @author Fabien
- *
+ * @author Fabien Crapart
  */
 public class UmlAssociation {
 	private String id;

@@ -3,7 +3,9 @@ package mda.generator.beans;
 import mda.generator.exceptions.MdaGeneratorException;
 
 /**
- * Domain representing a type in the model file
+ * Domain representing a type in the model file with some constraints :
+ * - maxLength
+ * - precision
  * 
  * @author Fabien Crapart
  */

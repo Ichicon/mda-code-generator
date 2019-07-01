@@ -20,6 +20,7 @@ public class SQLWriterConfig {
 	private Iterable<String> excludesClassesPrefixes;
 	private ConverterInterface converter;
 	private Charset charset = StandardCharsets.UTF_8;
+	private String sqlSchemaName;
 	
 	/**
 	 * @return the sqlTemplatePath
@@ -107,5 +108,17 @@ public class SQLWriterConfig {
 	public void setCharset(Charset charset) {
 		this.charset = charset;
 	}
-
+	
+	/**
+	 * @return the schema
+	 */
+	public String getSqlSchemaName() {
+		return sqlSchemaName;
+	}
+	/**
+	 * @param schema the schema to set
+	 */
+	public void setSqlSchemaName(String schema) {
+		this.sqlSchemaName = schema;
+	}
 }

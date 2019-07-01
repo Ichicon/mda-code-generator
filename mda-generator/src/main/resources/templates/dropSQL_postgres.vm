@@ -1,0 +1,38 @@
+-- *********************************************
+-- DROP TABLES FOR ORACLE
+--
+-- This file has been automatically generated
+-- *********************************************
+SET search_path TO $sqlSchemaName;
+
+-- ================================
+-- DROP SEQUENCE
+-- ================================
+#foreach( $sequence in $sequencesList )
+DROP SEQUENCE $sequence.getName();
+#end
+ 
+-- ================================
+-- DROP FOREIGN KEY
+-- ================================
+#foreach( $fk in $fksList )
+ALTER TABLE $fk.getSourceName() DROP CONSTRAINT FK_$fk.getName();
+#end
+ 
+-- ================================
+-- DROP FOREIGN KEYS INDEXES
+-- ================================
+#foreach( $fk in $fksList )
+DROP INDEX IDX_$fk.getName();
+#end
+ 
+-- ================================
+-- DROP TABLES
+-- ================================
+#foreach( $table in $tablesList )
+DROP TABLE $table.getName();
+#end
+
+## END OF GENERATED SQL
+$end_of_generated
+#if ( $keep_content )$content_to_keep#end

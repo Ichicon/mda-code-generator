@@ -4,7 +4,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 
 /**
- * Attribut d'une classe
+ * Attribute of a class
+ * 
  * @author Fabien
  *
  */
@@ -18,6 +19,7 @@ public class UmlAttribute {
 	private UmlDomain domain;
 	private String comment;
 	private Boolean isNotNull;
+	/** Atrtibute used for JPA updatable=false */
 	private Boolean isReadonly = true;
 
 	/**
