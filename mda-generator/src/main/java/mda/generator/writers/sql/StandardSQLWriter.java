@@ -142,11 +142,11 @@ public class StandardSQLWriter implements SQLWriterInterface {
 							manyToManyTable.setPkValue(pk1.getName() + "," + pk2.getName());
 							
 							// FK1
-							SQLForeignKey fk1 = new SQLForeignKey(umlAssociation.getName()+"_1", manyToManyTable.getName(), umlAssociation.getSource().getName(), pk1.getName(), pk1.getName());
+							SQLForeignKey fk1 = new SQLForeignKey(umlAssociation.getName()+"_1", manyToManyTable.getName(), umlAssociation.getSource().getName(), pk1.getName(), attrPk1.getName());
 							fksList.add(fk1);
 							
 							// FK2		
-							SQLForeignKey fk2 = new SQLForeignKey(umlAssociation.getName()+"_2", manyToManyTable.getName(), umlAssociation.getTarget().getName(), pk2.getName(), pk2.getName());
+							SQLForeignKey fk2 = new SQLForeignKey(umlAssociation.getName()+"_2", manyToManyTable.getName(), umlAssociation.getTarget().getName(), pk2.getName(), attrPk2.getName());
 							fksList.add(fk2);
 						} else {
 							// OneToMany, nothing to do, Key is on the "many" side
