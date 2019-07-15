@@ -17,12 +17,12 @@ Edit xxxxx.eap schematic with Entreprise Architect.
      * Use the first line (Associate) in Class Relationships.
      * On the association you can set these ([xxxx] ⇔ not mandatory) :
          * General → Name : name1(x characters, without underscore)_name2(x characters, without underscore) → do not input more than 26 characters because of index names limitations in DB (oracle => 30 characters)
-         * [Source Role → Role] : Name for get"ObjectName" (useful in case of double association to the same class). Default is PK name of pointed class.
-         * [Source Role → Alias] Nom pour la colonne FK dans la table (utile en cas de double liaison vers la même table). Par défaut nom de la PK de la classe pointée.
-         * [Target Role → Role] : Nom pour le getNOMOBJET (utile en cas de double liaison vers la même table)
-         * [Target Role → Alias] Nom pour la colonne FK dans la table (utile en cas de double liaison vers la même table). Par défaut nom de la PK de la classe pointée.
-         * [Target Role ou Source Role -> Owned] /!\ Pour une OneToOne permet d'indiquer que ce côté de la relation sera pointée par l'autre (la FK sera dans la table "owner")
-   * Pour ajouter des commentaires :
-       * Sur le package, il faut ajouter un objet Note sur le schéma et écrire dedans.
-       * Sur une classe il faut saisir le commentaire dans le champ “Notes”
-       * Sur un attribut il faut saisir le commentaire dans le champs “Alias”
+         * [Source Role → Role] : Name for get"ObjectName" (useful in case of multiple associations to the same class). Default is  is the name of the primary key of the pointed class.
+         * [Source Role → Alias] Name for the FK column in the SQL table (useful when multiple association to the same table). Default is the name of the primary key in the other table.
+         * [Target Role → Role] : Same as "Source Role -> Role", name for get"ObjectName" (useful in case of multiple associations to the same class). Default is  is the name of the primary key of the pointed class.
+         * [Target Role → Alias] Same as "Source Role -> Alias", name for the FK column in the SQL table (useful when multiple association to the same table). Default is the name of the primary key in the other table.
+         * [Target Role ou Source Role -> Owned] /!\ For a OneToOne, define which side hold the field (the is in the "owner" table => so not the one with "owned" to true).
+   * To add comments :
+       * For the package level (package-info.java), you must add a "Note" object into the diagram and write into.
+       * For a class, you have to add a comment in "Notes".
+       * For an attribute, you must put the comment in the "Alias" field.
