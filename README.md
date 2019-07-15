@@ -1,26 +1,28 @@
 # mda-code-generator
-Génération de code java et sql à partir d'une modélisation xml
+JAVA and SQL code generator from an XMI model and a XML metamodel (for types definition).
 
-## Modifications du modèle de données (sous ea 11)
+Build package structure, JPA entities, DAOs squeletons (SPRING crude repository), SQL create and drop scripts.
 
-Modifier le schéma dans xxxxx.eap avec Entreprise Architect.
+## Editing DATA model (with Enteprise architect 11)
 
-  * Pour ajouter un nouveau domaine :
-       * Aller dans Settings → Code Engineering Datatypes. Choisir Java puis saisir ou modifier les DO_xxx.
-       * Il faut exporter les metadata au format XML avec Project -> Model Import/Export -> Export Reference Data et cocher Model Data Types - Codes an DDL
-       * Remplacer le fichier metadata_xxxx.xml par ce nouveau fichier (ou le créer).
-  * Pour définir la clé primaire, il faut aller dans le détail de l'attribut et cocher isId
-  * Pour définir un attribut nullable, il faut aller dans le détail de l'attribut et mettre 0 dans Lower bound de Multiplicity.
-  * Pour ajouter une relation entre deux classes :
-     * Utiliser le 1er trait (Associate) dans Class Relationships.
-     * Sur l'association ([xxxx] ⇔ facultatif) :
-         * General → Name : nom1(x caractères, sans underscore)_nom2(x caractères, sans underscore) → ne pas dépasser 26 caractères à cause des noms des index générés (IDX_xxxx)
-         * [Source Role → Role] : Nom pour le getNOMOBJET (utile en cas de double liaison vers la même table). Par défaut nom de la classe pointée.
-         * [Source Role → Alias] Nom pour la colonne FK dans la table (utile en cas de double liaison vers la même table). Par défaut nom de la PK de la classe pointée.
-         * [Target Role → Role] : Nom pour le getNOMOBJET (utile en cas de double liaison vers la même table)
-         * [Target Role → Alias] Nom pour la colonne FK dans la table (utile en cas de double liaison vers la même table). Par défaut nom de la PK de la classe pointée.
-         * [Target Role ou Source Role -> Owned] /!\ Pour une OneToOne permet d'indiquer que ce côté de la relation sera pointée par l'autre (la FK sera dans la table "owner")
-   * Pour ajouter des commentaires :
-       * Sur le package, il faut ajouter un objet Note sur le schéma et écrire dedans.
-       * Sur une classe il faut saisir le commentaire dans le champ “Notes”
-       * Sur un attribut il faut saisir le commentaire dans le champs “Alias”
+Edit xxxxx.eap schematic with Entreprise Architect.
+
+  * To add a new domain (<=> new type with length and precision constraints) :
+       * Go to Settings → Code Engineering Datatypes. Choose Java and add or modify DO_xxx.
+       * You have to export metadata as XML with Project -> Model Import/Export -> Export Reference Data and check Model Data Types - Codes an DDL
+       * Replace metadata_xxxx.xml file (or generate it the first time) with this new file.
+  * To define a primary key, go to the attribut detail panel and check isId.
+  * To define a nullable attribute, go to the attribut detail panel and put 0 into Lower bound of Multiplicity.
+  * To add a relationship between to classes :
+     * Use the first line (Associate) in Class Relationships.
+     * On the association you can set these ([xxxx] ⇔ not mandatory) :
+         * General → Name : name1(x characters, without underscore)_name2(x characters, without underscore) → do not input more than 26 characters because of index names limitations in DB (oracle => 30 characters)
+         * [Source Role → Role] : Name for get"ObjectName" (useful in case of multiple associations to the same class). Default is  is the name of the primary key of the pointed class.
+         * [Source Role → Alias] Name for the FK column in the SQL table (useful when multiple association to the same table). Default is the name of the primary key in the other table.
+         * [Target Role → Role] : Same as "Source Role -> Role", name for get"ObjectName" (useful in case of multiple associations to the same class). Default is  is the name of the primary key of the pointed class.
+         * [Target Role → Alias] Same as "Source Role -> Alias", name for the FK column in the SQL table (useful when multiple association to the same table). Default is the name of the primary key in the other table.
+         * [Target Role ou Source Role -> Owned] /!\ For a OneToOne, define which side hold the field (the is in the "owner" table => so not the one with "owned" to true).
+   * To add comments :
+       * For the package level (package-info.java), you must add a "Note" object into the diagram and write into.
+       * For a class, you have to add a comment in "Notes".
+       * For an attribute, you must put the comment in the "Alias" field.
