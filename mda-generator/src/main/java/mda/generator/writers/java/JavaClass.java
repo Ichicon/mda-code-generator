@@ -447,8 +447,8 @@ public class JavaClass {
 				);
 				assocGetter.addAnnotations(new JavaAnnotation(
 					importManager.getFinalName("javax.persistence.JoinTable"),
-					new JavaAnnotationProperty("name","\"" +  association.getName() + "\""),
-					new JavaAnnotationProperty("inverseJoinColumns","@"+importManager.getFinalName("javax.persistence.JoinColumn")+"(name = \""+  NamesComputingUtil.computeFKName(association)+ "\")")
+					new JavaAnnotationProperty("name","\"" +  association.getTarget().getName() + "\""),
+					new JavaAnnotationProperty("inverseJoinColumns","@"+importManager.getFinalName("javax.persistence.JoinColumn")+"(name = \""+  association.getOpposite().getFkName() + "\")")
 				));	
 			} else {
 				assocGetter.addAnnotations(
