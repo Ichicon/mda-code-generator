@@ -11,7 +11,8 @@ import mda.generator.beans.UmlPackage;
 import mda.generator.converters.ConverterInterface;
 
 /**
- * Configuration for JavaWriter, alimented by MdaGenerator
+ * Configuration for JavaWriter, alimented by MdaGenerator.
+ * 
  * @author Fabien Crapart
  *
  */
@@ -53,6 +54,7 @@ public class JavaWriterConfig {
 		this.umlPackages = umlPackages;
 	}
 	/**
+	 * Uml to java converter.
 	 * @return the converter
 	 */
 	public ConverterInterface getConverter() {

@@ -13,7 +13,7 @@ import mda.generator.beans.UmlPackage;
 import mda.generator.converters.ConverterInterface;
 
 /**
- * Java package to generate to filesystem
+ * Java package to generate to filesystem.
  * 
  * @author Fabien
  *
@@ -25,7 +25,8 @@ public class JavaPackage {
 	private final List<JavaClass> classes = new ArrayList<>();
 	
 	/**
-	 * Package initialization
+	 * Package initialization.
+	 * 
 	 * @param parentPath Root of source code
 	 * @param packageName Package name
 	 * @param comments Facultative : comment to include in package-info.java

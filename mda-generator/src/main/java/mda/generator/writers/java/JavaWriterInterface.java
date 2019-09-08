@@ -8,7 +8,9 @@ package mda.generator.writers.java;
  */
 public interface JavaWriterInterface {
 	/**
-	 * Write code
+	 * Write java code using provided configuration.
+	 * 
+	 * @param config Java writer configuration.
 	 */
 	void writeSourceCode(JavaWriterConfig config);
 

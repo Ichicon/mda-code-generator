@@ -14,7 +14,7 @@ import mda.generator.exceptions.MdaGeneratorException;
 import mda.generator.writers.VelocityUtils;
 
 /**
- * Class to write java packages and classes from Uml objects
+ * Class to write java packages and classes from Uml objects.
  * 
  * @author Fabien Crapart
  */
@@ -149,6 +149,7 @@ public class JavaWriter implements JavaWriterInterface {
 	}
 	
 	/**
+	 * Write the dao file.
 	 * 
 	 * @param packageDaosPath
 	 * @param javaClass

@@ -19,7 +19,8 @@ import mda.generator.writers.VelocityUtils;
 import mda.generator.writers.java.NamesComputingUtil;
 
 /**
- * Create SQL files for Oracle
+ * Create SQL files for databases (create and drop scripts).
+ * 
  * @author Fabien Crapart
  */
 public class StandardSQLWriter implements SQLWriterInterface {
@@ -35,6 +36,9 @@ public class StandardSQLWriter implements SQLWriterInterface {
 	
 	private SQLWriterConfig config;
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void writeSql(SQLWriterConfig config) {
 		if(config == null) {
@@ -101,7 +105,7 @@ public class StandardSQLWriter implements SQLWriterInterface {
 				}
 				
 				// Compute pk value			
-				table.setPkValue(NamesComputingUtil.computePKValue(umlClass));
+				table.setPkValue(NamesComputingUtil.computePkSqlName(umlClass));
 				
 				// Add columns and compute pk name list			
 				for(UmlAttribute umlAttribute : umlClass.getAttributes()) {
@@ -130,12 +134,12 @@ public class StandardSQLWriter implements SQLWriterInterface {
 							// PK 1
 							UmlAttribute attrPk1 = umlAssociation.getSource().getPKs().get(0);
 													
-							SQLColumn pk1 = new SQLColumn(NamesComputingUtil.computeFKName(umlAssociation.getOpposite()),attrPk1.getDomain(),true,"ManyToMany FK " + umlAssociation.getSource().getName(), config.getConverter());
+							SQLColumn pk1 = new SQLColumn(NamesComputingUtil.computeJavaFkName(umlAssociation.getOpposite()),attrPk1.getDomain(),true,"ManyToMany FK " + umlAssociation.getSource().getName(), config.getConverter());
 							manyToManyTable.addColumn(pk1);
 							
 							// PK 2
 							UmlAttribute attrPk2 = umlAssociation.getTarget().getPKs().get(0);
-							SQLColumn pk2 = new SQLColumn(NamesComputingUtil.computeFKName(umlAssociation),attrPk2.getDomain(),true,"ManyToMany FK " + umlAssociation.getTarget().getName(), config.getConverter());
+							SQLColumn pk2 = new SQLColumn(NamesComputingUtil.computeJavaFkName(umlAssociation),attrPk2.getDomain(),true,"ManyToMany FK " + umlAssociation.getTarget().getName(), config.getConverter());
 							manyToManyTable.addColumn(pk2);
 							
 							// PK VALUE
@@ -162,7 +166,7 @@ public class StandardSQLWriter implements SQLWriterInterface {
 	                            SQLColumn fk;                       
 	                            // Use fk column name defined in association
 	                            if(umlAssociation.getTarget().getPKs().size() == 1) {
-	                                fk = new SQLColumn(NamesComputingUtil.computeFKName(umlAssociation),pkX.getDomain(), !umlAssociation.isTargetNullable(),"ManyToOne FK " + umlAssociation.getTarget().getName(), config.getConverter());
+	                                fk = new SQLColumn(NamesComputingUtil.computeJavaFkName(umlAssociation),pkX.getDomain(), !umlAssociation.isTargetNullable(),"ManyToOne FK " + umlAssociation.getTarget().getName(), config.getConverter());
 	                            } else { // Generate name from pk because it's a composite key
 	                                fk = new SQLColumn(pkX.getName(),pkX.getDomain(),true,"ManyToOne FK " + umlAssociation.getTarget().getName(), config.getConverter());       
 	                            }
@@ -180,7 +184,7 @@ public class StandardSQLWriter implements SQLWriterInterface {
 		                            SQLColumn fk;                       
 		                            // Use fk column name defined in association
 		                            if(umlAssociation.getTarget().getPKs().size() == 1) {
-		                                fk = new SQLColumn(NamesComputingUtil.computeFKName(umlAssociation),pkX.getDomain(), !umlAssociation.isTargetNullable(),"OneToOne FK " + umlAssociation.getTarget().getName(), config.getConverter());
+		                                fk = new SQLColumn(NamesComputingUtil.computeJavaFkName(umlAssociation),pkX.getDomain(), !umlAssociation.isTargetNullable(),"OneToOne FK " + umlAssociation.getTarget().getName(), config.getConverter());
 		                            } else { // Generate name from pk because it's a composite key
 		                                fk = new SQLColumn(pkX.getName(),pkX.getDomain(),true,"OneToOne FK " + umlAssociation.getTarget().getName(), config.getConverter());       
 		                            }

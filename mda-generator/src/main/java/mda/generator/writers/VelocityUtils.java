@@ -24,7 +24,7 @@ public class VelocityUtils {
 	private static Logger LOG = LogManager.getLogger();
 
 	/**
-	 * Analyse already existing file and keep_content and content_to_keep inside velocity context
+	 * Analyse already existing file and add "keep_content" and "content_to_keep" inside velocity context
 	 * 
 	 * @return false if the file shouldn't be regenerated
 	 * @throws IOException 

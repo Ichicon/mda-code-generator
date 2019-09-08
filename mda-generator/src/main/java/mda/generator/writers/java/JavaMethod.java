@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Class representing a java method
+ * Class representing a java method.
+ * 
  * @author Fabien Crapart
  *
  */

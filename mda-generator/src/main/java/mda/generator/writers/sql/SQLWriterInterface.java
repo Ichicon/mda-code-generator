@@ -1,7 +1,8 @@
 package mda.generator.writers.sql;
 
 /**
- * Class to write sql create tables and drop tables files
+ * Class to write sql create tables and drop tables files.
+ * 
  * @author Fabien Crapart
  */
 public interface SQLWriterInterface {

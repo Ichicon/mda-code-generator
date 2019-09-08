@@ -6,7 +6,8 @@ import java.util.List;
 import mda.generator.beans.UmlClass;
 
 /**
- * SQL table to print in sql file
+ * SQL table to print in sql file.
+ * 
  * @author Fabien Crapart
  *
  */

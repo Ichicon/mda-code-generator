@@ -1,8 +1,10 @@
 package mda.generator.writers.java;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.WordUtils;
 
 import mda.generator.beans.UmlAssociation;
 import mda.generator.beans.UmlAttribute;
@@ -10,7 +12,8 @@ import mda.generator.beans.UmlClass;
 import mda.generator.exceptions.MdaGeneratorException;
 
 /**
- * Util to compute FK and PK names
+ * Util to compute FK and PK names.
+ * 
  * @author Fabien Crapart
  *
  */
@@ -19,6 +22,10 @@ public class NamesComputingUtil {
 	public static final String DEFAULT_SEQUENCE_PREFIX ="SEQ_";
 	/** Actual sql sequence name prefix */
 	private static String sequencePrefix = DEFAULT_SEQUENCE_PREFIX;
+	
+	/** Pattern to find underscore in a string */
+	private static Pattern FIND_UNDERSCORE = Pattern.compile("_");
+	
 	
 	/**
 	 * Compute sequence name for a table with unique PK
@@ -45,15 +52,16 @@ public class NamesComputingUtil {
 	}
 
 	/**
-	 * Compute final name for FK, use name defined in association as a priority or pk name instead
+	 * Compute final name for FK, use name defined in association as a priority or pk name instead.
+	 * 
 	 * @param umlAssociation
 	 * @return
 	 */
-	public static String computeFKName(UmlAssociation umlAssociation) {
+	public static String computeJavaFkName(UmlAssociation umlAssociation) {
 		String fkName = umlAssociation.getFkName();
 		
 		if(StringUtils.isEmpty(fkName)) {
-			fkName = computePKName(umlAssociation.getTarget());
+			fkName = computeJavaPkName(umlAssociation.getTarget());
 		}
 		
 		return fkName;
@@ -64,7 +72,7 @@ public class NamesComputingUtil {
 	 * @param umlClass
 	 * @return
 	 */
-	public static String computePKName(UmlClass umlClass) {
+	public static String computeJavaPkName(UmlClass umlClass) {
 		String pkName;
 		List<UmlAttribute> pks = umlClass.getPKs();
 		if(pks.isEmpty()) {
@@ -78,7 +86,13 @@ public class NamesComputingUtil {
 		return pkName;		
 	}
 	
-	public static String computeFKValue(UmlAssociation umlAssociation) {
+	/**
+	 * Compute the FK name for SQL.
+	 * 
+	 * @param umlAssociation
+	 * @return
+	 */
+	public static String computeFkSqlName(UmlAssociation umlAssociation) {
 		String fkValue = null;
 		
 		// We can use fk name defined in model if it's a single pk
@@ -88,14 +102,20 @@ public class NamesComputingUtil {
 		
 		// If no fk name defined or multiple pk, we use pk names from target table
 		if(StringUtils.isEmpty(fkValue)) {
-			fkValue = computePKValue(umlAssociation.getTarget());
+			fkValue = computePkSqlName(umlAssociation.getTarget());
 		}
 
 		return fkValue;
 	}
 
 	
-	public static String computePKValue(UmlClass umlClass) {
+	/**
+	 * Compute PK name for SQL.
+	 * 
+	 * @param umlClass
+	 * @return
+	 */
+	public static String computePkSqlName(UmlClass umlClass) {
 		StringBuilder pkValue = new StringBuilder();
 		for(UmlAttribute pk : umlClass.getPKs()) {
 			if(pkValue.length() > 0) {
@@ -114,5 +134,22 @@ public class NamesComputingUtil {
 	 */
 	public static void changeSequencePrefix(String newPrefix) {
 		sequencePrefix = newPrefix;
+	}
+	
+	
+	/**
+	 * Convert a "snake case" name in "camel case name".
+	 * If there is no "_" in the original name, we just capitalize.
+	 * 
+	 * @param originalName Orignal name to convert to camelCase
+	 * @return name in camel case.
+	 */
+	public static String computeCamelCaseName(String originalName) {
+		if(FIND_UNDERSCORE.matcher(originalName).matches()){		
+			return StringUtils.remove(WordUtils.capitalizeFully(originalName, '_'), "_");
+		}
+		
+		// No underscore, we juste capitalize
+		return StringUtils.capitalize(originalName);
 	}
 }

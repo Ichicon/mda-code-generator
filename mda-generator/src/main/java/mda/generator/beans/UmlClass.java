@@ -8,6 +8,8 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 
+import mda.generator.writers.java.NamesComputingUtil;
+
 /**
  * Class inside a package (containing attributes and associations with other classes)
  * 
@@ -48,7 +50,7 @@ public class UmlClass {
 	public void setName(String name) {
 		// On modifie le nom
 		this.name = name;
-		this.camelCaseName = StringUtils.remove(WordUtils.capitalizeFully(name, '_'), "_");
+		this.camelCaseName = NamesComputingUtil.computeCamelCaseName(name);
 	}
 
 	

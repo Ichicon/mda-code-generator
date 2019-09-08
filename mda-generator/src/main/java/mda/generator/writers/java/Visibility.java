@@ -1,7 +1,7 @@
 package mda.generator.writers.java;
 
 /**
- * Visibilité d'un élément de code (class, méthode, attribut)
+ * Java scope of code (class, method, attribute)
  * @author Fabien
  *
  */
@@ -12,11 +12,13 @@ public enum Visibility {
 	PACKAGE("");
 	
 	private final String javaCode;
+	
 	private Visibility(String javaCode) {
 		this.javaCode = javaCode;
 	}
+	
 	/**
-	 * @return the javaCode
+	 * @return the javaCode for the scope
 	 */
 	public String toString() {
 		return javaCode;

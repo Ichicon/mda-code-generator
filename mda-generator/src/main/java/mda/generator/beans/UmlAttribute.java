@@ -3,6 +3,8 @@ package mda.generator.beans;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 
+import mda.generator.writers.java.NamesComputingUtil;
+
 /**
  * Attribute of a class
  * 
@@ -47,7 +49,7 @@ public class UmlAttribute {
 	 */
 	public void setName(String name) {
 		this.name = name;
-		this.camelCaseName =  WordUtils.uncapitalize(StringUtils.remove(WordUtils.capitalizeFully(name, '_'), "_"));
+		this.camelCaseName =  WordUtils.uncapitalize(NamesComputingUtil.computeCamelCaseName(name));
 	}
 	
 	/**

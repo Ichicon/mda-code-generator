@@ -4,6 +4,7 @@ import mda.generator.beans.UmlAssociation;
 import mda.generator.writers.java.NamesComputingUtil;
 
 /**
+ * Class which represent a foreign key between two tables
  * 
  * @author Fabien Crapart
  *
@@ -25,8 +26,8 @@ public class SQLForeignKey {
 		sourceName = umlAssociation.getSource().getName();
 		targetName = umlAssociation.getTarget().getName();
 				
-		fkValue = NamesComputingUtil.computeFKValue(umlAssociation);
-		pkValue = NamesComputingUtil.computePKValue(umlAssociation.getTarget());
+		fkValue = NamesComputingUtil.computeFkSqlName(umlAssociation);
+		pkValue = NamesComputingUtil.computePkSqlName(umlAssociation.getTarget());
 	}
 	
 	/**

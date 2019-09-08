@@ -5,7 +5,7 @@ import mda.generator.beans.UmlDomain;
 import mda.generator.converters.ConverterInterface;
 
 /**
- * SQl column in sql table for sql generation
+ * SQl column in sql table for sql generation.
  * 
  * @author Fabien Crapart
  */

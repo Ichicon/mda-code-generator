@@ -341,8 +341,8 @@ public class JavaClass {
 		);	
 		assocGetter.addAnnotations(new JavaAnnotation(
 				importManager.getFinalName("javax.persistence.JoinColumn"),
-				new JavaAnnotationProperty("name","\"" + NamesComputingUtil.computeFKName(association) + "\""),
-				new JavaAnnotationProperty("referencedColumnName","\"" + NamesComputingUtil.computePKName(association.getTarget()) + "\"")	
+				new JavaAnnotationProperty("name","\"" + NamesComputingUtil.computeJavaFkName(association) + "\""),
+				new JavaAnnotationProperty("referencedColumnName","\"" + NamesComputingUtil.computeJavaPkName(association.getTarget()) + "\"")	
 				));	
 	}
 
@@ -363,8 +363,8 @@ public class JavaClass {
 		} else {// Unidirectional, needs join column name and reference column name
 			JavaAnnotation joinColumn = new JavaAnnotation(
 					importManager.getFinalName("javax.persistence.JoinColumn"),
-					new JavaAnnotationProperty("name","\"" + NamesComputingUtil.computeFKName(association.getOpposite())+ "\""),
-					new JavaAnnotationProperty("referencedColumnName","\"" + NamesComputingUtil.computePKName(association.getSource()) + "\"")	
+					new JavaAnnotationProperty("name","\"" + NamesComputingUtil.computeJavaFkName(association.getOpposite())+ "\""),
+					new JavaAnnotationProperty("referencedColumnName","\"" + NamesComputingUtil.computeJavaPkName(association.getSource()) + "\"")	
 					);
 			assocGetter.addAnnotations(joinColumn);							
 		}					
@@ -397,8 +397,8 @@ public class JavaClass {
 				assocGetter.addAnnotations(new JavaAnnotation(
 					importManager.getFinalName("javax.persistence.JoinTable"),
 					new JavaAnnotationProperty("name","\"" +  association.getName() + "\""),
-					new JavaAnnotationProperty("joinColumns","@"+importManager.getFinalName("javax.persistence.JoinColumn")+"(name = \""+ NamesComputingUtil.computeFKName(association.getOpposite())+"\")"),
-					new JavaAnnotationProperty("inverseJoinColumns","@"+importManager.getFinalName("javax.persistence.JoinColumn")+"(name = \""+  NamesComputingUtil.computeFKName(association)+ "\")")
+					new JavaAnnotationProperty("joinColumns","@"+importManager.getFinalName("javax.persistence.JoinColumn")+"(name = \""+ NamesComputingUtil.computeJavaFkName(association.getOpposite())+"\")"),
+					new JavaAnnotationProperty("inverseJoinColumns","@"+importManager.getFinalName("javax.persistence.JoinColumn")+"(name = \""+  NamesComputingUtil.computeJavaFkName(association)+ "\")")
 				));						
 		} else { // Not "owner" of the manyToMany, mappedBy with opposite getter is enough
 			assocGetter.addAnnotations(new JavaAnnotation(
@@ -430,8 +430,8 @@ public class JavaClass {
 			// Reference to owner PK
 			assocGetter.addAnnotations(new JavaAnnotation(
 					importManager.getFinalName("javax.persistence.JoinColumn"),
-					new JavaAnnotationProperty("name","\"" + NamesComputingUtil.computeFKName(association) + "\""),
-					new JavaAnnotationProperty("referencedColumnName","\"" + NamesComputingUtil.computePKName(association.getTarget()) + "\"")	
+					new JavaAnnotationProperty("name","\"" + NamesComputingUtil.computeJavaFkName(association) + "\""),
+					new JavaAnnotationProperty("referencedColumnName","\"" + NamesComputingUtil.computeJavaPkName(association.getTarget()) + "\"")	
 			));	
 		}else { // If is owner, cascading to delete the owned object 
 			// Can't use mapped by if other OneToOne doesn't exists
@@ -445,10 +445,17 @@ public class JavaClass {
 						new JavaAnnotationProperty("cascade","{"+ importManager.getFinalName("javax.persistence.CascadeType")+".ALL}")
 					)	
 				);
+				
+				JavaAnnotation joinColumn = new JavaAnnotation(
+						importManager.getFinalName("javax.persistence.JoinColumn"),
+						new JavaAnnotationProperty("name","\"" + NamesComputingUtil.computeJavaFkName(association.getOpposite())+ "\""),
+						new JavaAnnotationProperty("referencedColumnName","\"" + NamesComputingUtil.computeJavaPkName(association.getSource()) + "\"")	
+						);
+				
 				assocGetter.addAnnotations(new JavaAnnotation(
 					importManager.getFinalName("javax.persistence.JoinTable"),
-					new JavaAnnotationProperty("name","\"" +  association.getTarget().getName() + "\""),
-					new JavaAnnotationProperty("inverseJoinColumns","@"+importManager.getFinalName("javax.persistence.JoinColumn")+"(name = \""+  association.getOpposite().getFkName() + "\")")
+					new JavaAnnotationProperty("name","\"" +  association.getName() + "\""),
+					new JavaAnnotationProperty("inverseJoinColumns","@"+importManager.getFinalName("javax.persistence.JoinColumn")+"(name = \""+  NamesComputingUtil.computeJavaFkName(association)+ "\")")
 				));	
 			} else {
 				assocGetter.addAnnotations(
