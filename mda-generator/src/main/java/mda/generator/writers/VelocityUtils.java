@@ -21,7 +21,7 @@ import mda.generator.exceptions.MdaGeneratorException;
  *
  */
 public class VelocityUtils {
-	private static Logger LOG = LogManager.getLogger();
+	private static Logger LOG = LogManager.getLogger(VelocityUtils.class);
 
 	/**
 	 * Analyse already existing file and add "keep_content" and "content_to_keep" inside velocity context

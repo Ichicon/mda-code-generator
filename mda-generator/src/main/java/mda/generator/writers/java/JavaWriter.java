@@ -37,6 +37,9 @@ public class JavaWriter implements JavaWriterInterface {
 	/** Writer config */
 	private JavaWriterConfig config;
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void writeSourceCode(JavaWriterConfig config) {
 		if(config == null) {
@@ -59,9 +62,9 @@ public class JavaWriter implements JavaWriterInterface {
 	}
 
 	/**
-	 * 
-	 * @param srcRoot
-	 * @param umlPackage
+	 * Creating java package (which create java classes)
+	 * @param srcRoot root path to create java classes
+	 * @param umlPackage UML Object with package information
 	 */
 	protected void createPackage(Path srcRoot, UmlPackage umlPackage) {
 		JavaPackage javaPackage = new JavaPackage(srcRoot, umlPackage, config.getConverter());
@@ -92,7 +95,12 @@ public class JavaWriter implements JavaWriterInterface {
 	}
 	
 	
-	
+	/**
+	 * Creation of package path for entities and the package info file inside.
+	 * 
+	 * @param javaPackage Object describing the java package
+	 * @return path of the directory representing the package for entities
+	 */
 	protected Path writeEntitiesPackageInfo(JavaPackage javaPackage) {
 		VelocityContext context = new VelocityContext();
 		context.put("commentsList", javaPackage.getCommentsList());
@@ -110,6 +118,13 @@ public class JavaWriter implements JavaWriterInterface {
 		return entitiesPackagePath;
 	}
 	
+	
+	/**
+	 * Creation of package path for DAOs and the package info file inside.
+	 * 
+	 * @param javaPackage Object describing the java package.
+	 * @return path of the directory representing the package for DAOs.
+	 */
 	protected Path writeDaosPackageInfo(JavaPackage javaPackage) {
 		VelocityContext context = new VelocityContext();
 		context.put("commentsList", javaPackage.getCommentsList());
@@ -129,10 +144,10 @@ public class JavaWriter implements JavaWriterInterface {
 
 	
 	/**
-	 * 
-	 * @param packageEntitiesPath
-	 * @param javaClass
-	 * @throws IOException
+	 * Write a java class into the given package path.
+	 * @param packageEntitiesPath Path where to create the java class.
+	 * @param javaClass Object with data to create the java class.
+	 * @throws IOException Error while writing the java class file.
 	 */
 	protected void writeClass(Path packageEntitiesPath, JavaClass javaClass) throws IOException {	
 		// Analyse file and existing content, add values to context to use in template
@@ -149,11 +164,11 @@ public class JavaWriter implements JavaWriterInterface {
 	}
 	
 	/**
-	 * Write the dao file.
+	 * Write the dao file corresponding to the given java class.
 	 * 
-	 * @param packageDaosPath
-	 * @param javaClass
-	 * @throws IOException
+	 * @param packageDaosPath Package associated with the class.
+	 * @param javaClass Object with data about the java class for which we generate a DAO.
+	 * @throws IOException Error while writing the DAO file.
 	 */
 	protected void writeDao(Path packageDaosPath, JavaClass javaClass) throws IOException {	
 		// Test if file already exists
@@ -172,10 +187,20 @@ public class JavaWriter implements JavaWriterInterface {
 		}
 	}
 	
+	/**
+	 * Change in the package name, the "entities" part with "daos" (depending on configurated names).
+	 * @param entitiesPackage Actual path for the package with entites
+	 * @return path for package with DAOs.
+	 */
 	private Path replaceEntitiesWithDaos(Path entitiesPackagePath) {
 		return Paths.get(replaceEntitiesWithDaos(entitiesPackagePath.toString()));
 	}
 
+	/**
+	 * Change in the package name, the "entities" part with "daos" (depending on configurated names).
+	 * @param entitiesPackage Package name for entities
+	 * @return package name for DAOs
+	 */
 	private String replaceEntitiesWithDaos(String entitiesPackage) {
 		return entitiesPackage.replaceAll(config.getEntities(),config.getDaos());
 	}

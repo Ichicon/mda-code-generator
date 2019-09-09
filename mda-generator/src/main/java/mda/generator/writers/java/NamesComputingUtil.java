@@ -23,9 +23,6 @@ public class NamesComputingUtil {
 	/** Actual sql sequence name prefix */
 	private static String sequencePrefix = DEFAULT_SEQUENCE_PREFIX;
 	
-	/** Pattern to find underscore in a string */
-	private static Pattern FIND_UNDERSCORE = Pattern.compile("_");
-	
 	
 	/**
 	 * Compute sequence name for a table with unique PK
@@ -145,7 +142,13 @@ public class NamesComputingUtil {
 	 * @return name in camel case.
 	 */
 	public static String computeCamelCaseName(String originalName) {
-		if(FIND_UNDERSCORE.matcher(originalName).matches()){		
+		// If null or empty, no process to do
+		if(StringUtils.isEmpty(originalName)) {
+			return originalName;
+		}
+		
+		// If contains at least one "_", we convert it from "snake case" to "camel case"
+		if(originalName.indexOf('_') != -1){		
 			return StringUtils.remove(WordUtils.capitalizeFully(originalName, '_'), "_");
 		}
 		
