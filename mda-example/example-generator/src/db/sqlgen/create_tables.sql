@@ -122,7 +122,7 @@ COMMENT ON COLUMN parameter.pk_two IS 'ManyToOne FK double_key';
 ALTER TABLE function ADD CONSTRAINT FK_function_function_body FOREIGN KEY (function_body_id) REFERENCES function_body(function_body_id);
 ALTER TABLE service ADD CONSTRAINT FK_service_service_parent FOREIGN KEY (parent_service_id) REFERENCES service(service_id);
 ALTER TABLE user_function_assoc ADD CONSTRAINT FK_user_function_assoc_1 FOREIGN KEY (user_id) REFERENCES user(user_id);
-ALTER TABLE user_function_assoc ADD CONSTRAINT FK_user_function_assoc_2 FOREIGN KEY (my_function_id) REFERENCES function(my_function_id);
+ALTER TABLE user_function_assoc ADD CONSTRAINT FK_user_function_assoc_2 FOREIGN KEY (my_function_id) REFERENCES function(function_id);
 ALTER TABLE user ADD CONSTRAINT FK_service_workplace_id FOREIGN KEY (workplace_service_id) REFERENCES service(service_id);
 ALTER TABLE user ADD CONSTRAINT FK_user_service FOREIGN KEY (service_id) REFERENCES service(service_id);
 ALTER TABLE user ADD CONSTRAINT FK_user_usertype FOREIGN KEY (type_id) REFERENCES user_type(type_id);
