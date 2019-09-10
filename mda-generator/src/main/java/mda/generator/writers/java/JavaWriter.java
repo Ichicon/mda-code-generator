@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.velocity.VelocityContext;
@@ -193,7 +194,8 @@ public class JavaWriter implements JavaWriterInterface {
 	 * @return path for package with DAOs.
 	 */
 	private Path replaceEntitiesWithDaos(Path entitiesPackagePath) {
-		return Paths.get(replaceEntitiesWithDaos(entitiesPackagePath.toString()));
+		String nomPackageDAO = replaceEntitiesWithDaos(entitiesPackagePath.toString());		
+		return Paths.get(StringUtils.replaceChars(nomPackageDAO,'.', '/'));
 	}
 
 	/**
