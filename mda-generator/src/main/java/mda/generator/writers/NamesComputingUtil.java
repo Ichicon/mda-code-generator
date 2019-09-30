@@ -1,7 +1,6 @@
-package mda.generator.writers.java;
+package mda.generator.writers;
 
 import java.util.List;
-import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
@@ -13,7 +12,7 @@ import mda.generator.exceptions.MdaGeneratorException;
 
 /**
  * Util to compute FK and PK names.
- * 
+ *
  * @author Fabien Crapart
  *
  */
@@ -22,8 +21,8 @@ public class NamesComputingUtil {
 	public static final String DEFAULT_SEQUENCE_PREFIX ="SEQ_";
 	/** Actual sql sequence name prefix */
 	private static String sequencePrefix = DEFAULT_SEQUENCE_PREFIX;
-	
-	
+
+
 	/**
 	 * Compute sequence name for a table with unique PK
 	 * @param umlClass
@@ -32,44 +31,30 @@ public class NamesComputingUtil {
 	public static String computeSequenceName(UmlClass umlClass) {
 		return sequencePrefix + umlClass.getName().toUpperCase();
 	}
-	
-	/**
-	 * Calcul le nom de l'objet dans un relation
-	 * @param association
-	 * @return nom calculé
-	 */	
-	public static String computeFkObjectName(UmlAssociation association) {
-		String roleName = association.getFkObjectName();
-		
-		if(StringUtils.isEmpty(roleName)) {
-			roleName = StringUtils.uncapitalize(association.getTarget().getCamelCaseName());
-		}
-		
-		return roleName;
-	}
+
 
 	/**
-	 * Compute final name for FK, use name defined in association as a priority or pk name instead.
-	 * 
+	 * Compute final name for FK column, use name defined in association as a priority or pk name instead.
+	 *
 	 * @param umlAssociation
 	 * @return
 	 */
-	public static String computeJavaFkName(UmlAssociation umlAssociation) {
+	public static String computeColumnFkName(UmlAssociation umlAssociation) {
 		String fkName = umlAssociation.getFkName();
-		
+
 		if(StringUtils.isEmpty(fkName)) {
-			fkName = computeJavaPkName(umlAssociation.getTarget());
+			fkName = computeColumnPkName(umlAssociation.getTarget());
 		}
-		
+
 		return fkName;
 	}
 
 	/**
-	 * 
+	 * Compute column name of PK
 	 * @param umlClass
 	 * @return
 	 */
-	public static String computeJavaPkName(UmlClass umlClass) {
+	public static String computeColumnPkName(UmlClass umlClass) {
 		String pkName;
 		List<UmlAttribute> pks = umlClass.getPKs();
 		if(pks.isEmpty()) {
@@ -80,23 +65,23 @@ public class NamesComputingUtil {
 			return StringUtils.uncapitalize(umlClass.getName()+"Id");
 		}
 
-		return pkName;		
+		return pkName;
 	}
-	
+
 	/**
 	 * Compute the FK name for SQL.
-	 * 
+	 *
 	 * @param umlAssociation
 	 * @return
 	 */
 	public static String computeFkSqlName(UmlAssociation umlAssociation) {
 		String fkValue = null;
-		
+
 		// We can use fk name defined in model if it's a single pk
 		if(umlAssociation.getTarget().getPKs().size() == 1) {
-			fkValue = umlAssociation.getFkName();		
-		}	
-		
+			fkValue = umlAssociation.getFkName();
+		}
+
 		// If no fk name defined or multiple pk, we use pk names from target table
 		if(StringUtils.isEmpty(fkValue)) {
 			fkValue = computePkSqlName(umlAssociation.getTarget());
@@ -105,10 +90,10 @@ public class NamesComputingUtil {
 		return fkValue;
 	}
 
-	
+
 	/**
 	 * Compute PK name for SQL.
-	 * 
+	 *
 	 * @param umlClass
 	 * @return
 	 */
@@ -120,24 +105,24 @@ public class NamesComputingUtil {
 			}
 			pkValue.append(pk.getName());
 		}
-		
+
 		return pkValue.toString();
 	}
-	
+
 	/**
 	 * Change sequence prefix, default prefix is SEQ_
 	 * @param newPrefix new value for prefix
-	 * @return 
+	 * @return
 	 */
 	public static void changeSequencePrefix(String newPrefix) {
 		sequencePrefix = newPrefix;
 	}
-	
-	
+
+
 	/**
 	 * Convert a "snake case" name in "camel case name".
 	 * If there is no "_" in the original name, we just capitalize.
-	 * 
+	 *
 	 * @param originalName Orignal name to convert to camelCase
 	 * @return name in camel case.
 	 */
@@ -146,12 +131,12 @@ public class NamesComputingUtil {
 		if(StringUtils.isEmpty(originalName)) {
 			return originalName;
 		}
-		
+
 		// If contains at least one "_", we convert it from "snake case" to "camel case"
-		if(originalName.indexOf('_') != -1){		
+		if(originalName.indexOf('_') != -1){
 			return StringUtils.remove(WordUtils.capitalizeFully(originalName, '_'), "_");
 		}
-		
+
 		// No underscore, we juste capitalize
 		return StringUtils.capitalize(originalName);
 	}

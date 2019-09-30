@@ -5,27 +5,27 @@ import org.apache.commons.lang3.StringUtils;
 /**
  * Unidirectional association between two classes. Contains a reference to its opposite association
  * Provide informations about nullability, multiplicity and navigability.
- * 
+ *
  * @author Fabien Crapart
  */
 public class UmlAssociation {
 	private String id;
 	private String name;
 	private boolean owned; // pour les manyToMany on a besoin d'un côté principal
-	
+
 	private UmlAssociation opposite;
-		
+
 	private boolean targetMultiple;
 	private boolean targetNullable;
 	private boolean targetNavigable;
-	
-	 // si pas défini, on utilise le nom de la classe target comme nom
+
+	// si pas défini, on utilise le nom de la classe target comme nom
 	private String fkObjectName; // utilisé pour le nom de l'objet
 	private String fkName; // utilisé pour le nom de la clef
-	
+
 	private UmlClass source;
 	private UmlClass target;
-		
+
 	/**
 	 * @return the id
 	 */
@@ -65,7 +65,7 @@ public class UmlAssociation {
 	 * @param owner the owner to set
 	 */
 	public void setSource(UmlClass owner) {
-		this.source = owner;
+		source = owner;
 	}
 
 	/**
@@ -93,15 +93,15 @@ public class UmlAssociation {
 	 * @param name for fk object in association
 	 */
 	public void setFkObjectName(String roleName) {
-		this.fkObjectName = roleName;
+		fkObjectName = roleName;
 	}
-	
-	
-	
+
+
+
 	/**
 	 * @return name of fk column
 	 */
-	public String getFkName() {	
+	public String getFkName() {
 		return fkName;
 	}
 
@@ -151,7 +151,7 @@ public class UmlAssociation {
 	 * @param targetIsMultiple the targetIsMultiple to set
 	 */
 	public void setTargetMultiple(boolean targetIsMultiple) {
-		this.targetMultiple = targetIsMultiple;
+		targetMultiple = targetIsMultiple;
 	}
 
 	/**
@@ -165,7 +165,7 @@ public class UmlAssociation {
 	 * @param targetIsNullable the targetIsNullable to set
 	 */
 	public void setTargetNullable(boolean targetIsNullable) {
-		this.targetNullable = targetIsNullable;
+		targetNullable = targetIsNullable;
 	}
 
 	/**
@@ -179,34 +179,35 @@ public class UmlAssociation {
 	 * @param targetIsNavigable the targetIsNavigable to set
 	 */
 	public void setTargetNavigable(boolean targetIsNavigable) {
-		this.targetNavigable = targetIsNavigable;
+		targetNavigable = targetIsNavigable;
 	}
 
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		
-		
+
+
 		sb.append(name).append(" ");
-		
+
 		sb.append(" [");
 		sb.append(opposite.isTargetNullable()?"0":"1");
 		sb.append("..");
 		sb.append(opposite.isTargetMultiple()?"*":"1");
 		sb.append("]");
-		
+
 		sb.append(opposite.isTargetNavigable()?" <":" ");
 		sb.append("---");
 		sb.append(targetNavigable?"> ":" ");
 
-		sb.append(target.getCamelCaseName());
+		sb.append(target.getName());
 		if(!StringUtils.isEmpty(fkObjectName)) {
 			sb.append(" as " + fkObjectName);
 		}
 		if(!StringUtils.isEmpty(fkName)) {
 			sb.append(" on " + fkName);
 		}
-		
-		
+
+
 		sb.append(" [");
 		sb.append(targetNullable?"0":"1");
 		sb.append("..");

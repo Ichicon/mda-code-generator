@@ -1,4 +1,4 @@
-package mda.generator.converters;
+package mda.generator.converters.type;
 
 
 import mda.generator.beans.UmlDomain;

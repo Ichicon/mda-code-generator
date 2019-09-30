@@ -1,4 +1,4 @@
-package mda.generator.writers.java;
+package mda.generator.writers.java.codepart;
 
 /**
  * Java scope of code (class, method, attribute)

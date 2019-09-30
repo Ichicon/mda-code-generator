@@ -1,7 +1,7 @@
 package mda.generator.writers.sql;
 
 import mda.generator.beans.UmlClass;
-import mda.generator.writers.java.NamesComputingUtil;
+import mda.generator.writers.NamesComputingUtil;
 
 
 /**

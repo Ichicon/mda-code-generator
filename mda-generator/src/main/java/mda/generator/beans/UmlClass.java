@@ -5,26 +5,20 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.WordUtils;
-
-import mda.generator.writers.java.NamesComputingUtil;
-
 /**
  * Class inside a package (containing attributes and associations with other classes)
- * 
+ *
  * @author Fabien Crapart
  *
  */
-public class UmlClass {	
+public class UmlClass {
 	private String id;
-	private String camelCaseName;
 	private String name;
 	private String comment;
-	
+
 	private UmlPackage xmiPackage;
-	private Map<String,UmlAttribute> attributs = new LinkedHashMap<>();
-	private List<UmlAssociation> associations = new ArrayList<>();
+	private final Map<String,UmlAttribute> attributs = new LinkedHashMap<>();
+	private final List<UmlAssociation> associations = new ArrayList<>();
 
 	/**
 	 * @return the eaId
@@ -36,28 +30,22 @@ public class UmlClass {
 	 * @param eaId the eaId to set
 	 */
 	public void setId(String eaId) {
-		this.id = eaId;
+		id = eaId;
 	}
-	/**
-	 * @return the name
-	 */
-	public String getCamelCaseName() {
-		return camelCaseName;
-	}
+
 	/**
 	 * @param name the name to set
 	 */
 	public void setName(String name) {
 		// On modifie le nom
 		this.name = name;
-		this.camelCaseName = NamesComputingUtil.computeCamelCaseName(name);
 	}
 
-	
+
 	public void addAttribute(UmlAttribute attribute) {
 		attributs.put(attribute.getId(), attribute);
 	}
-	
+
 	/**
 	 * @return the rawName
 	 */
@@ -75,7 +63,7 @@ public class UmlClass {
 	 * @param pack the pack to set
 	 */
 	public void setXmiPackage(UmlPackage pack) {
-		this.xmiPackage = pack;
+		xmiPackage = pack;
 	}
 
 
@@ -91,14 +79,14 @@ public class UmlClass {
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
-	
+
 	/**
 	 * @return the attribut
 	 */
 	public List<UmlAttribute> getAttributes() {
 		return new ArrayList<>(attributs.values());
 	}
-	
+
 	/**
 	 * Récupération d'un attribut par son id unique
 	 * @param id
@@ -107,7 +95,7 @@ public class UmlClass {
 	public UmlAttribute getAttributeById(String id) {
 		return attributs.get(id);
 	}
-	
+
 	/**
 	 * Renvoie la liste des attributs PKs
 	 * @return liste des attributs PKs
@@ -119,7 +107,7 @@ public class UmlClass {
 				pks.add(attr);
 			}
 		}
-		
+
 		return pks;
 	}
 
@@ -130,20 +118,21 @@ public class UmlClass {
 		return associations;
 	}
 
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("\n\t. ").append(camelCaseName).append(" (").append(name).append(")").append(" : ");
+		sb.append("\n\t. ").append(name).append(" : ");
 
 		for(UmlAttribute attribut : attributs.values()) {
 			sb.append("\n\t\t- ").append(attribut);
 		}
-		
+
 		for(UmlAssociation association : associations) {
 			sb.append("\n\t\t> ").append(association);
 		}
 
-		return sb.toString(); 
+		return sb.toString();
 	}
-	
+
 
 }

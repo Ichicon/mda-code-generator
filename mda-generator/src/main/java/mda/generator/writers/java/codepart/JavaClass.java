@@ -1,4 +1,4 @@
-package mda.generator.writers.java;
+package mda.generator.writers.java.codepart;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,8 +10,12 @@ import org.apache.commons.lang3.StringUtils;
 import mda.generator.beans.UmlAssociation;
 import mda.generator.beans.UmlAttribute;
 import mda.generator.beans.UmlClass;
-import mda.generator.converters.ConverterInterface;
+import mda.generator.converters.java.JavaNameConverterInterface;
+import mda.generator.converters.type.TypeConverterInterface;
 import mda.generator.exceptions.MdaGeneratorException;
+import mda.generator.writers.NamesComputingUtil;
+import mda.generator.writers.java.JavaWriter;
+import mda.generator.writers.java.utils.ImportManager;
 
 /**
  * Java class to store data to print in class file
@@ -20,7 +24,9 @@ import mda.generator.exceptions.MdaGeneratorException;
 public class JavaClass {
 	private final String packageName;
 
-	private final ImportManager importManager;
+	protected final ImportManager importManager;
+	protected final JavaNameConverterInterface javaNameConverter;
+	protected final TypeConverterInterface typeConverter;
 
 	private final List<String> commentsList  = new ArrayList<>();
 	private final List<JavaAnnotation> annotationsList = new ArrayList<>();
@@ -44,18 +50,24 @@ public class JavaClass {
 		this.packageName = packageName;
 		commentsList.add(comments);
 		importManager = new ImportManager(packageName);
+
+		// Not used in this case
+		javaNameConverter = null;
+		typeConverter = null;
 	}
 
-	/**
+	/**-
 	 *
 	 * @param javaPackage
 	 * @param umlClass
-	 * @param converter
+	 * @param typeConverter
+	 * @param javaNameConverter
 	 */
+	public JavaClass(JavaPackage javaPackage, UmlClass umlClass, TypeConverterInterface typeConverter, JavaNameConverterInterface javaNameConverter) {
+		this.javaNameConverter = javaNameConverter;
+		this.typeConverter = typeConverter;
 
-	public JavaClass(JavaPackage javaPackage, UmlClass umlClass, ConverterInterface converter) {
-		name = umlClass.getCamelCaseName() ;
-
+		name = javaNameConverter.convertClassName(umlClass.getName());
 		if(umlClass.getComment() != null) {
 			commentsList.addAll(Arrays.asList(umlClass.getComment().split("\n")));
 		} else {
@@ -77,16 +89,16 @@ public class JavaClass {
 
 		// Composite PK
 		if(umlClass.getPKs().size() > 1) {
-			createCompositePK(javaPackage, umlClass, converter);
+			createCompositePK(javaPackage, umlClass);
 		} else if(umlClass.getPKs().size() > 0){ // Standard single PK field
-			createPKField(javaPackage, umlClass, converter);
+			createPKField(javaPackage, umlClass);
 		}
 
 		// Attributes, getter, setter
-		manageAttributes(umlClass, converter);
+		manageAttributes(umlClass);
 
 		// Associations vers d'autres classes
-		manageAssociations(umlClass, converter);
+		manageAssociations(umlClass);
 	}
 
 	/**
@@ -173,9 +185,16 @@ public class JavaClass {
 		return userDefinedAnnotations;
 	}
 
-	protected void createPKField(JavaPackage javaPackage, UmlClass umlClass, ConverterInterface converter) {
+	/**
+	 *
+	 * @param javaPackage
+	 * @param umlClass
+	 * @param converter
+	 * @param nameConverter
+	 */
+	protected void createPKField(JavaPackage javaPackage, UmlClass umlClass) {
 		UmlAttribute umlPK = umlClass.getPKs().get(0);
-		pkField = new JavaAttribute(umlPK, converter, importManager);
+		pkField = new JavaAttribute(umlPK, typeConverter,javaNameConverter, importManager);
 		attributesList.add(pkField);
 
 		// Generate getter/setter
@@ -213,7 +232,7 @@ public class JavaClass {
 	 * @param umlClass
 	 * @param converter
 	 */
-	protected void createCompositePK(JavaPackage javaPackage, UmlClass umlClass, ConverterInterface converter) {
+	protected void createCompositePK(JavaPackage javaPackage, UmlClass umlClass) {
 		// Use an embedded class as attribute
 		pkClass = new JavaClass(getName()+"Id", javaPackage.getPackageName(),"Composite Key for " + getName());
 		// Add embedded annotation in imports
@@ -225,7 +244,7 @@ public class JavaClass {
 		// Add real pks in embeddable class
 		for(UmlAttribute pk : umlClass.getPKs()) {
 			// Attribute for pk
-			JavaAttribute compositeAttr = new JavaAttribute(pk, converter, importManager);
+			JavaAttribute compositeAttr = new JavaAttribute(pk, typeConverter, javaNameConverter, importManager);
 			pkClass.attributesList.add(compositeAttr);
 
 			// Getter with @Column
@@ -260,11 +279,11 @@ public class JavaClass {
 	 * @param umlClass
 	 * @param converter
 	 */
-	protected void manageAttributes(UmlClass umlClass, ConverterInterface converter) {
+	protected void manageAttributes(UmlClass umlClass ) {
 		for(UmlAttribute umlAttribute : umlClass.getAttributes()) {
 			// PKs managed before
 			if(!umlAttribute.isPK()) {
-				JavaAttribute javaAttribute = new JavaAttribute(umlAttribute, converter, importManager);
+				JavaAttribute javaAttribute = new JavaAttribute(umlAttribute,typeConverter,javaNameConverter, importManager);
 				attributesList.add(javaAttribute);
 
 				// Generate getter/setter
@@ -295,10 +314,10 @@ public class JavaClass {
 	 * @param umlClass
 	 * @param converter
 	 */
-	protected void manageAssociations(UmlClass umlClass, ConverterInterface converter) {
+	protected void manageAssociations(UmlClass umlClass) {
 		for(UmlAssociation association : umlClass.getAssociations()) {
 			if(association.isTargetNavigable()) {
-				JavaAttribute javaAttribute = new JavaAttribute(association, converter, importManager);
+				JavaAttribute javaAttribute = new JavaAttribute(association, typeConverter,javaNameConverter, importManager);
 				attributesList.add(javaAttribute);
 
 				// Generate getter/setter
@@ -341,8 +360,8 @@ public class JavaClass {
 				);
 		assocGetter.addAnnotations(new JavaAnnotation(
 				importManager.getFinalName("javax.persistence.JoinColumn"),
-				new JavaAnnotationProperty("name","\"" + NamesComputingUtil.computeJavaFkName(association) + "\""),
-				new JavaAnnotationProperty("referencedColumnName","\"" + NamesComputingUtil.computeJavaPkName(association.getTarget()) + "\"")
+				new JavaAnnotationProperty("name","\"" + NamesComputingUtil.computeColumnFkName(association) + "\""),
+				new JavaAnnotationProperty("referencedColumnName","\"" + NamesComputingUtil.computeColumnPkName(association.getTarget()) + "\"")
 				));
 	}
 
@@ -358,13 +377,13 @@ public class JavaClass {
 		if(association.getOpposite().isTargetNavigable()) {
 			// Cascading ALL for oneToMany "N" side
 			propertiesOneToMany.add(new JavaAnnotationProperty("cascade",importManager.getFinalName("javax.persistence.CascadeType")+".ALL"));
-			propertiesOneToMany.add(new JavaAnnotationProperty("mappedBy","\""+ NamesComputingUtil.computeFkObjectName(association.getOpposite()) + "\""));
+			propertiesOneToMany.add(new JavaAnnotationProperty("mappedBy","\""+ javaNameConverter.computeFkAttributeName(association.getOpposite()) + "\""));
 
 		} else {// Unidirectional, needs join column name and reference column name
 			JavaAnnotation joinColumn = new JavaAnnotation(
 					importManager.getFinalName("javax.persistence.JoinColumn"),
-					new JavaAnnotationProperty("name","\"" + NamesComputingUtil.computeJavaFkName(association.getOpposite())+ "\""),
-					new JavaAnnotationProperty("referencedColumnName","\"" + NamesComputingUtil.computeJavaPkName(association.getSource()) + "\"")
+					new JavaAnnotationProperty("name","\"" + NamesComputingUtil.computeColumnFkName(association.getOpposite())+ "\""),
+					new JavaAnnotationProperty("referencedColumnName","\"" + NamesComputingUtil.computeColumnPkName(association.getSource()) + "\"")
 					);
 			assocGetter.addAnnotations(joinColumn);
 		}
@@ -397,13 +416,13 @@ public class JavaClass {
 			assocGetter.addAnnotations(new JavaAnnotation(
 					importManager.getFinalName("javax.persistence.JoinTable"),
 					new JavaAnnotationProperty("name","\"" +  association.getName() + "\""),
-					new JavaAnnotationProperty("joinColumns","@"+importManager.getFinalName("javax.persistence.JoinColumn")+"(name = \""+ NamesComputingUtil.computeJavaFkName(association.getOpposite())+"\")"),
-					new JavaAnnotationProperty("inverseJoinColumns","@"+importManager.getFinalName("javax.persistence.JoinColumn")+"(name = \""+  NamesComputingUtil.computeJavaFkName(association)+ "\")")
+					new JavaAnnotationProperty("joinColumns","@"+importManager.getFinalName("javax.persistence.JoinColumn")+"(name = \""+ NamesComputingUtil.computeColumnFkName(association.getOpposite())+"\")"),
+					new JavaAnnotationProperty("inverseJoinColumns","@"+importManager.getFinalName("javax.persistence.JoinColumn")+"(name = \""+  NamesComputingUtil.computeColumnFkName(association)+ "\")")
 					));
 		} else { // Not "owner" of the manyToMany, mappedBy with opposite getter is enough
 			assocGetter.addAnnotations(new JavaAnnotation(
 					importManager.getFinalName("javax.persistence.ManyToMany"),
-					new JavaAnnotationProperty("mappedBy","\""+ NamesComputingUtil.computeFkObjectName(association.getOpposite()) + "List\""),
+					new JavaAnnotationProperty("mappedBy","\""+ javaNameConverter.computeFkAttributeName(association.getOpposite()) + "\""),
 					new JavaAnnotationProperty("cascade","{"
 							+ importManager.getFinalName("javax.persistence.CascadeType")+".PERSIST,"
 							+ importManager.getFinalName("javax.persistence.CascadeType")+".MERGE}")
@@ -430,8 +449,8 @@ public class JavaClass {
 			// Reference to owner PK
 			assocGetter.addAnnotations(new JavaAnnotation(
 					importManager.getFinalName("javax.persistence.JoinColumn"),
-					new JavaAnnotationProperty("name","\"" + NamesComputingUtil.computeJavaFkName(association) + "\""),
-					new JavaAnnotationProperty("referencedColumnName","\"" + NamesComputingUtil.computeJavaPkName(association.getTarget()) + "\"")
+					new JavaAnnotationProperty("name","\"" + NamesComputingUtil.computeColumnFkName(association) + "\""),
+					new JavaAnnotationProperty("referencedColumnName","\"" + NamesComputingUtil.computeColumnPkName(association.getTarget()) + "\"")
 					));
 		}
 		// Not owner, must have the owning side define (or association can't work)
@@ -446,7 +465,7 @@ public class JavaClass {
 								// OneToOne is eager by default, which is bad :/
 								new JavaAnnotationProperty("fetch",importManager.getFinalName("javax.persistence.FetchType")+".LAZY"),
 								// mapped by
-								new JavaAnnotationProperty("mappedBy","\""+ NamesComputingUtil.computeFkObjectName(association.getOpposite())  + "\""),
+								new JavaAnnotationProperty("mappedBy","\""+ javaNameConverter.computeFkAttributeName(association.getOpposite())  + "\""),
 								// cascading all
 								new JavaAnnotationProperty("cascade","{"+ importManager.getFinalName("javax.persistence.CascadeType")+".ALL}")
 								)

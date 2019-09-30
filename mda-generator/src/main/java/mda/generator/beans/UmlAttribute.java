@@ -1,20 +1,15 @@
 package mda.generator.beans;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.WordUtils;
-
-import mda.generator.writers.java.NamesComputingUtil;
-
 /**
  * Attribute of a class
- * 
+ *
  * @author Fabien
  *
  */
 public class UmlAttribute {
 	/** Id in xml schema */
 	private String id;
-	
+
 	private boolean isPK;
 	private String name;
 	private String camelCaseName;
@@ -39,27 +34,20 @@ public class UmlAttribute {
 	}
 
 	/**
-	 * @return the name
-	 */
-	public String getCamelCaseName() {
-		return camelCaseName;
-	}
-	/**
 	 * @param name the name to set
 	 */
 	public void setName(String name) {
 		this.name = name;
-		this.camelCaseName =  WordUtils.uncapitalize(NamesComputingUtil.computeCamelCaseName(name));
 	}
-	
+
 	/**
 	 * @return the rawName
 	 */
 	public String getName() {
 		return name;
 	}
-	
-	
+
+
 	/**
 	 * @return the domain
 	 */
@@ -84,7 +72,7 @@ public class UmlAttribute {
 	public void setIsNotNull(Boolean isNotNull) {
 		this.isNotNull = isNotNull;
 	}
-	
+
 	/**
 	 * @return the comment
 	 */
@@ -98,7 +86,7 @@ public class UmlAttribute {
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
-	
+
 
 	/**
 	 * @return the isReadonly
@@ -117,10 +105,10 @@ public class UmlAttribute {
 	@Override
 	public String toString() {
 		return camelCaseName + " => " +
-			name + " " + (isPK?"(PK)":"") + " " +
-			domain.getName()+" " +
-			(isNotNull?"not null":"nullable") +
-			(isReadonly!=null && isReadonly?" NOT UPDATABLE":"");
+				name + " " + (isPK?"(PK)":"") + " " +
+				domain.getName()+" " +
+				(isNotNull?"not null":"nullable") +
+				(isReadonly!=null && isReadonly?" NOT UPDATABLE":"");
 	}
 
 	/**
@@ -136,6 +124,6 @@ public class UmlAttribute {
 	public void setId(String id) {
 		this.id = id;
 	}
-	
-	
+
+
 }

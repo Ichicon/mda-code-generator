@@ -15,12 +15,12 @@ import mda.generator.beans.UmlAttribute;
 import mda.generator.beans.UmlClass;
 import mda.generator.beans.UmlPackage;
 import mda.generator.exceptions.MdaGeneratorException;
+import mda.generator.writers.NamesComputingUtil;
 import mda.generator.writers.VelocityUtils;
-import mda.generator.writers.java.NamesComputingUtil;
 
 /**
  * Create SQL files for databases (create and drop scripts).
- * 
+ *
  * @author Fabien Crapart
  */
 public class StandardSQLWriter implements SQLWriterInterface {
@@ -29,13 +29,13 @@ public class StandardSQLWriter implements SQLWriterInterface {
 
 	private static final String STOP_GENERATION = "-- STOP GENERATION";
 	private static final String END_OF_GENERATED = "-- END OF GENERATED CODE - YOU CAN EDIT THE FILE AFTER THIS LINE, DO NOT EDIT THIS LINE OR BEFORE THIS LINE";
-	
-	private List<SQLForeignKey> fksList = new ArrayList<>();
-	private List<SQLTable> tablesList = new ArrayList<>();
-	private List<SQLSequence> sequencesList = new ArrayList<>();
-	
+
+	private final List<SQLForeignKey> fksList = new ArrayList<>();
+	private final List<SQLTable> tablesList = new ArrayList<>();
+	private final List<SQLSequence> sequencesList = new ArrayList<>();
+
 	private SQLWriterConfig config;
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -43,9 +43,9 @@ public class StandardSQLWriter implements SQLWriterInterface {
 	public void writeSql(SQLWriterConfig config) {
 		if(config == null) {
 			throw new MdaGeneratorException("Null config given for sql writer");
-		}		
+		}
 		this.config = config;
-		
+
 		// Create the root directory for sql if doesn't exists
 		try {
 			Files.createDirectories(config.getSqlOutputDirectory());
@@ -53,11 +53,11 @@ public class StandardSQLWriter implements SQLWriterInterface {
 			throw new MdaGeneratorException("Error while creating source root path", e);
 		}
 
-		// Iterate to extract datas from all classes	
+		// Iterate to extract datas from all classes
 		for(UmlPackage umlPackage : config.getPackagesList()) {
 			extractDataFromPackage(umlPackage);
 		}
-		
+
 		// Write SQL file from template and extracted data
 		try {
 			writeSQLFile(config.getSqlOutputDirectory().resolve("create_tables.sql"), config.getCreateSqlTemplatePath());
@@ -66,14 +66,14 @@ public class StandardSQLWriter implements SQLWriterInterface {
 			throw new MdaGeneratorException("Error while writing SQL files", e);
 		}
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param filePath
 	 * @param templateToUse
 	 * @throws IOException
 	 */
-	protected void writeSQLFile(Path filePath, Path templateToUse) throws IOException {				
+	protected void writeSQLFile(Path filePath, Path templateToUse) throws IOException {
 		VelocityContext context = new VelocityContext();
 		if(VelocityUtils.analyseFileAndCompleteContext(filePath, STOP_GENERATION, END_OF_GENERATED, context)) {
 			context.put("sequencesList", sequencesList);
@@ -87,10 +87,10 @@ public class StandardSQLWriter implements SQLWriterInterface {
 			LOG.debug(filePath + " will not be overwritten because '" + STOP_GENERATION + "' is present");
 		}
 	}
-	
-	
+
+
 	/**
-	 * 
+	 *
 	 * @param umlPackage
 	 */
 	protected void extractDataFromPackage(UmlPackage umlPackage) {
@@ -98,22 +98,22 @@ public class StandardSQLWriter implements SQLWriterInterface {
 			if(!isExcludedClassName(umlClass)) {
 				SQLTable table = new SQLTable(umlClass);
 				tablesList.add(table);
-				
+
 				// Compute sequence name, no sequence for multiple pks
 				if(umlClass.getPKs().size() == 1) {
 					sequencesList.add(new SQLSequence(umlClass));
 				}
-				
-				// Compute pk value			
+
+				// Compute pk value
 				table.setPkValue(NamesComputingUtil.computePkSqlName(umlClass));
-				
-				// Add columns and compute pk name list			
+
+				// Add columns and compute pk name list
 				for(UmlAttribute umlAttribute : umlClass.getAttributes()) {
-					SQLColumn column  = new SQLColumn(umlAttribute, config.getConverter());
-					
+					SQLColumn column  = new SQLColumn(umlAttribute, config.getTypeConverter());
+
 					table.addColumn(column);
 				}
-				
+
 				// Compute association columns and FKs
 				for(UmlAssociation umlAssociation : umlClass.getAssociations()) {
 					// xToMany
@@ -124,75 +124,75 @@ public class StandardSQLWriter implements SQLWriterInterface {
 							if(umlAssociation.getSource().getPKs().size() > 1 || umlAssociation.getTarget().getPKs().size() > 1) {
 								throw new MdaGeneratorException("Cannot create table for " + umlAssociation.getName() + " association, composite pk forbidden in many to many");
 							}
-							
+
 							// Table
-							SQLTable manyToManyTable = new SQLTable(umlAssociation.getName(), "ManyToMany " 
-									+ umlAssociation.getSource().getName() + " / " 
+							SQLTable manyToManyTable = new SQLTable(umlAssociation.getName(), "ManyToMany "
+									+ umlAssociation.getSource().getName() + " / "
 									+ umlAssociation.getTarget().getName());
 							tablesList.add(manyToManyTable);
-							
+
 							// PK 1
 							UmlAttribute attrPk1 = umlAssociation.getSource().getPKs().get(0);
-													
-							SQLColumn pk1 = new SQLColumn(NamesComputingUtil.computeJavaFkName(umlAssociation.getOpposite()),attrPk1.getDomain(),true,"ManyToMany FK " + umlAssociation.getSource().getName(), config.getConverter());
+
+							SQLColumn pk1 = new SQLColumn(NamesComputingUtil.computeColumnFkName(umlAssociation.getOpposite()),attrPk1.getDomain(),true,"ManyToMany FK " + umlAssociation.getSource().getName(), config.getTypeConverter());
 							manyToManyTable.addColumn(pk1);
-							
+
 							// PK 2
 							UmlAttribute attrPk2 = umlAssociation.getTarget().getPKs().get(0);
-							SQLColumn pk2 = new SQLColumn(NamesComputingUtil.computeJavaFkName(umlAssociation),attrPk2.getDomain(),true,"ManyToMany FK " + umlAssociation.getTarget().getName(), config.getConverter());
+							SQLColumn pk2 = new SQLColumn(NamesComputingUtil.computeColumnFkName(umlAssociation),attrPk2.getDomain(),true,"ManyToMany FK " + umlAssociation.getTarget().getName(), config.getTypeConverter());
 							manyToManyTable.addColumn(pk2);
-							
+
 							// PK VALUE
 							manyToManyTable.setPkValue(pk1.getName() + "," + pk2.getName());
-							
+
 							// FK1
 							SQLForeignKey fk1 = new SQLForeignKey(umlAssociation.getName()+"_1", manyToManyTable.getName(), umlAssociation.getSource().getName(), pk1.getName(), attrPk1.getName());
 							fksList.add(fk1);
-							
-							// FK2		
+
+							// FK2
 							SQLForeignKey fk2 = new SQLForeignKey(umlAssociation.getName()+"_2", manyToManyTable.getName(), umlAssociation.getTarget().getName(), pk2.getName(), attrPk2.getName());
 							fksList.add(fk2);
 						} else {
 							// OneToMany, nothing to do, Key is on the "many" side
 						}
-						
-					} 
+
+					}
 					// xToOne
-					else {	
+					else {
 						// ManyToOne, create FK
-						if(umlAssociation.getOpposite().isTargetMultiple()) {							
-	                        // Columns for FK
-	                        for(UmlAttribute pkX : umlAssociation.getTarget().getPKs()){
-	                            SQLColumn fk;                       
-	                            // Use fk column name defined in association
-	                            if(umlAssociation.getTarget().getPKs().size() == 1) {
-	                                fk = new SQLColumn(NamesComputingUtil.computeJavaFkName(umlAssociation),pkX.getDomain(), !umlAssociation.isTargetNullable(),"ManyToOne FK " + umlAssociation.getTarget().getName(), config.getConverter());
-	                            } else { // Generate name from pk because it's a composite key
-	                                fk = new SQLColumn(pkX.getName(),pkX.getDomain(),true,"ManyToOne FK " + umlAssociation.getTarget().getName(), config.getConverter());       
-	                            }
-	                            table.addColumn(fk);                       
-	                        }
-	                        
-							fksList.add(new SQLForeignKey(umlAssociation));							
+						if(umlAssociation.getOpposite().isTargetMultiple()) {
+							// Columns for FK
+							for(UmlAttribute pkX : umlAssociation.getTarget().getPKs()){
+								SQLColumn fk;
+								// Use fk column name defined in association
+								if(umlAssociation.getTarget().getPKs().size() == 1) {
+									fk = new SQLColumn(NamesComputingUtil.computeColumnFkName(umlAssociation),pkX.getDomain(), !umlAssociation.isTargetNullable(),"ManyToOne FK " + umlAssociation.getTarget().getName(), config.getTypeConverter());
+								} else { // Generate name from pk because it's a composite key
+									fk = new SQLColumn(pkX.getName(),pkX.getDomain(),true,"ManyToOne FK " + umlAssociation.getTarget().getName(), config.getTypeConverter());
+								}
+								table.addColumn(fk);
+							}
+
+							fksList.add(new SQLForeignKey(umlAssociation));
 						}
 						// OneToOne, create FK if owned
 						else {
 							// The key is on the owner side (we only know owned and not owner so if target is owned we are owner)
 							if(umlAssociation.isTargetOwned()) {
 								// Columns for FK
-		                        for(UmlAttribute pkX : umlAssociation.getTarget().getPKs()){
-		                            SQLColumn fk;                       
-		                            // Use fk column name defined in association
-		                            if(umlAssociation.getTarget().getPKs().size() == 1) {
-		                                fk = new SQLColumn(NamesComputingUtil.computeJavaFkName(umlAssociation),pkX.getDomain(), !umlAssociation.isTargetNullable(),"OneToOne FK " + umlAssociation.getTarget().getName(), config.getConverter());
-		                            } else { // Generate name from pk because it's a composite key
-		                                fk = new SQLColumn(pkX.getName(),pkX.getDomain(),true,"OneToOne FK " + umlAssociation.getTarget().getName(), config.getConverter());       
-		                            }
-		                            table.addColumn(fk);                       
-		                        }
-		                        
-								fksList.add(new SQLForeignKey(umlAssociation));			
-							}							
+								for(UmlAttribute pkX : umlAssociation.getTarget().getPKs()){
+									SQLColumn fk;
+									// Use fk column name defined in association
+									if(umlAssociation.getTarget().getPKs().size() == 1) {
+										fk = new SQLColumn(NamesComputingUtil.computeColumnFkName(umlAssociation),pkX.getDomain(), !umlAssociation.isTargetNullable(),"OneToOne FK " + umlAssociation.getTarget().getName(), config.getTypeConverter());
+									} else { // Generate name from pk because it's a composite key
+										fk = new SQLColumn(pkX.getName(),pkX.getDomain(),true,"OneToOne FK " + umlAssociation.getTarget().getName(), config.getTypeConverter());
+									}
+									table.addColumn(fk);
+								}
+
+								fksList.add(new SQLForeignKey(umlAssociation));
+							}
 						}
 					}
 				}
@@ -217,6 +217,6 @@ public class StandardSQLWriter implements SQLWriterInterface {
 
 		return false;
 	}
-	
+
 
 }

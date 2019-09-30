@@ -12,7 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import mda.generator.converters.ConverterInterface;
+import mda.generator.converters.java.JavaNameConverterInterface;
+import mda.generator.converters.java.JavaSnakeToCamelNameConverter;
+import mda.generator.converters.type.TypeConverterInterface;
 import mda.generator.exceptions.MdaGeneratorException;
 import mda.generator.readers.ModelFileReaderInterface;
 import mda.generator.readers.xmi.XmiReader;
@@ -26,28 +28,31 @@ import mda.generator.writers.sql.StandardSQLWriter;
 
 /**
  * Builder to initialize the MdaGenerator.
- * 
+ *
  * @author Fabien
  */
 public class MdaGeneratorBuilder {
 	/** Classe pour lire le model */
 	private Class<? extends ModelFileReaderInterface> readerClass = XmiReader.class;
-	/** Emplacement du fichier de métadonnées */ 
-	private Path pathToMetadata= null;	
+	/** Emplacement du fichier de métadonnées */
+	private Path pathToMetadata= null;
 	/** Empalcement du fichier de model */
-	private Path pathToModel = null;	
+	private Path pathToModel = null;
 
 	/** Classe pour convertir les domains en types java et bdd */
-	private Class<? extends ConverterInterface> typeConverter;
+	private Class<? extends TypeConverterInterface> typeConverter;
+
+	/** Classe pour convertir les noms du diagramme en nom java */
+	private Class<? extends JavaNameConverterInterface> javaNameConverter = JavaSnakeToCamelNameConverter.class;
 
 	/** Classe pour écrire les classes java*/
 	private Class<? extends JavaWriterInterface> javaWriter = JavaWriter.class;
 
 	/** Classe pour écrire le sql */
 	private Class<? extends SQLWriterInterface> sqlWriter = StandardSQLWriter.class;
-	
+
 	/** Annotations à ajouter aux classes */
-	private Map<String, List<String>> annotationsForClasses = new HashMap<>();
+	private final Map<String, List<String>> annotationsForClasses = new HashMap<>();
 
 	/** Emplacement de sortie des packages et fichiers générés */
 	private Path javaOutputDirectory;
@@ -106,8 +111,8 @@ public class MdaGeneratorBuilder {
 		if(!Files.exists(modelPath)){
 			throw new MdaGeneratorException("Le fichier de modèle n'a pas été trouvé à l'emplacemen fourni : "  + modelPath);
 		}
-		
-		this.pathToModel = modelPath;		
+
+		pathToModel = modelPath;
 		return this;
 	}
 	/**
@@ -116,7 +121,7 @@ public class MdaGeneratorBuilder {
 	 * @return builder to re-use
 	 */
 	public MdaGeneratorBuilder withMetadataPath(Path metadataPath) {
-		this.pathToMetadata = metadataPath;		
+		pathToMetadata = metadataPath;
 		return this;
 	}
 
@@ -125,18 +130,28 @@ public class MdaGeneratorBuilder {
 	 * @param typeConverter Class implementing DomainToTypeConverter interface
 	 * @return builder to re-use
 	 */
-	public MdaGeneratorBuilder withTypeConverter(Class<? extends ConverterInterface> typeConverter) {
-		this.typeConverter = typeConverter;		
+	public MdaGeneratorBuilder withTypeConverter(Class<? extends TypeConverterInterface> typeConverter) {
+		this.typeConverter = typeConverter;
 		return this;
 	}
 
 	/**
-	 * Path to output directory to write java packages, entities and daos, default "PROGRAM_ROOT"/../../src/main/javagen 
+	 * Class to use for generating java names from diagram names. Default is JavaSnakeToCamelNameConverter
+	 * @param typeConverter Class implementing JavaNameConverterInterface interface
+	 * @return builder to re-use
+	 */
+	public MdaGeneratorBuilder withJavaNameConverter(Class<? extends JavaNameConverterInterface> javaNameConverterClass) {
+		javaNameConverter = javaNameConverterClass;
+		return this;
+	}
+
+	/**
+	 * Path to output directory to write java packages, entities and daos, default "PROGRAM_ROOT"/../../src/main/javagen
 	 * @param javaOutputDirPath /path/to/directory
 	 * @return builder to re-use
 	 */
 	public MdaGeneratorBuilder withJavaOutputDirectory(Path javaOutputDirPath) {
-		this.javaOutputDirectory = javaOutputDirPath;		
+		javaOutputDirectory = javaOutputDirPath;
 		return this;
 	}
 
@@ -146,7 +161,7 @@ public class MdaGeneratorBuilder {
 	 * @return builder to re-use
 	 */
 	public MdaGeneratorBuilder withSqlOutputDirectory(Path sqlOutputDirPath) {
-		this.sqlOutputDirectory = sqlOutputDirPath;		
+		sqlOutputDirectory = sqlOutputDirPath;
 		return this;
 	}
 
@@ -156,7 +171,7 @@ public class MdaGeneratorBuilder {
 	 * @return builder to re-use
 	 */
 	public MdaGeneratorBuilder withEntitiesPackagePartName(String entitiesPackagePartName) {
-		this.entitiesPackagePartName = entitiesPackagePartName;		
+		this.entitiesPackagePartName = entitiesPackagePartName;
 		return this;
 	}
 
@@ -167,7 +182,7 @@ public class MdaGeneratorBuilder {
 	 * @return builder to re-use
 	 */
 	public MdaGeneratorBuilder withPackageInfoTemplate(Path template) {
-		this.pathToPackageInfoTemplate = template;		
+		pathToPackageInfoTemplate = template;
 		return this;
 	}
 
@@ -177,7 +192,7 @@ public class MdaGeneratorBuilder {
 	 * @return builder to re-use
 	 */
 	public MdaGeneratorBuilder withEntityTemplate(Path template) {
-		this.pathToEntitiesTemplate = template;		
+		pathToEntitiesTemplate = template;
 		return this;
 	}
 
@@ -187,7 +202,7 @@ public class MdaGeneratorBuilder {
 	 * @return builder to re-use
 	 */
 	public MdaGeneratorBuilder withDaoTemplate(Path template) {
-		this.pathToDaosTemplate = template;		
+		pathToDaosTemplate = template;
 		return this;
 	}
 
@@ -197,9 +212,9 @@ public class MdaGeneratorBuilder {
 	 * @return builder to re-use
 	 */
 	public MdaGeneratorBuilder withCreateSQLTemplate(Path template) {
-		this.pathToCreateSQLTemplate = template;		
+		pathToCreateSQLTemplate = template;
 		return this;
-	}	
+	}
 
 	/**
 	 * drop_tables.sql template file,  default "PROGRAM_ROOT"/dropSQL_oracle.vm
@@ -207,17 +222,17 @@ public class MdaGeneratorBuilder {
 	 * @return builder to re-use
 	 */
 	public MdaGeneratorBuilder withDropSQLTemplate(Path template) {
-		this.pathToDropSQLTemplate = template;		
+		pathToDropSQLTemplate = template;
 		return this;
 	}
 
 	/**
-	 * Name of the package part which is root for daos, default "daos". Ex (see withEntitiesPackagePartName example too) : the package "com.mycompany.myproject.entities.users" will become "com.mycompany.myproject.daos.users" 
+	 * Name of the package part which is root for daos, default "daos". Ex (see withEntitiesPackagePartName example too) : the package "com.mycompany.myproject.entities.users" will become "com.mycompany.myproject.daos.users"
 	 * @param daosPackagePartName name (ex: "daos"), can be the equals to entities
 	 * @return builder to re-use
 	 */
 	public MdaGeneratorBuilder withDaosPackagePartName(String daosPackagePartName) {
-		this.daosPackagePartName = daosPackagePartName;		
+		this.daosPackagePartName = daosPackagePartName;
 		return this;
 	}
 
@@ -238,7 +253,7 @@ public class MdaGeneratorBuilder {
 	 * @return builder to re-use
 	 */
 	public MdaGeneratorBuilder withJavaWriter(Class<? extends JavaWriterInterface> javaWriterClass){
-		this.javaWriter = javaWriterClass;
+		javaWriter = javaWriterClass;
 
 		return this;
 	}
@@ -249,7 +264,7 @@ public class MdaGeneratorBuilder {
 	 * @return builder to re-use
 	 */
 	public MdaGeneratorBuilder withSqlWriter(Class<? extends SQLWriterInterface> slqWriterClass){
-		this.sqlWriter = slqWriterClass;
+		sqlWriter = slqWriterClass;
 
 		return this;
 	}
@@ -274,7 +289,7 @@ public class MdaGeneratorBuilder {
 		this.excludedPrefixes = Arrays.asList(excludedPrefixes);
 		return this;
 	}
-	
+
 	/**
 	 * Charset used to write the files
 	 * @param sqlSequencePrefixName SQL Sequence prefix name to use (can be empty)
@@ -286,8 +301,8 @@ public class MdaGeneratorBuilder {
 	}
 
 	/**
-	 * Add an annotation to list of class (simple name). Call multiple times to add multiple annotations. 
-	 * @param annotation Annotation text. Ex: "@Cacheable(true)" 
+	 * Add an annotation to list of class (simple name). Call multiple times to add multiple annotations.
+	 * @param annotation Annotation text. Ex: "@Cacheable(true)"
 	 * @param classNames Simple names of class which will have this annotation. Ex : "Organisme"
 	 * @return builder to re-use
 	 */
@@ -298,11 +313,11 @@ public class MdaGeneratorBuilder {
 				listeAnnots = new ArrayList<>();
 				annotationsForClasses.put(className, listeAnnots);
 			}
-			
+
 			listeAnnots.add(annotation);
 		}
-		
-		
+
+
 		return this;
 	}
 
@@ -315,7 +330,7 @@ public class MdaGeneratorBuilder {
 		this.sqlSchemaName = sqlSchemaName;
 		return this;
 	}
-		
+
 	/**
 	 * Build the MdaGenerator from parameters
 	 * @return MdaGenerator object built
@@ -329,12 +344,12 @@ public class MdaGeneratorBuilder {
 		generator.setPathToModelFile(pathToModel);
 		generator.setPathToMetadataFile(pathToMetadata);
 		generator.setReaderClass(readerClass);
-		generator.setConverterClass(typeConverter);
+		generator.setTypeConverterClass(typeConverter);
 		generator.setJavaWriterClass(javaWriter);
 		generator.setSqlWriterClass(sqlWriter);
 		generator.setJavaOutputDirectory(javaOutputDirectory);
 		generator.setAnnotationsForClasses(annotationsForClasses);
-		generator.setConverterClass(typeConverter);
+		generator.setJavaNameConverterClass(javaNameConverter);
 		generator.setSqlOutputDirectory(sqlOutputDirectory);
 		generator.setDaosPackagePartName(daosPackagePartName);
 		generator.setEntitiesPackagePartName(entitiesPackagePartName);
@@ -347,10 +362,10 @@ public class MdaGeneratorBuilder {
 		generator.setExcludedPrefixes(excludedPrefixes);
 		generator.setSqlSequencePrefixName(sqlSequencePrefixName);
 		generator.setSqlSchemaName(sqlSchemaName);
-		
+
 		return generator;
 	}
-	
+
 	/**
 	 * Vérifie la validité des paramètres fournis
 	 */
@@ -365,6 +380,9 @@ public class MdaGeneratorBuilder {
 
 		if(typeConverter == null){
 			throw new MdaGeneratorException("MdaGenerator needs a Domain -> Types converter, define a class implementing ConverterInterface interface and use mdaGeneratorBuilder.withTypeConverter(myTypeConverter.class)");
+		}
+		if(javaNameConverter == null){
+			throw new MdaGeneratorException("MdaGenerator needs a Java names converter, define a class implementing JavaNameConverterInterface interface and use mdaGeneratorBuilder.withJavaNameConverter(myJavaNameConverter.class)");
 		}
 		if(javaWriter == null){
 			throw new MdaGeneratorException("MdaGenerator needs a java writer, define a class implementing JavaWriterInterface interface and use mdaGeneratorBuilder.withJavaWriter(myJavaWriter.class)");
@@ -407,9 +425,9 @@ public class MdaGeneratorBuilder {
 			throw new MdaGeneratorException("MdaGenerator needs a charset defined to create files. Use mdaGeneratorBuilder.withCharset(StandardCharsets.UTF_8)");
 		}
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param pathToProperties
 	 */
 	private void loadProperties(Path pathToProperties) {
@@ -422,6 +440,7 @@ public class MdaGeneratorBuilder {
 			PropertyUtils.loadPathFromProperty("pathToModel", prop, this);
 			PropertyUtils.loadPathFromProperty("pathToMetadata", prop, this);
 			PropertyUtils.loadClassFromProperty("typeConverter", prop, this);
+			PropertyUtils.loadClassFromProperty("javaNameConverter", prop, this);
 
 			PropertyUtils.loadCharset("charset", prop, this);
 
@@ -442,7 +461,7 @@ public class MdaGeneratorBuilder {
 			PropertyUtils.loadString("sqlSchemaName", prop, this);
 		} catch(Exception e) {
 			throw new MdaGeneratorException("Cannot load property file " + pathToProperties.toString(),e);
-		} 
+		}
 	}
 
 
