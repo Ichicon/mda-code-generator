@@ -1,4 +1,4 @@
-package mda.generator.writers.java;
+package mda.generator.writers.java.codepart;
 
 /**
  * Property of an annotation ( ex: @ManyToMany(name = value) )

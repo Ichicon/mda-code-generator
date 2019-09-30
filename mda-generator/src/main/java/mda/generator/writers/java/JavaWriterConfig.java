@@ -8,27 +8,32 @@ import java.util.List;
 import java.util.Map;
 
 import mda.generator.beans.UmlPackage;
-import mda.generator.converters.ConverterInterface;
+import mda.generator.converters.java.JavaNameConverterInterface;
+import mda.generator.converters.type.TypeConverterInterface;
 
 /**
  * Configuration for JavaWriter, alimented by MdaGenerator.
- * 
+ *
  * @author Fabien Crapart
  *
  */
 public class JavaWriterConfig {
-	private Path javaOutputDirectory; 
-	private Collection<UmlPackage> umlPackages; 
-	private ConverterInterface converter;
+	private Path javaOutputDirectory;
+	private Collection<UmlPackage> umlPackages;
+	private TypeConverterInterface converter;
 	private Path pathToPackageInfoTemplate;
 	private Path pathToEntitiesTemplate;
 	private Path pathToDaosTemplate;
 	private String entities;
 	private String daos;
+	private JavaNameConverterInterface javaNameConverter;
+
+
+
 	/** Added annotations for classes Map<ClassName, List<AnnotationString>>*/
 	private Map<String,List<String>> annotationsForClasses;
 	private Charset charset = StandardCharsets.UTF_8;
-	
+
 	/**
 	 * @return the javaOutputDirectory
 	 */
@@ -57,13 +62,13 @@ public class JavaWriterConfig {
 	 * Uml to java converter.
 	 * @return the converter
 	 */
-	public ConverterInterface getConverter() {
+	public TypeConverterInterface getConverter() {
 		return converter;
 	}
 	/**
 	 * @param converter the converter to set
 	 */
-	public void setConverter(ConverterInterface converter) {
+	public void setConverter(TypeConverterInterface converter) {
 		this.converter = converter;
 	}
 	/**
@@ -150,5 +155,16 @@ public class JavaWriterConfig {
 	public void setAnnotationsForClasses(Map<String, List<String>> annotationsForClasses) {
 		this.annotationsForClasses = annotationsForClasses;
 	}
-	
+	/**
+	 * @return the javaNameConverter
+	 */
+	public JavaNameConverterInterface getJavaNameConverter() {
+		return javaNameConverter;
+	}
+	/**
+	 * @param javaNameConverter the javaNameConverter to set
+	 */
+	public void setJavaNameConverter(JavaNameConverterInterface javaNameConverter) {
+		this.javaNameConverter = javaNameConverter;
+	}
 }

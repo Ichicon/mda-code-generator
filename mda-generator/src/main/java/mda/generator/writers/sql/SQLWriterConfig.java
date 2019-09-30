@@ -5,23 +5,26 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
 import mda.generator.beans.UmlPackage;
-import mda.generator.converters.ConverterInterface;
+import mda.generator.converters.type.TypeConverterInterface;
 
 /**
  * Configuration for SQLWriter, alimented by MdaGenerator
- * 
+ *
  * @author Fabien Crapart
  */
 public class SQLWriterConfig {
+
 	private Path createSqlTemplatePath;
 	private Path dropSqlTemplatePath;
 	private Path sqlOutputDirectory;
+	private Path createTablesPath;
+	private Path dropTablesPath;
 	private Iterable<UmlPackage> packagesList;
 	private Iterable<String> excludesClassesPrefixes;
-	private ConverterInterface converter;
+	private TypeConverterInterface typeConverter;
 	private Charset charset = StandardCharsets.UTF_8;
 	private String sqlSchemaName;
-	
+
 	/**
 	 * @return the sqlTemplatePath
 	 */
@@ -32,9 +35,9 @@ public class SQLWriterConfig {
 	 * @param sqlTemplatePath the sqlTemplatePath to set
 	 */
 	public void setDropSqlTemplatePath(Path sqlTemplatePath) {
-		this.dropSqlTemplatePath = sqlTemplatePath;
+		dropSqlTemplatePath = sqlTemplatePath;
 	}
-	
+
 	/**
 	 * @return the sqlTemplatePath
 	 */
@@ -45,19 +48,33 @@ public class SQLWriterConfig {
 	 * @param sqlTemplatePath the sqlTemplatePath to set
 	 */
 	public void setCreateSqlTemplatePath(Path sqlTemplatePath) {
-		this.createSqlTemplatePath = sqlTemplatePath;
+		createSqlTemplatePath = sqlTemplatePath;
+	}
+
+	/**
+	 * @return the createTablesPath
+	 */
+	public Path getCreateTablesPath() {
+		return createTablesPath;
 	}
 	/**
-	 * @return the sqlOutputDirectory
+	 * @param createTablesPath the createTablesPath to set
 	 */
-	public Path getSqlOutputDirectory() {
-		return sqlOutputDirectory;
+	public void setCreateTablesPath(Path createTablesPath) {
+		this.createTablesPath = createTablesPath;
+	}
+
+	/**
+	 * @return the dropTablesPath
+	 */
+	public Path getDropTablesPath() {
+		return dropTablesPath;
 	}
 	/**
-	 * @param sqlOutputDirectory the sqlOutputDirectory to set
+	 * @param dropTablesPath the dropTablesPath to set
 	 */
-	public void setSqlOutputDirectory(Path sqlOutputDirectory) {
-		this.sqlOutputDirectory = sqlOutputDirectory;
+	public void setDropTablesPath(Path dropTablesPath) {
+		this.dropTablesPath = dropTablesPath;
 	}
 	/**
 	 * @return the packagesList
@@ -84,18 +101,20 @@ public class SQLWriterConfig {
 		this.excludesClassesPrefixes = excludesClassesPrefixes;
 	}
 	/**
-	 * @return the convert
+	 * @param typeConverter the convert to set
 	 */
-	public ConverterInterface getConverter() {
-		return converter;
+	public void setTypeConverter(TypeConverterInterface typeConverter) {
+		this.typeConverter = typeConverter;
 	}
+
 	/**
-	 * @param convert the convert to set
+	 *
+	 * @return typeConverter
 	 */
-	public void setConverter(ConverterInterface convert) {
-		this.converter = convert;
+	public TypeConverterInterface getTypeConverter() {
+		return typeConverter;
 	}
-	
+
 	/**
 	 * @return the charset
 	 */
@@ -108,7 +127,7 @@ public class SQLWriterConfig {
 	public void setCharset(Charset charset) {
 		this.charset = charset;
 	}
-	
+
 	/**
 	 * @return the schema
 	 */
@@ -119,6 +138,7 @@ public class SQLWriterConfig {
 	 * @param schema the schema to set
 	 */
 	public void setSqlSchemaName(String schema) {
-		this.sqlSchemaName = schema;
+		sqlSchemaName = schema;
 	}
+
 }

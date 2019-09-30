@@ -1,4 +1,4 @@
-package mda.generator.writers.java;
+package mda.generator.writers.java.utils;
 
 import java.util.Collection;
 import java.util.HashMap;

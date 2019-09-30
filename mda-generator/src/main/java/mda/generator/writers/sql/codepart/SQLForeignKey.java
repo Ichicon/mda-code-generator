@@ -1,7 +1,7 @@
-package mda.generator.writers.sql;
+package mda.generator.writers.sql.codepart;
 
 import mda.generator.beans.UmlAssociation;
-import mda.generator.writers.java.NamesComputingUtil;
+import mda.generator.writers.NamesComputingUtil;
 
 /**
  * Class which represent a foreign key between two tables

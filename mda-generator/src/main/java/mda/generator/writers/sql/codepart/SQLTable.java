@@ -1,4 +1,4 @@
-package mda.generator.writers.sql;
+package mda.generator.writers.sql.codepart;
 
 import java.util.ArrayList;
 import java.util.List;

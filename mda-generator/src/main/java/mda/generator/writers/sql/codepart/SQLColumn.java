@@ -1,12 +1,12 @@
-package mda.generator.writers.sql;
+package mda.generator.writers.sql.codepart;
 
 import mda.generator.beans.UmlAttribute;
 import mda.generator.beans.UmlDomain;
-import mda.generator.converters.ConverterInterface;
+import mda.generator.converters.type.TypeConverterInterface;
 
 /**
  * SQl column in sql table for sql generation.
- * 
+ *
  * @author Fabien Crapart
  */
 public class SQLColumn {
@@ -14,17 +14,17 @@ public class SQLColumn {
 	private final String type;
 	private final boolean isNotNull;
 	private final String comment;
-	
-	public SQLColumn(UmlAttribute umlAttribute, ConverterInterface converter) {
-		this.name = umlAttribute.getName();
-		this.type = converter.getDataBaseType(umlAttribute.getDomain());
-		this.isNotNull = umlAttribute.getIsNotNull();
-		this.comment = umlAttribute.getComment();
+
+	public SQLColumn(UmlAttribute umlAttribute, TypeConverterInterface converter) {
+		name = umlAttribute.getName();
+		type = converter.getDataBaseType(umlAttribute.getDomain());
+		isNotNull = umlAttribute.getIsNotNull();
+		comment = umlAttribute.getComment();
 	}
-	
-	public SQLColumn(String name, UmlDomain domain, boolean isNotNull,String comment, ConverterInterface converter) {
+
+	public SQLColumn(String name, UmlDomain domain, boolean isNotNull,String comment, TypeConverterInterface converter) {
 		this.name = name;
-		this.type = converter.getDataBaseType(domain);
+		type = converter.getDataBaseType(domain);
 		this.isNotNull = isNotNull;
 		this.comment = comment;
 	}
@@ -56,6 +56,6 @@ public class SQLColumn {
 	public String getComment() {
 		return comment;
 	}
-	
-	
+
+
 }

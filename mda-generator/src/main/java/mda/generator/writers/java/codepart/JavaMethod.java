@@ -1,4 +1,4 @@
-package mda.generator.writers.java;
+package mda.generator.writers.java.codepart;
 
 import java.util.ArrayList;
 import java.util.List;
