@@ -1,4 +1,4 @@
-package mda.generator.writers.sql;
+package mda.generator.writers.sql.codepart;
 
 import mda.generator.beans.UmlAssociation;
 import mda.generator.writers.NamesComputingUtil;

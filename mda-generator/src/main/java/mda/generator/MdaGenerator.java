@@ -55,7 +55,8 @@ public class MdaGenerator {
 	private Map<String, List<String>> annotationsForClasses;
 
 	/** Emplacement du fichier SQL généré en sortie */
-	private Path sqlOutputDirectory = null;
+	private Path sqlCreateTablesPath = null;
+	private Path sqlDropTablesPath = null;
 	private Class<? extends SQLWriterInterface> sqlWriterClass;
 	private Path pathToCreateSQLTemplate;
 	private Path pathToDropSQLTemplate;
@@ -166,7 +167,8 @@ public class MdaGenerator {
 		// Generation du sql
 		SQLWriterConfig sqlConfig = new SQLWriterConfig();
 		sqlConfig.setPackagesList(reader.getPackagesMap().values());
-		sqlConfig.setSqlOutputDirectory(sqlOutputDirectory);
+		sqlConfig.setCreateTablesPath(sqlCreateTablesPath);
+		sqlConfig.setDropTablesPath(sqlDropTablesPath);
 		sqlConfig.setCreateSqlTemplatePath(pathToCreateSQLTemplate);
 		sqlConfig.setDropSqlTemplatePath(pathToDropSQLTemplate);
 		sqlConfig.setTypeConverter(typeConverter);
@@ -228,13 +230,6 @@ public class MdaGenerator {
 	 */
 	public void setJavaOutputDirectory(Path javaOutputDirectory) {
 		this.javaOutputDirectory = javaOutputDirectory;
-	}
-
-	/**
-	 * @param sqlOutputDirectory the sqlOutputDirectory to set
-	 */
-	public void setSqlOutputDirectory(Path sqlOutputDirectory) {
-		this.sqlOutputDirectory = sqlOutputDirectory;
 	}
 
 	/**
@@ -336,6 +331,20 @@ public class MdaGenerator {
 		sqlSchemaName = schema;
 	}
 
+	/**
+	 * @param sqlCreateTablesPath the sqlCreateTablesPath to set
+	 */
+	public void setSqlCreateTablesPath(Path sqlCreateTablesPath) {
+		this.sqlCreateTablesPath = sqlCreateTablesPath;
+	}
+
+	/**
+	 * @param sqlDropTablesPath the sqlDropTablesPath to set
+	 */
+	public void setSqlDropTablesPath(Path sqlDropTablesPath) {
+		this.sqlDropTablesPath = sqlDropTablesPath;
+	}
+
 	private void logConfiguration() {
 		StringBuilder msgConfig = new StringBuilder();
 		msgConfig.append("\nMDA GENERATOR CONFIGURATION :");
@@ -346,8 +355,8 @@ public class MdaGenerator {
 		msgConfig.append("\n - JAVA sources will be written with "+ javaWriterClass.getName() +" in ").append(javaOutputDirectory)
 		.append( " with '").append( entitiesPackagePartName ).append( "' as entities package part and '" )
 		.append( daosPackagePartName ).append( "' as daos package part");
-		msgConfig.append("\n - CREATE SQL will be written with '" + sqlWriterClass.getName() +"' and '" + pathToCreateSQLTemplate + "' template in " + sqlOutputDirectory);
-		msgConfig.append("\n - DROP SQL will be written with '" + sqlWriterClass.getName() +"' and '" + pathToDropSQLTemplate + "' template in " + sqlOutputDirectory);
+		msgConfig.append("\n - CREATE SQL will be written with '" + sqlWriterClass.getName() +"' and '" + pathToCreateSQLTemplate + "' template in " + sqlCreateTablesPath);
+		msgConfig.append("\n - DROP SQL will be written with '" + sqlWriterClass.getName() +"' and '" + pathToDropSQLTemplate + "' template in " + sqlDropTablesPath);
 		msgConfig.append("\n\n");
 
 		LOG.info(msgConfig.toString());

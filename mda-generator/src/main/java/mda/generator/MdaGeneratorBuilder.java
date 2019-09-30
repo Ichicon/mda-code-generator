@@ -32,6 +32,9 @@ import mda.generator.writers.sql.StandardSQLWriter;
  * @author Fabien
  */
 public class MdaGeneratorBuilder {
+	private static String CREATE_TABLES_DEFAULT_FILE_NAME = "create_tables.sql";
+	private static String DROP_TABLES_DEFAULT_FILE_NAME = "drop_tables.sql";
+
 	/** Classe pour lire le model */
 	private Class<? extends ModelFileReaderInterface> readerClass = XmiReader.class;
 	/** Emplacement du fichier de métadonnées */
@@ -56,8 +59,12 @@ public class MdaGeneratorBuilder {
 
 	/** Emplacement de sortie des packages et fichiers générés */
 	private Path javaOutputDirectory;
-	/** Emplacement du fichier SQL généré en sortie */
+	/** Emplacement du répertoire par défaut des SQL générés en sortie */
 	private Path sqlOutputDirectory;
+	/** Emplacement du fichier SQL de création de tables généré en sortie */
+	private Path sqlCreateTablesPath;
+	/** Emplacement du fichier SQL de suppression de table généré en sortie */
+	private Path sqlDropTablesPath;
 
 	/** Nom dans les packages qui correspond à l'emplacement des entities, permet de faire le path équivalent pour les daos */
 	private String entitiesPackagePartName = "entities";
@@ -350,7 +357,20 @@ public class MdaGeneratorBuilder {
 		generator.setJavaOutputDirectory(javaOutputDirectory);
 		generator.setAnnotationsForClasses(annotationsForClasses);
 		generator.setJavaNameConverterClass(javaNameConverter);
-		generator.setSqlOutputDirectory(sqlOutputDirectory);
+
+		if(sqlCreateTablesPath == null) {
+			generator.setSqlCreateTablesPath(sqlOutputDirectory.resolve(CREATE_TABLES_DEFAULT_FILE_NAME));
+		} else {
+			generator.setSqlCreateTablesPath(sqlCreateTablesPath);
+		}
+
+		if(sqlDropTablesPath == null) {
+			generator.setSqlDropTablesPath(sqlOutputDirectory.resolve(DROP_TABLES_DEFAULT_FILE_NAME));
+		} else {
+			generator.setSqlDropTablesPath(sqlDropTablesPath);
+		}
+
+
 		generator.setDaosPackagePartName(daosPackagePartName);
 		generator.setEntitiesPackagePartName(entitiesPackagePartName);
 		generator.setPathToCreateSQLTemplate(pathToCreateSQLTemplate);
@@ -402,19 +422,28 @@ public class MdaGeneratorBuilder {
 		if(pathToEntitiesTemplate == null) {
 			throw new MdaGeneratorException("MdaGenerator needs a java entities template. Create a velocity template and bind it with mdaGeneratorBuilder.withEntityTemplate(\"path/to/template.vm\")");
 		}
+
 		if(pathToDaosTemplate == null) {
 			throw new MdaGeneratorException("MdaGenerator needs a java daos template. Create a velocity template and bind it with mdaGeneratorBuilder.withDaoTemplate(\"path/to/template.vm\")");
 		}
-
-
 
 		if(sqlWriter == null){
 			throw new MdaGeneratorException("MdaGenerator needs a sql writer, define a class implementing SqlWriterInterface interface and use mdaGeneratorBuilder.withSqlWriter(mySqlWriter.class)");
 		}
 
-		if(sqlOutputDirectory == null) {
-			throw new MdaGeneratorException("MdaGenerator needs a sql root directory to write files, use mdaGeneratorBuilder.withSqlOutputDirectory(\"/path/to/directory\")");
+
+		if(sqlCreateTablesPath == null && sqlOutputDirectory == null) {
+			throw new MdaGeneratorException("MdaGenerator needs a path to generate SQL create tables file. "
+					+ "Define either a path with mdaGeneratorBuilder.withSqlCreateTablesPath(\\\"/path/to/file\\\") "
+					+ "or a SQL root directory to write files with default names using mdaGeneratorBuilder.withSqlOutputDirectory(\"/path/to/directory\")");
 		}
+
+		if(sqlDropTablesPath == null && sqlOutputDirectory == null) {
+			throw new MdaGeneratorException("MdaGenerator needs a path to generate SQL drop tables file. "
+					+ "Define either a path with mdaGeneratorBuilder.withSqlDropTablesPath(\\\"/path/to/file\\\") "
+					+ "or a SQL root directory to write files with default names using mdaGeneratorBuilder.withSqlOutputDirectory(\"/path/to/directory\")");
+		}
+
 		if(pathToCreateSQLTemplate == null) {
 			throw new MdaGeneratorException("MdaGenerator needs a create sql template. Create a velocity template and bind it with mdaGeneratorBuilder.withCreateSQLTemplate(\"path/to/template.vm\")");
 		}
@@ -454,6 +483,8 @@ public class MdaGeneratorBuilder {
 
 			PropertyUtils.loadClassFromProperty("sqlWriter", prop, this);
 			PropertyUtils.loadPathFromProperty("sqlOutputDirectory", prop, this);
+			PropertyUtils.loadPathFromProperty("sqlCreateTablesPath", prop, this);
+			PropertyUtils.loadPathFromProperty("sqlDropTablesPath", prop, this);
 			PropertyUtils.loadPathFromProperty("pathToCreateSQLTemplate", prop, this);
 			PropertyUtils.loadPathFromProperty("pathToDropSQLTemplate", prop, this);
 			PropertyUtils.loadStringList("excludedPrefixes", prop, this);

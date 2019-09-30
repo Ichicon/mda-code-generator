@@ -13,9 +13,12 @@ import mda.generator.converters.type.TypeConverterInterface;
  * @author Fabien Crapart
  */
 public class SQLWriterConfig {
+
 	private Path createSqlTemplatePath;
 	private Path dropSqlTemplatePath;
 	private Path sqlOutputDirectory;
+	private Path createTablesPath;
+	private Path dropTablesPath;
 	private Iterable<UmlPackage> packagesList;
 	private Iterable<String> excludesClassesPrefixes;
 	private TypeConverterInterface typeConverter;
@@ -47,17 +50,31 @@ public class SQLWriterConfig {
 	public void setCreateSqlTemplatePath(Path sqlTemplatePath) {
 		createSqlTemplatePath = sqlTemplatePath;
 	}
+
 	/**
-	 * @return the sqlOutputDirectory
+	 * @return the createTablesPath
 	 */
-	public Path getSqlOutputDirectory() {
-		return sqlOutputDirectory;
+	public Path getCreateTablesPath() {
+		return createTablesPath;
 	}
 	/**
-	 * @param sqlOutputDirectory the sqlOutputDirectory to set
+	 * @param createTablesPath the createTablesPath to set
 	 */
-	public void setSqlOutputDirectory(Path sqlOutputDirectory) {
-		this.sqlOutputDirectory = sqlOutputDirectory;
+	public void setCreateTablesPath(Path createTablesPath) {
+		this.createTablesPath = createTablesPath;
+	}
+
+	/**
+	 * @return the dropTablesPath
+	 */
+	public Path getDropTablesPath() {
+		return dropTablesPath;
+	}
+	/**
+	 * @param dropTablesPath the dropTablesPath to set
+	 */
+	public void setDropTablesPath(Path dropTablesPath) {
+		this.dropTablesPath = dropTablesPath;
 	}
 	/**
 	 * @return the packagesList
@@ -123,4 +140,5 @@ public class SQLWriterConfig {
 	public void setSqlSchemaName(String schema) {
 		sqlSchemaName = schema;
 	}
+
 }

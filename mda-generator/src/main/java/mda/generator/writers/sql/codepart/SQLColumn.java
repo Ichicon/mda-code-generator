@@ -1,4 +1,4 @@
-package mda.generator.writers.sql;
+package mda.generator.writers.sql.codepart;
 
 import mda.generator.beans.UmlAttribute;
 import mda.generator.beans.UmlDomain;

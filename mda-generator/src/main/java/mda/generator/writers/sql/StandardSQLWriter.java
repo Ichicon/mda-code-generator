@@ -17,6 +17,10 @@ import mda.generator.beans.UmlPackage;
 import mda.generator.exceptions.MdaGeneratorException;
 import mda.generator.writers.NamesComputingUtil;
 import mda.generator.writers.VelocityUtils;
+import mda.generator.writers.sql.codepart.SQLColumn;
+import mda.generator.writers.sql.codepart.SQLForeignKey;
+import mda.generator.writers.sql.codepart.SQLSequence;
+import mda.generator.writers.sql.codepart.SQLTable;
 
 /**
  * Create SQL files for databases (create and drop scripts).
@@ -48,7 +52,8 @@ public class StandardSQLWriter implements SQLWriterInterface {
 
 		// Create the root directory for sql if doesn't exists
 		try {
-			Files.createDirectories(config.getSqlOutputDirectory());
+			Files.createDirectories(config.getCreateTablesPath().getParent());
+			Files.createDirectories(config.getDropTablesPath().getParent());
 		} catch (IOException e) {
 			throw new MdaGeneratorException("Error while creating source root path", e);
 		}
@@ -60,8 +65,8 @@ public class StandardSQLWriter implements SQLWriterInterface {
 
 		// Write SQL file from template and extracted data
 		try {
-			writeSQLFile(config.getSqlOutputDirectory().resolve("create_tables.sql"), config.getCreateSqlTemplatePath());
-			writeSQLFile(config.getSqlOutputDirectory().resolve("drop_tables.sql"), config.getDropSqlTemplatePath());
+			writeSQLFile(config.getCreateTablesPath(), config.getCreateSqlTemplatePath());
+			writeSQLFile(config.getDropTablesPath(), config.getDropSqlTemplatePath());
 		}catch(Exception e) {
 			throw new MdaGeneratorException("Error while writing SQL files", e);
 		}
