@@ -2,7 +2,6 @@ package mda.generator.converters;
 
 
 import mda.generator.beans.UmlDomain;
-import mda.generator.converters.AbstractDomainToJavaConverter;
 
 
 /**
@@ -22,7 +21,11 @@ public class DomainToPostgresConverter extends AbstractDomainToJavaConverter {
 
 			switch (javaType) {
 			case "String":
-				dbType = "TEXT";
+				if (domain.getMaxLength() != null && Integer.parseInt(domain.getMaxLength()) > 0) {
+					dbType = "VARCHAR(" + domain.getMaxLength() + ')';
+				} else {
+					dbType = "TEXT";
+				}
 				break;
 			case "Boolean":
 				dbType = "BOOLEAN";
