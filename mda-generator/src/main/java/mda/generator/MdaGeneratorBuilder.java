@@ -339,6 +339,26 @@ public class MdaGeneratorBuilder {
 	}
 
 	/**
+	 *
+	 * @param sqlCreateTablesPath
+	 * @return
+	 */
+	public MdaGeneratorBuilder withSqlCreateTablesPath(final Path sqlCreateTablesPath) {
+		this.sqlCreateTablesPath = sqlCreateTablesPath;
+		return this;
+	}
+
+	/**
+	 *
+	 * @param sqlDropTablesPath
+	 * @return
+	 */
+	public MdaGeneratorBuilder withSqlDropTablesPath(final Path sqlDropTablesPath) {
+		this.sqlDropTablesPath = sqlDropTablesPath;
+		return this;
+	}
+
+	/**
 	 * Build the MdaGenerator from parameters
 	 * @return MdaGenerator object built
 	 * @throws MdaGeneratorException if parameters are not set correctly
