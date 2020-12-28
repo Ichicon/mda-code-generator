@@ -375,18 +375,20 @@ public class JavaClass {
 
 		//  Bidirectionnal relation, mappedBy is enough
 		if(association.getOpposite().isTargetNavigable()) {
-			// Cascading ALL for oneToMany "N" side
-			propertiesOneToMany.add(new JavaAnnotationProperty("cascade",importManager.getFinalName("javax.persistence.CascadeType")+".ALL"));
+
 			propertiesOneToMany.add(new JavaAnnotationProperty("mappedBy","\""+ javaNameConverter.computeFkAttributeName(association.getOpposite()) + "\""));
 
 		} else {// Unidirectional, needs join column name and reference column name
 			JavaAnnotation joinColumn = new JavaAnnotation(
 					importManager.getFinalName("javax.persistence.JoinColumn"),
 					new JavaAnnotationProperty("name","\"" + NamesComputingUtil.computeColumnFkName(association.getOpposite())+ "\""),
-					new JavaAnnotationProperty("referencedColumnName","\"" + NamesComputingUtil.computeColumnPkName(association.getSource()) + "\"")
+					new JavaAnnotationProperty("referencedColumnName","\"" + NamesComputingUtil.computeColumnPkName(association.getSource()) + "\""),
+					new JavaAnnotationProperty("nullable", association.getOpposite().isTargetNullable() ? "true" : "false")
 					);
 			assocGetter.addAnnotations(joinColumn);
 		}
+		// Cascading ALL
+		propertiesOneToMany.add(new JavaAnnotationProperty("cascade",importManager.getFinalName("javax.persistence.CascadeType")+".ALL"));
 		// Add orphan removal
 		propertiesOneToMany.add(new JavaAnnotationProperty("orphanRemoval","true"));
 
